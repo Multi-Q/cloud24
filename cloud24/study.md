@@ -181,6 +181,240 @@ public class GlobalExceptionHandler {
 
 ```
 
-### 四、
+## 第三天
 
+### 一、Consul服务注册与发现
+* 为什么要引入服务注册中心？<br>
+实现微服务之间的动态注册与发现
+  
+Consul需要从官网下载（https://developer.hashicorp.com/consul/install） ，安装到本地,验证是否安装成功：
+到安装包所在的目录，打开cmd，输入`consul --version`，如果出现一下信息表示成功。
+
+```cmd
+F:\Consul>consul --version
+Consul v1.18.0
+Revision 349cec17
+Build Date 2024-02-26T22:05:50Z
+Protocol 2 spoken by default, understands 2 to 3 (agent will automatically use protocol >2 when speaking to compatible agents)
+```
+
+以开发者模式启动Consul，输入命令`consul agent -dev`。然后就可以访问consul了，访问地址为：`http://localhost:8500`。
+
+### 二、将服务者模块和消费者模块加入Consul
+**服务提供者** 步骤：
+
+1、`服务提供者`添加`spring-cloud-starter-consul-discovery`依赖。（项目中cloud-provider-payment8001是提供者）
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+</dependency>
+```
+2、提供者的`yml`添加一下配置：
+```yml
+spring:
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+```
+3、提供者的`主启动类`上添加`@EnableDiscoveryClient`注解，激活Consul。
+```java
+
+package com.atguigu.cloud;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import tk.mybatis.spring.annotation.MapperScan;
+
+/**
+ * @author QRH
+ * @date 2024/3/14 14:15
+ * @description 主启动类
+ */
+@SpringBootApplication
+@MapperScan("com.atguigu.cloud.mapper")
+
+@EnableDiscoveryClient
+
+public class Main8001 {
+    public static void main(String[] args) {
+        SpringApplication.run(Main8001.class,args);
+    }
+}
+```
+4、最后在Consul网页内可以查看到服务了。
+![img.png](studyImgs/img.png)
+
+**服务消费者** 步骤：
+
+1、消费者模块添加pom依赖：
+```xml
+ <dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+<!--    排除掉控制打印台的烦人警告，可加可不加-->
+    <exclusions>
+        <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+```
+
+2、在消费者模块的`yml`中配置：
+```yml
+spring:
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+        prefer-ip-address: true #优先使用服务ip进行注册
+```
+
+3、`主启动类`添加`@EnableDiscoveryClient`。
+```java
+package com.atguigu.cloud;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
+/**
+ * @author QRH
+ * @date 2024/3/15 13:09
+ * @description TODO
+ */
+@SpringBootApplication
+
+@EnableDiscoveryClient
+
+public class Main80 {
+    public static void main(String[] args) {
+        SpringApplication.run(Main80.class,args);
+    }
+}
+
+```
+
+最后，启动提供者模块和消费者模块，进行测试。
+
+ http://localhost/consumer/pay/get/1 。提示报错。
+```cmd
+Caused by: java.net.UnknownHostException: cloud-payment-service
+```
+
+造成的原因是，`RestTemplateConfig.java`没有开启`负载均衡`。
+
+```java
+package com.atguigu.cloud.config;
+
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+
+/**
+ * @author QRH
+ * @date 2024/3/15 13:20
+ * @description TODO
+ */
+@Configuration
+public class RestTemplateConfig {
+
+    @Bean
+    @LoadBalanced
+    public RestTemplate restTemplate(){
+        return new RestTemplate();
+    }
+
+}
+```
+
+### 三、服务配置与刷新
+
+通用全局配置信息，直接注册进Consul服务器，从Consul获取
+
+
+步骤：
+
+1、引入依赖 **（服务提供者模块）**
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-consul-config</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-bootstrap</artifactId>
+</dependency>
+```
+
+2、给服务提供者模块添加`bootstrap.yml`
+```yml
+spring:
+  application:
+    name: cloud-payment-service
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+      config:
+        profile-separator: "-"
+        format: YAML
+```
+
+所以，清除掉`application.yml`中与`bootstrap.yml`中相同的内容。
+
+3、在`application.yml`中添加：
+```yml
+spring:
+  profiles:
+    active: dev #多环境配置加载内容dev/prod，不写就是默认default配置
+```
+
+### 四、Consul服务器Key/Value配置填写
+配置填写一定要遵循官方规则
+
+步骤：
+
+1、Consul页面的`Key/Value`创建文件夹，（必须以`config`开头）
+![img.png](studyImgs/img1.png)
+
+2、再在`config`文件夹内创建`服务`,（必须一`/`结尾）
+![img.png](studyImgs/img2.png)
+
+3、再给上面三个文件夹创建`data`内容，（data不再是文件夹）
+![img.png](studyImgs/img3.png)
+
+### 五、动态刷新
+Consul刷新是有默认刷新间隔的，默认是`55秒`。
+
+1、`主启动类`添加`@RefreshScope`
+
+2、`bootstrap.yml`添加配置：（实际开发建议不改）
+```yml
+spring:
+  cloud:
+    consul:
+      config:
+        watch:
+          wait-time: 1
+```
+
+### 六、Consul的配置持久化
+
+当Consul服务关闭时，再次进入页面之前的配好的配置就会全没有，所以需要将Consul持久化
+
+
+## LoadBalancer负载均衡
+spring cloud LoadBalancer没有专门的jar包，它挂载在`Spring-Cloud-Commons`jar包下。
 
