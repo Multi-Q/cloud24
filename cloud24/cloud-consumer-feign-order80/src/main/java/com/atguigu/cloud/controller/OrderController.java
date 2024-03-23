@@ -4,6 +4,7 @@ import com.atguigu.cloud.apis.PayFeignApi;
 import com.atguigu.cloud.entities.PayDTO;
 import com.atguigu.cloud.resp.ResultData;
 import jakarta.annotation.Resource;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -13,9 +14,11 @@ import org.springframework.web.client.RestTemplate;
  * @description TODO
  */
 @RestController
+//@FeignClient(value = "cloud-payment-service")
 public class OrderController {
     @Resource
     private PayFeignApi payFeignApi;
+
 
     @PostMapping(value = "/feign/pay/add")
     public ResultData<String> addOrder(@RequestBody PayDTO payDTO) {
@@ -26,6 +29,7 @@ public class OrderController {
     @GetMapping(value = "/feign/pay/get/{id}")
     public ResultData getPayInfo(@PathVariable("id")Integer id){
         System.out.println("支付微服务远程调用，按照id查询订单支付流水信息");
+
         return payFeignApi.getPayInfo(id);
     }
 

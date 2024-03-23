@@ -195,7 +195,8 @@ public class GlobalExceptionHandler {
 * 为什么要引入服务注册中心？<br>
   实现微服务之间的动态注册与发现
 
-Consul需要从官网下载（https://developer.hashicorp.com/consul/install） ，安装到本地,验证是否安装成功： 到安装包所在的目录，打开cmd，输入`consul --version`，如果出现一下信息表示成功。
+Consul需要从官网下载（https://developer.hashicorp.com/consul/install） ，安装到本地,验证是否安装成功： 到安装包所在的目录，打开cmd，输入`consul --version`
+，如果出现一下信息表示成功。
 
 ```cmd
 F:\Consul>consul --version
@@ -440,8 +441,6 @@ spring:
 
 当Consul服务关闭时，再次进入页面之前的配好的配置就会全没有，所以需要将Consul持久化。（持久化配置将在之后进行）
 
-
-
 ## 第三天
 
 ### 一、LoadBalancer负载均衡
@@ -454,15 +453,19 @@ spring cloud LoadBalancer没有专门的jar包，它挂载在`Spring-Cloud-Commo
 
 * spring-cloud-starter-loadbalancer是什么？
 
-这是Spring Cloud官方提供的一个开源的、简易的客户端负载均衡器，它包含在Spring Cloud Commons中用来替代以前的Ribbon组件。相较于Ribbon，Spring Cloud LoadBalancer不经能支持`RestTemplate`，还支持`WebClient`（WebClient是Spring Web Flux中提供的功能，可以实现响应式异步请求）。
+这是Spring Cloud官方提供的一个开源的、简易的客户端负载均衡器，它包含在Spring Cloud Commons中用来替代以前的Ribbon组件。相较于Ribbon，Spring Cloud
+LoadBalancer不经能支持`RestTemplate`，还支持`WebClient`（WebClient是Spring Web Flux中提供的功能，可以实现响应式异步请求）。
 
 ### 二、完成Consul的数据持久化
+
 #### 1、Consul数据持久化配置并注册为Window服务
+
 步骤：
 
 ①在`consul.exe`所在的文件目录下新增一个名为`mydata`的空文件夹（文件夹名叫啥都行）。
 
 ②创建`consul_start.bat`并编辑内容（注，consul_start.bat与consul.exe在`同级目录`下）。
+
 ```bat
 @echo.服务启动...
 @echo off
@@ -477,12 +480,14 @@ spring cloud LoadBalancer没有专门的jar包，它挂载在`Spring-Cloud-Commo
 
 ④验证是否成功，浏览器输入网址(http://localhost:8500)，成功打开，然后在windows的后台看consul的服务是否注册成功。
 
-
 ### 三、开始使用LoadBalancer
+
 步骤：
 
 1、`消费者端`添加`spring-cloud-starter-loadbalancer`(本项目中cloud-sonsumer-order80实消费端)。
+
 ```xml
+
 <dependency>
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-starter-loadbalancer</artifactId>
@@ -494,32 +499,37 @@ spring cloud LoadBalancer没有专门的jar包，它挂载在`Spring-Cloud-Commo
 ```java
  public static final  String PaymentSrv_URL="http://cloud-payment-service";
 
-@GetMapping(value="/consumer/pay/get/info")
-  public String getInfoByConsul(){
-      return restTemplate.getForObject(PaymentSrv_URL+"/pay/get/info",String.class);
-  }
-  
+@GetMapping(value = "/consumer/pay/get/info")
+public String getInfoByConsul(){
+        return restTemplate.getForObject(PaymentSrv_URL+"/pay/get/info",String.class);
+        }
+
 ```
 
 3、重启消费者服务，浏览器访问（http://localhost:80/consumer/pay/get/info）。
 
-
 ### 四、OpenFeign服务接口调用
+
 * OpenFeign是什么？
-  
-  Feign是一个<span style="color:red;font-weight:bolder;font-size:20px;">`声明式web服务客户端`</span>。他编写web服务客户端变得更容易。`使用Feign创建一个接口并对其进行注释`。它具有可插入的注释支持，包括Feign注释和JAX-RS注释。Feign还支持可插拔编码器和解码器。Spring Cloud添加了对Spring MVC注释的支持，以及对使用Spring Web中默认使用的HttpMessageConveter的支持。Spring Cloud还集成了Eureka、Spring Cloud CircuitBreaker以及Spring Cloud LoadBalancer，以便使用Feign时提供负载均衡的http客户端。
-  
+
+  Feign是一个<span style="color:red;font-weight:bolder;font-size:20px;">`声明式web服务客户端`</span>
+  。他编写web服务客户端变得更容易。`使用Feign创建一个接口并对其进行注释`。它具有可插入的注释支持，包括Feign注释和JAX-RS注释。Feign还支持可插拔编码器和解码器。Spring Cloud添加了对Spring
+  MVC注释的支持，以及对使用Spring Web中默认使用的HttpMessageConveter的支持。Spring Cloud还集成了Eureka、Spring Cloud CircuitBreaker以及Spring Cloud
+  LoadBalancer，以便使用Feign时提供负载均衡的http客户端。
+
 
 * 已经有了loadbalancer为什么还要学OpenFeign？日常用哪个？
 
   日常用OpenFeign
 
 #### 1、OpenFeign通用步骤
+
 ①创建一个公共api模块(cloud-consumer-feign-order80)，该模块与服务提供者一一对应。
 
 ![img4.jpg](studyImgs/img4.jpg)
 
 ②在这个模块的`主启动类`上添加`@EnableFeignClients`表示开启OpenFeign功能并激活
+
 ```java
 package com.atguigu.cloud;
 
@@ -538,21 +548,25 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients
 @EnableDiscoveryClient
 public class MainOpenFeign80 {
-  public static void main(String[] args) {
-    SpringApplication.run(Main.class,args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(Main.class, args);
+    }
 }
 
 ```
-  
+
 ③将`feign接口`定义在`公共通用模块`（cloud-api-commons）中，并把feign依赖引入。
+
 ```xml
- <dependency>
+
+<dependency>
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-starter-openfeign</artifactId>
 </dependency>
 ```
+
 ④新建服务接口PayFeignApi，头上配置`@FeignClient`注解
+
 ```java
 package com.atguigu.cloud.apis;
 
@@ -569,24 +583,25 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @date 2024/3/21 14:31
  * @description TODO
  */
-@FeignClient(value="cloud-payment-service")
+@FeignClient(value = "cloud-payment-service")
 public interface PayFeignApi {
-    
-    @PostMapping(value="/pay/add/")
+
+    @PostMapping(value = "/pay/add/")
     public ResultData addPay(@RequestBody PayDTO payDTO);
-    
-    @GetMapping(value="/pay/get/{id}")
+
+    @GetMapping(value = "/pay/get/{id}")
     public ResultData getPayInfo(@PathVariable("id") Integer id);
-    
-    @GetMapping(value="/pay/get/info")
+
+    @GetMapping(value = "/pay/get/info")
     public String mylb();
-    
+
     //......
 }
 
 ```
 
 ⑤`cloud-consumer-feign-order80`项目内创建OrderController.java。（该controller与cloud-consumer-order80模块的controller类不同）
+
 ```java
 package com.atguigu.cloud.controller;
 
@@ -612,15 +627,15 @@ public class OrderController {
         System.out.println("第一步，模拟本地addOrder新增订单成功，第一步在开启addPay支付微服务远程调用");
         return payFeignApi.addPay(payDTO);
     }
-    
+
     @GetMapping(value = "/feign/pay/get/{id}")
-    public ResultData getPayInfo(@PathVariable("id")Integer id){
+    public ResultData getPayInfo(@PathVariable("id") Integer id) {
         System.out.println("支付微服务远程调用，按照id查询订单支付流水信息");
         return payFeignApi.getPayInfo(id);
     }
-    
-    @GetMapping(value="/feign/pay/info")
-    public String getMylb(){
+
+    @GetMapping(value = "/feign/pay/info")
+    public String getMylb() {
         return payFeignApi.mylb();
     }
 
@@ -630,6 +645,214 @@ public class OrderController {
 
 ⑤测试，启动服务，观察Consul是否能够注册成功。然后输入网址检查是否能返回正确数据。
 ![img.png](studyImgs/img6.png)
+
+### 五、OpenFeign高级特性
+
+#### 1、OpenFeign超时配置
+
+OpenFign默认等待时间：60s，超时报错
+
+在`消费者模块的application.yml`添加以下内容：
+
+```yml
+spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            #连接超时时间
+            connectionTimeout: 3000
+            #读取超时时间
+            readTimeout: 3000
+```
+
+上面这种是为全局统一设置超时时间
+
+那为单个服务设置超时时间该如何做呢？
+步骤：
+①在`cloud-consumer-feign-order80`项目中的controller头上天剑指定的`微服务服务实例`
+```java
+@RestController
+@FeignClient(value = "cloud-payment-service") //指定微服务服务实例 
+public class OrderController {
+    //.....
+}
+```
+
+②在yml中配置超时配置
+```yml
+spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          #为单个服务配置超时
+          cloud-payment-service:
+            connectionTimeout: 3000
+            readTimeout: 3000
+            
+#          default:
+#            #连接超时时间
+#            connectionTimeout: 3000
+#            #读取超时时间
+#            readTimeout: 3000
+```
+③<span style="color:red;">如果全局超时配置和单个服务超时配置同时共存，会`优先使用单个服务配置的超时时间`。</span>
+
+#### 2、OpenFign重试机制
+
+重试机制默认是`关闭的`，开启重试机制需写个配置类
+
+**FeignConfig.java**
+
+```java
+package com.atguigu.cloud;
+
+import feign.Retryer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * @author QRH
+ * @date 2024/3/23 13:44
+ * @description Feign 配置类
+ */
+@Configuration
+public class FeignConfig {
+    
+    @Bean
+    public Retryer myRetryer() {
+        //最大请求次数为3，出时间间隔时间为100ms，重试最大间隔时间为1s
+        return new Retryer.Default(100,1,3);
+    }
+}
+
+```
+
+OpenFign的重试次数在控制台看不到，只是给出了最终结果。如果想要看到每次重试的结果，将在日志打印那学到
+
+#### 3、OpenFign默认HttpClient修改
+
+OpenFign中的Http Client如果不做特殊配置，则会默认使用JDK自带的HttpURLConnection发送HTTP请求。<br>
+但，由于默认的HttpURLConnection没有连接池，性能和效率比较低，如果采用默认，性能不是最牛的，所以要加到最大。
+
+所以使用Apache HttpClient5替换HttpURLConnection
+
+步骤：
+
+①修改`消费者模块(cloud-consumer-feign-order80)的pom.xml`，引入`httpclient5`依赖
+```xml
+<!-- httpclient5-->
+<dependency>
+    <groupId>org.apache.httpcomponents.client5</groupId>
+    <artifactId>httpclient5</artifactId>
+    <version>5.3</version>
+</dependency>
+<!-- feign-hc5-->
+<dependency>
+    <groupId>io.github.openfeign</groupId>
+    <artifactId>feign-hc5</artifactId>
+    <version>13.1</version>
+</dependency>
+```
+
+②修改`消费者模块(cloud-consumer-feign-order80)的application.yml`，配置Apache HttpClient5
+```yml
+spring:
+  cloud:
+    openfign:
+      httpclient:
+        hc5:
+          enabled: true
+
+```
+
+#### 4、OpenFign请求/压缩功能
+对请求和响应进行GZIP压缩，以减少同行过程中的性能损耗
+```yml
+spring:
+  cloud:
+    openfeign:
+      compression:
+        request:
+          enabled: true
+          min-request-size: 2048 #最小触发压缩的大小
+          mime-types: text/xml,application/xml,application/json #触发压缩数据类型
+        response:
+          enabled: true
+```
+
+#### 5、OpenFign日志打印功能
+
+日志级别：
+* NONE:默认，不显示任何日志。
+* BASIC:显示请求方法、请求URL、请求状态码、请求错误信息。
+* HEADERS:除了BASIC，还显示请求和响应头信息。
+* FULL:除了HEADERS，还显示请求和响应体信息。
+
+所以，
+
+①在`FeignConfig.java`中修改默认日志打印级别。
+
+**FeignConfig.java**
+
+```java
+package com.atguigu.cloud;
+
+import feign.Logger;
+import feign.Retryer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * @author QRH
+ * @date 2024/3/23 13:44
+ * @description Feign 配置类
+ */
+@Configuration
+public class FeignConfig {
+
+    @Bean
+    public Retryer myRetryer() {
+        return Retryer.NEVER_RETRY;
+        //最大请求次数为3(1 default +2)，出时间间隔时间为100ms，重试最大间隔时间为1s
+//        return new Retryer.Default(100,1,3);
+    }
+    
+    @Bean
+   public Logger.Level feignLoggerLevel() {
+        return Logger.Level.FULL;
+    }
+   
+}
+
+
+```
+
+②`yml`中配置日志打印级别为`DEBUG`。（Feign日志仅相应DEBUG级别）
+
+写法：logging.level+含有@FeignClient注解的完整带包名的接口名+debug
+
+```yml
+logging:
+  level:
+    com:
+      atguigu:
+        cloud:
+          apis:
+            PayFeignApi: debug
+```
+
+### 六、CirCuitBreaker断路器
+
+断路器：当某个服务不可用时，会自动切换到备用服务。
+
+CirCuitBreaker只是一套规范或接口，落实实现是`Resiliences4j`
+
+Resiliences4j是什么？
+* Resiliences4j是容错库
+
 
 
 
