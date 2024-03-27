@@ -669,10 +669,10 @@ spring:
 
 上面这种是为全局统一设置超时时间
 
-那为单个服务设置超时时间该如何做呢？
-步骤：
-①在`cloud-consumer-feign-order80`项目中的controller头上天剑指定的`微服务服务实例`
+那为单个服务设置超时时间该如何做呢？ 步骤： ①在`cloud-consumer-feign-order80`项目中的controller头上天剑指定的`微服务服务实例`
+
 ```java
+
 @RestController
 @FeignClient(value = "cloud-payment-service") //指定微服务服务实例 
 public class OrderController {
@@ -681,6 +681,7 @@ public class OrderController {
 ```
 
 ②在yml中配置超时配置
+
 ```yml
 spring:
   cloud:
@@ -691,13 +692,14 @@ spring:
           cloud-payment-service:
             connectionTimeout: 3000
             readTimeout: 3000
-            
+
 #          default:
 #            #连接超时时间
 #            connectionTimeout: 3000
 #            #读取超时时间
 #            readTimeout: 3000
 ```
+
 ③<span style="color:red;">如果全局超时配置和单个服务超时配置同时共存，会`优先使用单个服务配置的超时时间`。</span>
 
 #### 2、OpenFign重试机制
@@ -720,11 +722,11 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class FeignConfig {
-    
+
     @Bean
     public Retryer myRetryer() {
         //最大请求次数为3，出时间间隔时间为100ms，重试最大间隔时间为1s
-        return new Retryer.Default(100,1,3);
+        return new Retryer.Default(100, 1, 3);
     }
 }
 
@@ -742,6 +744,7 @@ OpenFign中的Http Client如果不做特殊配置，则会默认使用JDK自带�
 步骤：
 
 ①修改`消费者模块(cloud-consumer-feign-order80)的pom.xml`，引入`httpclient5`依赖
+
 ```xml
 <!-- httpclient5-->
 <dependency>
@@ -749,15 +752,16 @@ OpenFign中的Http Client如果不做特殊配置，则会默认使用JDK自带�
     <artifactId>httpclient5</artifactId>
     <version>5.3</version>
 </dependency>
-<!-- feign-hc5-->
+        <!-- feign-hc5-->
 <dependency>
-    <groupId>io.github.openfeign</groupId>
-    <artifactId>feign-hc5</artifactId>
-    <version>13.1</version>
+<groupId>io.github.openfeign</groupId>
+<artifactId>feign-hc5</artifactId>
+<version>13.1</version>
 </dependency>
 ```
 
 ②修改`消费者模块(cloud-consumer-feign-order80)的application.yml`，配置Apache HttpClient5
+
 ```yml
 spring:
   cloud:
@@ -769,7 +773,9 @@ spring:
 ```
 
 #### 4、OpenFign请求/压缩功能
+
 对请求和响应进行GZIP压缩，以减少同行过程中的性能损耗
+
 ```yml
 spring:
   cloud:
@@ -786,6 +792,7 @@ spring:
 #### 5、OpenFign日志打印功能
 
 日志级别：
+
 * NONE:默认，不显示任何日志。
 * BASIC:显示请求方法、请求URL、请求状态码、请求错误信息。
 * HEADERS:除了BASIC，还显示请求和响应头信息。
@@ -819,12 +826,12 @@ public class FeignConfig {
         //最大请求次数为3(1 default +2)，出时间间隔时间为100ms，重试最大间隔时间为1s
 //        return new Retryer.Default(100,1,3);
     }
-    
+
     @Bean
-   public Logger.Level feignLoggerLevel() {
+    public Logger.Level feignLoggerLevel() {
         return Logger.Level.FULL;
     }
-   
+
 }
 
 
@@ -832,7 +839,7 @@ public class FeignConfig {
 
 ②`yml`中配置日志打印级别为`DEBUG`。（Feign日志仅相应DEBUG级别）
 
-写法：logging.level+含有@FeignClient注解的完整带包名的接口名+debug
+写法：`logging.level+含有@FeignClient注解的完整带包名的接口名+debug`
 
 ```yml
 logging:
@@ -851,7 +858,194 @@ logging:
 CirCuitBreaker只是一套规范或接口，落实实现是`Resiliences4j`
 
 Resiliences4j是什么？
+
 * Resiliences4j是容错库
+
+#### 6.1 熔断（CirCuitBreaker）
+##### 6.1.1 按照COUNT_BASE
+
+步骤：
+
+①在提供者模块`cloud-provider-payment8001`新增PayCircuitController.java
+
+```java
+package com.atguigu.cloud.controller;
+
+import cn.hutool.core.util.IdUtil;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.concurrent.TimeUnit;
+
+/**
+ * @author QRH
+ * @date 2024/3/27 20:44
+ * @description TODO
+ */
+@RestController
+public class PayCircuitController {
+
+    /**
+     * Resilience4j circuitBreaker的例子
+     * @param id
+     * @return
+     */
+    @GetMapping(value = "/pay/circuit/{id}")
+    public String myCircuit(@PathVariable("id") Integer id) {
+        if (id == -4) throw new RuntimeException("---circuit id不能为负数");
+        if (id == 9999) try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return "Hello ,Circuit inputId: " + id + " \t" + IdUtil.simpleUUID();
+    }
+}
+
+```
+
+②修改`PayFeignApi.java`的接口（cloud-api-commons）。
+
+**PayFeignApi.java**
+
+```java
+
+@FeignClient(value = "cloud-payment-service")
+public interface PayFeignApi {
+    /**
+     * 测试熔断 Resilience4j CircuitBreak断路器
+     * @param id
+     * @return 提示信息
+     */
+    @GetMapping(value = "/pay/circuit/{id}")
+    public String myCircuit(@PathVariable("id") Integer id);
+}
+```
+
+③消费者模块`cloud-consumer-feign-order80`添加Resilience4j的依赖
+
+```xml
+
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+</dependency>
+        <!--        由于短路保护需要aop实现，所以必须导入aop包-->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-aop</artifactId>
+</dependency>
+
+```
+
+④编写yml
+```yml
+spring:
+  cloud:
+    openfeign:
+      #开启断路器和分组激活spring.cloud.openfeign.circuitbreaker.enabled
+      circuitbreaker:
+        enabled: true
+        group:
+          enabled: true #没开分组永远不用开分组配置。精确优先，分组次之，默认最后
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        failureRateThreshold: 50 #设置50%的调用失败时打开断路器，超过失败请求百分比CirCuitBreaker变为OPEN状态
+        slidingWindowType: COUNT_BASED #滑动窗口的类型
+        slidingWindowSize: 6 #滑动窗口的大小配置COUNT_BASED表示6个请求，配置TIME_BASED表示6秒
+        minimumNumberOfCalls: 6 #断路器计算失败率或慢调用率之前所需的最小样本（每个滑动周期）。默认为10，
+        automaticTransitionFromOpenToHalfOpenEnabled: true #是否启用自动从开启状态过渡到半开状态，默认值为true，如果启用，circuitbreaker
+        permittedNumberOfCallsInHalfOpenState: 2 #半开状态允许的最大请求数，默认为10
+        recordExceptions:
+          - java.lang.Exception
+    instances:
+      cloud-payment-service:
+        baseConfig: default #使用默认配置
+```
+
+⑤新建OrderCircuitController.java
+```java
+package com.atguigu.cloud.controller;
+
+import com.atguigu.cloud.apis.PayFeignApi;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * @author QRH
+ * @date 2024/3/27 21:17
+ * @description TODO
+ */
+@RestController
+public class OrderCircuitController {
+    @Resource
+    private PayFeignApi payFeignApi;
+    
+    @GetMapping(value = "/feign/pay/circuit/{id}")
+    @CircuitBreaker(name="cloud-payment-service",fallbackMethod = "myCircuitFallback")
+    public String myCircuitBreaker(@PathVariable("id") Integer id){
+        return  payFeignApi.myCircuit(id);
+    }
+    
+    //myCircuitFallback就是服务熔断降级后的兜底处理方法
+    public String myCircuitFallback(Integer id,Throwable t){
+        return "myCircuitFallback，系统繁忙，请稍后重试----~~~~";
+    }
+}
+
+```
+
+⑥测试
+
+##### 6.1.2 按照TIME_BASED
+步骤：
+①修改yml
+```yml
+resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 10s #默认限制远程1s，超过1s就超时异常，配置了降级，就走降级逻辑
+  circuitbreaker:
+    configs:
+      default:
+        #TIME_BASED
+        failureRateThreshold: 50 #设置50%的调用失败时打开断路器，超过失败请求百分⽐CircuitBreaker变为OPEN状态。
+        slowCallDurationThreshold: 2s #慢调用时间阈值，高于这个阈值的视为慢调用并增加慢调用比例。
+        slowCallRateThreshold: 30 #慢调用百分比峰值，断路器把调用时间⼤于slowCallDurationThreshold，视为慢调用，当慢调用比例高于阈值，断路器打开，并开启服务降级
+        slidingWindowType: TIME_BASED # 滑动窗口的类型
+        slidingWindowSize: 2 #滑动窗口的大小配置，配置TIME_BASED表示2秒
+        minimumNumberOfCalls: 2 #断路器计算失败率或慢调用率之前所需的最小样本(每个滑动窗口周期)。
+        permittedNumberOfCallsInHalfOpenState: 2 #半开状态允许的最大请求数，默认值为10。
+        waitDurationInOpenState: 5s #从OPEN到HALF_OPEN状态需要等待的时间
+
+        recordExceptions:
+          - java.lang.Exception
+    instances:
+      cloud-payment-service:
+        baseConfig: default #使用默认配置
+```
+
+##### 6.1.3 COUNT_BASED和TIME_BASED用哪个？
+建议使用COUNT_BASED
+
+#### 6.2 隔离（BuldHead）
+隔离是什么？
+* 限制并发
+
+隔离能干什么？
+* 用来限制对于下游服务的并发请求数
+
+Resilience4j提供了两种隔离的实现：
+
+##### 6.2.1 Semahore信号量
 
 
 
