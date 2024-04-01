@@ -31,4 +31,33 @@ public class PayCircuitController {
         }
         return "Hello ,Circuit inputId: " + id + " \t" + IdUtil.simpleUUID();
     }
+
+    /**
+     * Resilience4j bulkHead的例子
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping(value = "/pay/bulkhead/{id}")
+    public String myBulkHead(@PathVariable("id") Integer id) {
+        if (id == -4) throw new RuntimeException("----bulkHead id 不能为空");
+        if (id == 999) try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return "Hello bulkHead inputId : " + id + "\t" + IdUtil.simpleUUID();
+    }
+
+    /**
+     * Resilience4j rateLimiter的例子
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping(value = "/pay/ratelimit/{id}")
+    public String myRateLimiter(@PathVariable("id") Integer id) {
+     return  "Hello ratelimiter inputId : " + id + "\t" + IdUtil.simpleUUID();
+    }
+
 }

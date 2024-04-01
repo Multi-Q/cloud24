@@ -513,8 +513,7 @@ public String getInfoByConsul(){
 * OpenFeign是什么？
 
   Feign是一个<span style="color:red;font-weight:bolder;font-size:20px;">`声明式web服务客户端`</span>
-  。他编写web服务客户端变得更容易。`使用Feign创建一个接口并对其进行注释`。它具有可插入的注释支持，包括Feign注释和JAX-RS注释。Feign还支持可插拔编码器和解码器。Spring Cloud添加了对Spring
-  MVC注释的支持，以及对使用Spring Web中默认使用的HttpMessageConveter的支持。Spring Cloud还集成了Eureka、Spring Cloud CircuitBreaker以及Spring Cloud
+  。他编写web服务客户端变得更容易。`使用Feign创建一个接口并对其进行注释`。它具有可插入的注释支持，包括Feign注释和JAX-RS注释。Feign还支持可插拔编码器和解码器。Spring Cloud添加了对Spring MVC注释的支持，以及对使用Spring Web中默认使用的HttpMessageConveter的支持。Spring Cloud还集成了Eureka、Spring Cloud CircuitBreaker以及Spring Cloud
   LoadBalancer，以便使用Feign时提供负载均衡的http客户端。
 
 
@@ -669,7 +668,11 @@ spring:
 
 上面这种是为全局统一设置超时时间
 
-那为单个服务设置超时时间该如何做呢？ 步骤： ①在`cloud-consumer-feign-order80`项目中的controller头上天剑指定的`微服务服务实例`
+那为单个服务设置超时时间该如何做呢？ 
+
+步骤： 
+
+①在`cloud-consumer-feign-order80`项目中的controller头上添加指定的`微服务服务实例`
 
 ```java
 
@@ -754,9 +757,9 @@ OpenFign中的Http Client如果不做特殊配置，则会默认使用JDK自带�
 </dependency>
         <!-- feign-hc5-->
 <dependency>
-<groupId>io.github.openfeign</groupId>
-<artifactId>feign-hc5</artifactId>
-<version>13.1</version>
+    <groupId>io.github.openfeign</groupId>
+    <artifactId>feign-hc5</artifactId>
+    <version>13.1</version>
 </dependency>
 ```
 
@@ -862,6 +865,7 @@ Resiliences4j是什么？
 * Resiliences4j是容错库
 
 #### 6.1 熔断（CirCuitBreaker）
+
 ##### 6.1.1 按照COUNT_BASE
 
 步骤：
@@ -931,7 +935,7 @@ public interface PayFeignApi {
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
 </dependency>
-        <!--        由于短路保护需要aop实现，所以必须导入aop包-->
+        <!--        由于断路保护需要aop实现，所以必须导入aop包-->
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-aop</artifactId>
@@ -940,6 +944,7 @@ public interface PayFeignApi {
 ```
 
 ④编写yml
+
 ```yml
 spring:
   cloud:
@@ -968,6 +973,7 @@ resilience4j:
 ```
 
 ⑤新建OrderCircuitController.java
+
 ```java
 package com.atguigu.cloud.controller;
 
@@ -987,15 +993,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderCircuitController {
     @Resource
     private PayFeignApi payFeignApi;
-    
+
     @GetMapping(value = "/feign/pay/circuit/{id}")
-    @CircuitBreaker(name="cloud-payment-service",fallbackMethod = "myCircuitFallback")
-    public String myCircuitBreaker(@PathVariable("id") Integer id){
-        return  payFeignApi.myCircuit(id);
+    @CircuitBreaker(name = "cloud-payment-service", fallbackMethod = "myCircuitFallback")
+    public String myCircuitBreaker(@PathVariable("id") Integer id) {
+        return payFeignApi.myCircuit(id);
     }
-    
+
     //myCircuitFallback就是服务熔断降级后的兜底处理方法
-    public String myCircuitFallback(Integer id,Throwable t){
+    public String myCircuitFallback(Integer id, Throwable t) {
         return "myCircuitFallback，系统繁忙，请稍后重试----~~~~";
     }
 }
@@ -1005,8 +1011,9 @@ public class OrderCircuitController {
 ⑥测试
 
 ##### 6.1.2 按照TIME_BASED
-步骤：
-①修改yml
+
+步骤： ①修改yml
+
 ```yml
 resilience4j:
   timelimiter:
@@ -1034,19 +1041,580 @@ resilience4j:
 ```
 
 ##### 6.1.3 COUNT_BASED和TIME_BASED用哪个？
+
 建议使用COUNT_BASED
 
 #### 6.2 隔离（BuldHead）
+
 隔离是什么？
+
 * 限制并发
 
 隔离能干什么？
+
 * 用来限制对于下游服务的并发请求数
 
 Resilience4j提供了两种隔离的实现：
 
 ##### 6.2.1 Semahore信号量
 
+使用Semahore需要导入舱壁的包
+
+```xml
+
+<dependency>
+    <groupId>io.github.resilience4j</groupId>
+    <artifactId>resilience4j-bulkhead</artifactId>
+</dependency>
+```
+
+然后配置
+
+```yml
+resilience4j:
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 2
+        maxWaitDuration: 1s
+      instances:
+        cloud-payment-service:
+          baseConfig: default
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 10s #默认限制远程1s，超过1s就超时异常，配置了降级，就走降级逻辑
+```
+
+再在提供者模块`cloud-provider-hystrix-payment8001`中添加方法
+**PayCircuitController.java**
+
+```java
+
+/**
+ * Resilience4j bulkHead的例子
+ * @param id
+ * @return
+ */
+@GetMapping(value = "/pay/bulkhead/{id}")
+public String myBulkHead(@PathVariable("id") Integer id){
+        if(id==-4)throw new RuntimeException("----bulkHead id 不能为空");
+        if(id==999)try{TimeUnit.SECONDS.sleep(5);}catch(InterruptedException e){e.printStackTrace();}
+        return"Hello bulkHead inputId : "+id+"\t"+IdUtil.simpleUUID();
+        }
+
+```
+
+PayFeignApi.java添加myBulkHead方法，供外部调用
+
+```java
+/**
+ * 测试熔断 Resilience4j BulkHead
+ * @param id
+ * @return 提示信息
+ */
+@GetMapping(value = "/pay/bulkhead/{id}")
+public String myBulkHead(@PathVariable("id") Integer id);
+```
+
+消费者模块`cloud-consumer-feign-order80`中添加方法访问
+**OrderCircuitController.java**
+
+```java
+   /**
+ * 舱壁
+ * @param id
+ * @return
+ */
+@GetMapping(value = "/feign/pay/bulkhead/{id}")
+@Bulkhead(name = "cloud-payment-service", fallbackMethod = "myBulkheadFallback", type = Bulkhead.Type.SEMAPHORE)
+public String myBulkHead(@PathVariable("id") Integer id){
+        return payFeignApi.myBulkHead(id);
+        }
+
+public String myBulkheadFallback(Integer id,Throwable t){
+        return"myBulkheadFallback ，舱壁超出最大数量限制， 系统繁忙，请稍后重试----~~~~";
+        }
+
+```
+
+最后启动项目，测试结果。
+
+##### 6.2.2 固定线程池FixedThreadPoolBulkhead舱壁
+
+使用Semahore需要导入舱壁的包
+
+```xml
+
+<dependency>
+    <groupId>io.github.resilience4j</groupId>
+    <artifactId>resilience4j-bulkhead</artifactId>
+</dependency>
+```
+
+然后配置
+
+```yml
+resilience4j:
+  thread-pool-bulkhead:
+    configs:
+      default:
+        core-thread-pool-size: 1
+        max-thread-pool-size: 1
+        queue-capacity: 1
+    instances:
+      cloud-payment-service:
+        base-config: default
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 10s #默认限制远程1s，超过1s就超时异常，配置了降级，就走降级逻辑
+
+#使用固定线程需要将spring.cloud.openfeign.circuitbreaker.group.enabled设置为false
+```
+
+再在提供者模块`cloud-provider-hystrix-payment8001`中添加方法
+**PayCircuitController.java**
+
+```java
+
+/**
+ * Resilience4j bulkHead的例子
+ * @param id
+ * @return
+ */
+@GetMapping(value = "/pay/bulkhead/{id}")
+public String myBulkHead(@PathVariable("id") Integer id){
+        if(id==-4)throw new RuntimeException("----bulkHead id 不能为空");
+        if(id==999)try{TimeUnit.SECONDS.sleep(5);}catch(InterruptedException e){e.printStackTrace();}
+        return"Hello bulkHead inputId : "+id+"\t"+IdUtil.simpleUUID();
+        }
+
+```
+
+PayFeignApi.java添加myBulkHead方法，供外部调用
+
+```java
+/**
+ * 测试熔断 Resilience4j BulkHead
+ * @param id
+ * @return 提示信息
+ */
+@GetMapping(value = "/pay/bulkhead/{id}")
+public String myBulkHead(@PathVariable("id") Integer id);
+```
+
+消费者模块`cloud-consumer-feign-order80`中添加方法访问
+**OrderCircuitController.java**
+
+```java
+   /**
+ * 舱壁
+ * @param id
+ * @return
+ */
+@GetMapping(value = "/feign/pay/bulkhead/{id}")
+@Bulkhead(name = "cloud-payment-service", fallbackMethod = "myBulkheadFallback", type = Bulkhead.Type.SEMAPHORE)
+public String myBulkHead(@PathVariable("id") Integer id){
+        return payFeignApi.myBulkHead(id);
+        }
+
+public String myBulkheadFallback(Integer id,Throwable t){
+        return"myBulkheadFallback ，舱壁超出最大数量限制， 系统繁忙，请稍后重试----~~~~";
+        }
+
+```
+
+最后启动项目，测试结果。
+
+#### 6.3 限流器（RateLimiter）
+
+限流器是什么？
+
+* 用来限制对某个资源（如：接口）的访问次数
+
+```xml
+
+<dependency>
+    <groupId>io.github.resilience4j</groupId>
+    <artifactId>resilience4j-ratelimiter</artifactId>
+</dependency>
+```
+
+```yml
+ #限流器
+ resilience4j:
+   ratelimiter:
+     configs:
+       default:
+         limit-for-period: 2
+         limit-refresh-period: 1s
+         timeout-duration: 1
+     instances:
+       cloud-payment-service:
+         base-config: default
+```
+
+### 七、分布式链路追踪
+
+为什么要用分布式链路追踪？
+
+* 在位服务框架中，一个由客户端发起的请求在后端系统中会经过多个不同的服务结点调用来协同产生最后的请求结果，每一个前段请求都会形成一条复杂的分布式服务调用链路，链路中的任何一环出现高延时或错误都会引起整个请求最后的失败
+
+#### 7.1 Zipkin链路追踪负责数据展现
+
+* Zipkin是一个开源的分布式追踪系统，用于收集和聚合跨服务调用的链路和操作数据，可用于构建和操作分布式系统间的延迟数据。
+
+zipkin下载地址：https://zipkin.io/pages/quickstart.html
+
+cmd窗口下执行：java -jar zipkin-server-3.1.1-exec.jar
+
+访问地址：http://localhost:9411/，若能出现ui界面说明成功了
+
+#### 7.2 Micrometer+Zipkin搭配使用
+
+1、引入相关jar
+
+**父工程pom**
+
+```xml
+
+<prperties>
+    <micrometer-tracing.version>1.2.0</micrometer-tracing.version>
+    <micrometer-observation.version>1.12.0</micrometer-observation.version>
+    <feign-micrometer.version>12.5</feign-micrometer.version>
+    <zipkin-reporter-brave.version>2.17.0</zipkin-reporter-brave.version>
+</properties>
+
+<dependencyManagement>
+<dependencies>
+    <!--micrometer-tracing-bom导入链路追踪版本中心-1-->
+    <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-tracing-bom</artifactId>
+        <version>${micrometer-tracing.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+    </dependency>
+    <!--            micrometer-tracing指标追踪-2-->
+    <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-tracing</artifactId>
+        <version>${micrometer-tracing.version}</version>
+    </dependency>
+    <!--micrometer-tracing-bridge-brave适配zipkin的桥接包 3-->
+    <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-tracing-bridge-brave</artifactId>
+        <version>${micrometer-tracing.version}</version>
+    </dependency>
+    <!--micrometer-observation 4-->
+    <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-observation</artifactId>
+        <version>${micrometer-observation.version}</version>
+    </dependency>
+    <!--feign-micrometer 5-->
+    <dependency>
+        <groupId>io.github.openfeign</groupId>
+        <artifactId>feign-micrometer</artifactId>
+        <version>${feign-micrometer.version}</version>
+    </dependency>
+    <!--zipkin-reporter-brave 6-->
+    <dependency>
+        <groupId>io.zipkin.reporter2</groupId>
+        <artifactId>zipkin-reporter-brave</artifactId>
+        <version>${zipkin-reporter-brave.version}</version>
+    </dependency>
+</dependencies>
+</dependencyManagement>
+
+```
+
+2、`服务提供者8001(cloud-payment-service)`
+**pom**
+
+```xml
+ <!--            micrometer-tracing指标追踪-2-->
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-tracing</artifactId>
+    <version>${micrometer-tracing.version}</version>
+</dependency>
+        <!--micrometer-tracing-bridge-brave适配zipkin的桥接包 3-->
+<dependency>
+<groupId>io.micrometer</groupId>
+<artifactId>micrometer-tracing-bridge-brave</artifactId>
+<version>${micrometer-tracing.version}</version>
+</dependency>
+        <!--micrometer-observation 4-->
+<dependency>
+<groupId>io.micrometer</groupId>
+<artifactId>micrometer-observation</artifactId>
+<version>${micrometer-observation.version}</version>
+</dependency>
+        <!--feign-micrometer 5-->
+<dependency>
+<groupId>io.github.openfeign</groupId>
+<artifactId>feign-micrometer</artifactId>
+<version>${feign-micrometer.version}</version>
+</dependency>
+        <!--zipkin-reporter-brave 6-->
+<dependency>
+<groupId>io.zipkin.reporter2</groupId>
+<artifactId>zipkin-reporter-brave</artifactId>
+<version>${zipkin-reporter-brave.version}</version>
+</dependency>
+```
+
+**application.yml**
+
+```yml
+management:
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  tracing:
+    sampling:
+      probability: 1.0 #值越大手机越及时
+```
+
+3、新建业务类
+**PayMicrometerController.java**
+
+```java
+import cn.hutool.core.util.IdUtil;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * @author QRH
+ * @date 2024/4/1 17:46
+ * @description 测试Micrometer
+ */
+@RestController
+public class PayMicrometerController {
+    @GetMapping(value = "/pay/micrometer/{id}")
+    public String myMicrometer(@PathVariable("id") Integer id) {
+        return "欢迎来到myMicrometer inputId ： " + id + "\t 服务返回：" + IdUtil.simpleUUID();
+    }
+}
+```
+
+**PayFeignApi.java**
+
+```java
+
+/**
+ * Micrometer链路追踪
+ *
+ * @param id
+ * @return
+ */
+@GetMapping(value = "/pay/micrometer/{id}")
+public String myMicrometer(@PathVariable("id") Integer id);
+```
+
+3、`服务消费者80(cloud-consumer-feign-feign-order80)`
+操作步骤如前所示
+
+### 八、网关
+
+#### 8.1 配置
+
+1、新建cloud-gateway-gateway9527
+
+2、pom.xml
+
+```xml
+
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-gateway</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
 
 
+</dependencies>
+
+<build>
+<plugins>
+    <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+    </plugin>
+</plugins>
+</build>
+
+```
+
+3、application.yml
+
+```yml
+
+server:
+  port: 9527
+
+spring:
+  application:
+    name: cloud-gateway
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        prefer-ip-address: true
+        service-name: ${spring.application.name}
+
+```
+
+4、主启动
+
+```java
+package com.atguigu.cloud;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
+/**
+ * @author QRH
+ * @date 2024/4/1 18:25
+ * @description TODO
+ */
+@SpringBootApplication
+@EnableDiscoveryClient
+public class Main9527 {
+    public static void main(String[] args) {
+        SpringApplication.run(Main9527.class, args);
+    }
+}
+
+
+```
+
+5、关联路由
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          uri: http://localhost:8001                #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/get/**              # 断言，路径相匹配的进行路由
+
+
+        - id: pay_routh2 #pay_routh2                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          uri: http://localhost:8001                #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/info/**              # 断言，路径相匹配的进行路由
+```
+
+6、启动使用9527端口访问链接
+
+7、FeignApi.java添加两个接口
+
+```java
+
+@GetMapping(value = "/pay/gateway/get/{id}")
+public ResultData getGateWayById(@PathVariable("id") Integer id);
+
+@GetMapping(value = "/pay/gateway/get/info")
+public ResultData<String> getGateWayInfo();
+```
+
+8、PayGateWayController.java添加两个接口
+```java
+package com.atguigu.cloud.controller;
+
+import cn.hutool.core.util.IdUtil;
+import com.atguigu.cloud.entities.Pay;
+import com.atguigu.cloud.resp.ResultData;
+import com.atguigu.cloud.service.PayService;
+import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * @author QRH
+ * @date 2024/4/1 22:16
+ * @description TODO
+ */
+@RestController
+public class PayGateWayController {
+
+    @Resource
+    private PayService payService;
+
+    @GetMapping(value = "/pay/gateway/get/{id}")
+    public ResultData<Pay> getGateWayById(@PathVariable("id") Integer id){
+        return ResultData.success(payService.getById(id));
+    }
+
+    @GetMapping(value = "/pay/gateway/get/info")
+    public ResultData<String> getGateWayInfo(){
+        return ResultData.success("gateway info test: "+ IdUtil.simpleUUID());
+    }
+
+}
+
+
+```
+
+9、OrderGateWayController.java添加两个接口
+```java
+package com.atguigu.cloud.controller;
+
+import cn.hutool.core.util.IdUtil;
+import com.atguigu.cloud.apis.PayFeignApi;
+import com.atguigu.cloud.resp.ResultData;
+import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * @author QRH
+ * @date 2024/4/1 22:31
+ * @description TODO
+ */
+@RestController
+public class OrderGateWayController {
+
+    @Resource
+    private PayFeignApi payFeignApi;
+
+    @GetMapping(value = "/feign/pay/gateway/get/{id}")
+    public ResultData getGateWayById(@PathVariable("id") Integer id){
+        return payFeignApi.getGateWayById(id);
+    }
+
+    @GetMapping(value = "/feign/pay/gateway/get/info")
+    public ResultData<String> getGateWayInfo(){
+        return payFeignApi.getGateWayInfo();
+    }
+
+}
+
+```
+
+```java
+
+//@FeignClient(value = "cloud-payment-service")
+@FeignClient(value = "cloud-gateway")
+public interface PayFeignApi {}
+```
 
