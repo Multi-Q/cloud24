@@ -1618,3 +1618,305 @@ public class OrderGateWayController {
 public interface PayFeignApi {}
 ```
 
+#### 8.2 常用api
+
+##### 8.2.1 After Route Predicate
+在`什么时间之后`能访问这个链接
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          uri: lb://cloud-payment-service               #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/get/** 
+            - After=2024-04-01T00:00:00.000+08:00[Asia/Shanghai]
+```
+
+##### 8.2.2 Before Route Predicate
+在`什么时间之前`能访问这个链接
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          uri: lb://cloud-payment-service               #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/get/** 
+            - Before=2024-04-03T00:00:00.000+08:00[Asia/Shanghai]
+```
+
+##### 8.2.3 Between Route Predicate
+在`什么时间之前`能访问这个链接
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          uri: lb://cloud-payment-service               #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/get/**
+            - Between=2024-04-02T00:00:00.000+08:00[Asia/Shanghai],2024-04-03T00:00:00.000+08:00[Asia/Shanghai]
+```
+
+##### 8.2.4 Cookie Route Predicate
+Cookie断言，需要两个参数`Cookie`和`正则表达式`
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          uri: lb://cloud-payment-service               #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/get/**
+            - After=2024-04-01T00:00:00.000+08:00[Asia/Shanghai]
+            - Cookie=username,qrh
+```
+
+结果，使用cmd测试
+```cmd
+C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1 --cookie "username=qrh"
+
+{"code":"200","message":"success","data":{"id":1,"payNo":"pay17203699","orderNo":"6544bafb424a","userId":1,"amount":19.99,"deleted":0,"createTime":"2024-03-14 12:56:24","updateTime":"2024-03-14 15:18:14"},"timestamp":1712069458399}
+```
+
+##### 8.2.5 Header Route Predicate
+需要两个参数`header请求头`和`正则表达式`
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          uri: lb://cloud-payment-service               #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/get/**
+            - After=2024-04-01T00:00:00.000+08:00[Asia/Shanghai]
+            - Header=X-Request-Id,123456 
+```
+
+结果，使用cmd测试
+
+```cmd
+C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1 -H "X-Request-Id:123456"
+
+{"code":"200","message":"success","data":{"id":1,"payNo":"pay17203699","orderNo":"6544bafb424a","userId":1,"amount":19.99,"deleted":0,"createTime":"2024-03-14 12:56:24","updateTime":"2024-03-14 15:18:14"},"timestamp":1712070083153}
+
+```
+
+##### 8.2.6 Host Route Predicate
+需要两个参数`header请求头`和`正则表达式`
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          uri: lb://cloud-payment-service               #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/get/**
+            - Host=**.atguigu.com
+```
+
+结果，使用cmd测试
+```cmd
+C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1 -H "Host:www.atguigu.com"
+
+{"code":"200","message":"success","data":{"id":1,"payNo":"pay17203699","orderNo":"6544bafb424a","userId":1,"amount":19.99,"deleted":0,"createTime":"2024-03-14 12:56:24","updateTime":"2024-03-14 15:18:14"},"timestamp":1712070408884}
+
+```
+
+##### 8.2.7 Method Route Predicate
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          uri: lb://cloud-payment-service               #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/get/**
+            - Method=GET,POST #注意需要大写，小写不行
+```
+
+结果，使用cmd测试
+```cmd
+C:\Users\qrh19>curl -X GET  http://localhost:9527/pay/gateway/get/1
+
+{"code":"200","message":"success","data":{"id":1,"payNo":"pay17203699","orderNo":"6544bafb424a","userId":1,"amount":19.99,"deleted":0,"createTime":"2024-03-14 12:56:24","updateTime":"2024-03-14 15:18:14"},"timestamp":1712070926046}
+```
+
+##### 8.2.8 Path Route Predicate
+访问路径。
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          uri: lb://cloud-payment-service               #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/get/**
+            
+```
+
+##### 8.2.9 Query Route Predicate
+
+查询请求参数
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          uri: lb://cloud-payment-service               #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/get/**
+            - Query=username,qrh
+```
+
+结果，使用cmd测试
+```cmd
+C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1?username=qrh
+
+{"code":"200","message":"success","data":{"id":1,"payNo":"pay17203699","orderNo":"6544bafb424a","userId":1,"amount":19.99,"deleted":0,"createTime":"2024-03-14 12:56:24","updateTime":"2024-03-14 15:18:14"},"timestamp":1712071157949}
+C:\Users\qrh19>
+
+```
+
+##### 8.2.10 RemoteAddr  Route Predicate
+
+远程地址请求访问，只有这个地址才能访问
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          uri: lb://cloud-payment-service               #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/get/**
+            - RemoteAddr=192.168.10.1/24
+```
+
+结果，使用cmd测试
+```cmd
+C:\Users\qrh19>curl http://192.168.10.12:9527/pay/gateway/get/1
+
+{"code":"200","message":"success","data":{"id":1,"payNo":"pay17203699","orderNo":"6544bafb424a","userId":1,"amount":19.99,"deleted":0,"createTime":"2024-03-14 12:56:24","updateTime":"2024-03-14 15:18:14"},"timestamp":1712071431679}
+C:\Users\qrh19>
+
+```
+
+##### 8.2.11 自定义断言
+①新建自定义断言类，（注意：`必须以RoutePredicateFactory`结尾）
+
+**MyRoutePredicateFactory.java**
+```java
+package com.atguigu.cloud.gateway;
+
+import jakarta.validation.constraints.NotEmpty;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.cloud.gateway.handler.predicate.AbstractRoutePredicateFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.server.ServerWebExchange;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Predicate;
+
+/**
+ * @author QRH
+ * @date 2024/4/2 23:29
+ * @description 自定义断言类
+ * 按照会员等级进行判断（钻、金、银）三个等级
+ */
+@Component //必须加这个注解
+public class MyRoutePredicateFactory extends AbstractRoutePredicateFactory<MyRoutePredicateFactory.Config> {
+
+    public static final String USER_TYPE_KEY = "userType";
+
+    public MyRoutePredicateFactory() {
+        super(MyRoutePredicateFactory.Config.class);
+    }
+
+    //开启Shortcut配置，因为路由断言有两种配置方式：shortcut和fully expend
+    public List<String> shortcutFieldOrder() {
+        return Collections.singletonList("userType");
+    }
+
+    @Override
+    public Predicate<ServerWebExchange> apply(MyRoutePredicateFactory.Config config) {
+        return new Predicate<ServerWebExchange>() {
+            public boolean test(ServerWebExchange serverWebExchange) {
+                String userType = serverWebExchange.getRequest().getQueryParams().getFirst("userType");
+                if(userType==null) return false;
+                if (userType.equalsIgnoreCase(config.getUserType())) return true;
+
+                return false;
+            }
+
+//            public Object getConfig() {
+//                return config;
+//            }
+
+//            public String toString() {
+//                return String.format("MyRoutePredicateFactory: %s", config.getUserType());
+//            }
+
+        };
+    }
+
+
+
+
+    @Validated
+    public static class Config {
+        @Setter
+        @Getter
+        @NotEmpty
+        private String userType; //钻、金、银等用户等级
+}
+
+
+}
+
+```
+②写yml
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+          uri: lb://cloud-payment-service               #匹配后提供服务的路由地址
+          predicates:
+            - Path=/pay/gateway/get/**
+            - My=diamod
+```
+
+③测试
+```cmd
+
+C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1?userType=diamod
+
+{"code":"200","message":"success","data":{"id":1,"payNo":"pay17203699","orderNo":"6544bafb424a","userId":1,"amount":19.99,"deleted":0,"createTime":"2024-03-14 12:56:24","updateTime":"2024-03-14 15:18:14"},"timestamp":1712073665745}
+C:\Users\qrh19>
+```
