@@ -513,7 +513,8 @@ public String getInfoByConsul(){
 * OpenFeign是什么？
 
   Feign是一个<span style="color:red;font-weight:bolder;font-size:20px;">`声明式web服务客户端`</span>
-  。他编写web服务客户端变得更容易。`使用Feign创建一个接口并对其进行注释`。它具有可插入的注释支持，包括Feign注释和JAX-RS注释。Feign还支持可插拔编码器和解码器。Spring Cloud添加了对Spring MVC注释的支持，以及对使用Spring Web中默认使用的HttpMessageConveter的支持。Spring Cloud还集成了Eureka、Spring Cloud CircuitBreaker以及Spring Cloud
+  。他编写web服务客户端变得更容易。`使用Feign创建一个接口并对其进行注释`。它具有可插入的注释支持，包括Feign注释和JAX-RS注释。Feign还支持可插拔编码器和解码器。Spring Cloud添加了对Spring
+  MVC注释的支持，以及对使用Spring Web中默认使用的HttpMessageConveter的支持。Spring Cloud还集成了Eureka、Spring Cloud CircuitBreaker以及Spring Cloud
   LoadBalancer，以便使用Feign时提供负载均衡的http客户端。
 
 
@@ -668,9 +669,9 @@ spring:
 
 上面这种是为全局统一设置超时时间
 
-那为单个服务设置超时时间该如何做呢？ 
+那为单个服务设置超时时间该如何做呢？
 
-步骤： 
+步骤：
 
 ①在`cloud-consumer-feign-order80`项目中的controller头上添加指定的`微服务服务实例`
 
@@ -757,9 +758,9 @@ OpenFign中的Http Client如果不做特殊配置，则会默认使用JDK自带�
 </dependency>
         <!-- feign-hc5-->
 <dependency>
-    <groupId>io.github.openfeign</groupId>
-    <artifactId>feign-hc5</artifactId>
-    <version>13.1</version>
+<groupId>io.github.openfeign</groupId>
+<artifactId>feign-hc5</artifactId>
+<version>13.1</version>
 </dependency>
 ```
 
@@ -937,8 +938,8 @@ public interface PayFeignApi {
 </dependency>
         <!--        由于断路保护需要aop实现，所以必须导入aop包-->
 <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-aop</artifactId>
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-aop</artifactId>
 </dependency>
 
 ```
@@ -1536,6 +1537,7 @@ public ResultData<String> getGateWayInfo();
 ```
 
 8、PayGateWayController.java添加两个接口
+
 ```java
 package com.atguigu.cloud.controller;
 
@@ -1560,13 +1562,13 @@ public class PayGateWayController {
     private PayService payService;
 
     @GetMapping(value = "/pay/gateway/get/{id}")
-    public ResultData<Pay> getGateWayById(@PathVariable("id") Integer id){
+    public ResultData<Pay> getGateWayById(@PathVariable("id") Integer id) {
         return ResultData.success(payService.getById(id));
     }
 
     @GetMapping(value = "/pay/gateway/get/info")
-    public ResultData<String> getGateWayInfo(){
-        return ResultData.success("gateway info test: "+ IdUtil.simpleUUID());
+    public ResultData<String> getGateWayInfo() {
+        return ResultData.success("gateway info test: " + IdUtil.simpleUUID());
     }
 
 }
@@ -1575,6 +1577,7 @@ public class PayGateWayController {
 ```
 
 9、OrderGateWayController.java添加两个接口
+
 ```java
 package com.atguigu.cloud.controller;
 
@@ -1598,12 +1601,12 @@ public class OrderGateWayController {
     private PayFeignApi payFeignApi;
 
     @GetMapping(value = "/feign/pay/gateway/get/{id}")
-    public ResultData getGateWayById(@PathVariable("id") Integer id){
+    public ResultData getGateWayById(@PathVariable("id") Integer id) {
         return payFeignApi.getGateWayById(id);
     }
 
     @GetMapping(value = "/feign/pay/gateway/get/info")
-    public ResultData<String> getGateWayInfo(){
+    public ResultData<String> getGateWayInfo() {
         return payFeignApi.getGateWayInfo();
     }
 
@@ -1615,12 +1618,14 @@ public class OrderGateWayController {
 
 //@FeignClient(value = "cloud-payment-service")
 @FeignClient(value = "cloud-gateway")
-public interface PayFeignApi {}
+public interface PayFeignApi {
+}
 ```
 
-#### 8.2 常用api
+#### 8.2 Predicate常用api
 
 ##### 8.2.1 After Route Predicate
+
 在`什么时间之后`能访问这个链接
 
 ```yml
@@ -1631,11 +1636,12 @@ spring:
         - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
           uri: lb://cloud-payment-service               #匹配后提供服务的路由地址
           predicates:
-            - Path=/pay/gateway/get/** 
+            - Path=/pay/gateway/get/**
             - After=2024-04-01T00:00:00.000+08:00[Asia/Shanghai]
 ```
 
 ##### 8.2.2 Before Route Predicate
+
 在`什么时间之前`能访问这个链接
 
 ```yml
@@ -1646,11 +1652,12 @@ spring:
         - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
           uri: lb://cloud-payment-service               #匹配后提供服务的路由地址
           predicates:
-            - Path=/pay/gateway/get/** 
+            - Path=/pay/gateway/get/**
             - Before=2024-04-03T00:00:00.000+08:00[Asia/Shanghai]
 ```
 
 ##### 8.2.3 Between Route Predicate
+
 在`什么时间之前`能访问这个链接
 
 ```yml
@@ -1666,6 +1673,7 @@ spring:
 ```
 
 ##### 8.2.4 Cookie Route Predicate
+
 Cookie断言，需要两个参数`Cookie`和`正则表达式`
 
 ```yml
@@ -1682,6 +1690,7 @@ spring:
 ```
 
 结果，使用cmd测试
+
 ```cmd
 C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1 --cookie "username=qrh"
 
@@ -1689,6 +1698,7 @@ C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1 --cookie "username=q
 ```
 
 ##### 8.2.5 Header Route Predicate
+
 需要两个参数`header请求头`和`正则表达式`
 
 ```yml
@@ -1714,6 +1724,7 @@ C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1 -H "X-Request-Id:123
 ```
 
 ##### 8.2.6 Host Route Predicate
+
 需要两个参数`header请求头`和`正则表达式`
 
 ```yml
@@ -1729,6 +1740,7 @@ spring:
 ```
 
 结果，使用cmd测试
+
 ```cmd
 C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1 -H "Host:www.atguigu.com"
 
@@ -1751,6 +1763,7 @@ spring:
 ```
 
 结果，使用cmd测试
+
 ```cmd
 C:\Users\qrh19>curl -X GET  http://localhost:9527/pay/gateway/get/1
 
@@ -1758,6 +1771,7 @@ C:\Users\qrh19>curl -X GET  http://localhost:9527/pay/gateway/get/1
 ```
 
 ##### 8.2.8 Path Route Predicate
+
 访问路径。
 
 ```yml
@@ -1769,7 +1783,7 @@ spring:
           uri: lb://cloud-payment-service               #匹配后提供服务的路由地址
           predicates:
             - Path=/pay/gateway/get/**
-            
+
 ```
 
 ##### 8.2.9 Query Route Predicate
@@ -1789,6 +1803,7 @@ spring:
 ```
 
 结果，使用cmd测试
+
 ```cmd
 C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1?username=qrh
 
@@ -1814,6 +1829,7 @@ spring:
 ```
 
 结果，使用cmd测试
+
 ```cmd
 C:\Users\qrh19>curl http://192.168.10.12:9527/pay/gateway/get/1
 
@@ -1823,9 +1839,11 @@ C:\Users\qrh19>
 ```
 
 ##### 8.2.11 自定义断言
+
 ①新建自定义断言类，（注意：`必须以RoutePredicateFactory`结尾）
 
 **MyRoutePredicateFactory.java**
+
 ```java
 package com.atguigu.cloud.gateway;
 
@@ -1866,7 +1884,7 @@ public class MyRoutePredicateFactory extends AbstractRoutePredicateFactory<MyRou
         return new Predicate<ServerWebExchange>() {
             public boolean test(ServerWebExchange serverWebExchange) {
                 String userType = serverWebExchange.getRequest().getQueryParams().getFirst("userType");
-                if(userType==null) return false;
+                if (userType == null) return false;
                 if (userType.equalsIgnoreCase(config.getUserType())) return true;
 
                 return false;
@@ -1884,20 +1902,19 @@ public class MyRoutePredicateFactory extends AbstractRoutePredicateFactory<MyRou
     }
 
 
-
-
     @Validated
     public static class Config {
         @Setter
         @Getter
         @NotEmpty
         private String userType; //钻、金、银等用户等级
-}
+    }
 
 
 }
 
 ```
+
 ②写yml
 
 ```yml
@@ -1913,6 +1930,7 @@ spring:
 ```
 
 ③测试
+
 ```cmd
 
 C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1?userType=diamod
@@ -1920,3 +1938,1560 @@ C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1?userType=diamod
 {"code":"200","message":"success","data":{"id":1,"payNo":"pay17203699","orderNo":"6544bafb424a","userId":1,"amount":19.99,"deleted":0,"createTime":"2024-03-14 12:56:24","updateTime":"2024-03-14 15:18:14"},"timestamp":1712073665745}
 C:\Users\qrh19>
 ```
+
+#### 8.3 Filter
+
+相当于Spring MVC的拦截器，Serlvet的过滤器
+
+##### 8.3.1 全局过滤器Global Filter
+
+gateway默认自带的，直接用就可以
+
+##### 8.3.2 单一过滤器
+
+单一内置过滤器一共有38个
+
+###### 8.3.2.1 请求头过滤器
+
+1、AddRequestHeader GatewayFilter Factory
+
+该过滤器包含一个`name`和`value`
+
+步骤：
+
+①提供者模块(cloud-provider-payment8001) PayGateWayController.java添加方法
+
+```java
+ @GetMapping(value = "/pay/gateway/filter")
+public ResultData<String> getGateWayFilter(HttpServletRequest request){
+        String result="";
+        Enumeration<String> headers=request.getHeaderNames();
+        while(headers.hasMoreElements()){
+        String headerName=headers.nextElement();
+        String headerValue=request.getHeader(headerName);
+        System.out.println("请求头名： "+headerName+"\t\t\t请求头值： "+headerValue);
+        if(headerName.equalsIgnoreCase("X-Request-atguigu1")||headerName.equalsIgnoreCase("X-Request-atguigu2")){
+        result=result+headerName+"\t"+headerValue+" ";
+        }
+
+        }
+        return ResultData.success("getGateWayFilter 过滤器 test： "+result+" \t"+DateUtil.now());
+        }
+
+```
+
+②cloud-gateway9527 yml编写配置
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+
+        - id: pay_routh3
+          uri: lb://cloud-payment-service
+          predicates:
+            - Path=/pay/gateway/filter/**
+          filters:
+            - AddRequestHeader=X-Request-atguigu1,atguiguValue1
+            - AddRequestHeader=X-Request-atguigu2,atguiguValue2
+
+```
+
+2 RemoveRequestHeader GatewayFilter Factory
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+
+        - id: pay_routh3
+          uri: lb://cloud-payment-service
+          predicates:
+            - Path=/pay/gateway/filter/**
+          filters:
+            - AddRequestHeader=X-Request-atguigu1,atguiguValue1
+            - AddRequestHeader=X-Request-atguigu2,atguiguValue2
+            - RemoveRequestHeader=X-Request-atguigu1
+```
+
+3、 SetRequestHeader GatewayFilter Factory
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+
+        - id: pay_routh3
+          uri: lb://cloud-payment-service
+          predicates:
+            - Path=/pay/gateway/filter/**
+          filters:
+            - AddRequestHeader=X-Request-atguigu1,atguiguValue1
+            - AddRequestHeader=X-Request-atguigu2,atguiguValue2
+            #设置或修改，如果有这个name那么就修改，否则是新增
+            - SetRequestHeader=X-Request-atguigu2,HelloWorld
+            - SetRequestHeader=X-request-atguigu3,guiguValue3
+```
+
+###### 8.3.2.2 请求参数过滤器
+
+1、AddRequestParameter和RemoveRequestParameter
+
+```java
+@GetMapping(value = "/pay/gateway/filter")
+public ResultData<String> getGateWayFilter(HttpServletRequest request){
+        String result="";
+        Enumeration<String> headers=request.getHeaderNames();
+        while(headers.hasMoreElements()){
+        String headerName=headers.nextElement();
+        String headerValue=request.getHeader(headerName);
+        System.out.println("请求头名： "+headerName+"\t\t\t请求头值： "+headerValue);
+        if(headerName.equalsIgnoreCase("X-Request-atguigu1")||headerName.equalsIgnoreCase("X-Request-atguigu2")){
+        result=result+headerName+"\t"+headerValue+" ";
+        }
+
+        }
+        System.out.println("=============================");
+        String customerId=request.getParameter("customerId");
+        System.out.println("request parameter customId: "+customerId);
+
+        String customerName=request.getParameter("customerName");
+        System.out.println("request parameter customerName: "+customerName);
+        System.out.println("=============================");
+        return ResultData.success("getGateWayFilter 过滤器 test： "+result+" \t"+DateUtil.now());
+        }
+
+```
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+
+        - id: pay_routh3
+          uri: lb://cloud-payment-service
+          predicates:
+            - Path=/pay/gateway/filter/**
+          filters:
+            - AddRequestHeader=X-Request-atguigu1,atguiguValue1
+            - AddRequestHeader=X-Request-atguigu2,atguiguValue2
+            #设置或修改，如果有这个name那么就修改，否则是新增
+            - AddRequestParameter=customerId,1234566
+            - RemoveRequestParameter=customerName
+```
+
+访问http://localhost:9527/pay/gateway/filter?customerId=9999&customerName=h123，如果传了customerId，那就是用传过来的值，如果链接没有请求参数，那就使用配置内定义好的值
+
+![img7.png](studyImgs/img7.png)
+
+![img8.png](studyImgs/img8.png)
+
+##### 8.3.3 自定义全局过滤器
+
+步骤：
+
+①新建一个MyGlobalFilter.java
+
+```java
+package com.atguigu.cloud.mygateway;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.Ordered;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+/**
+ * @author QRH
+ * @date 2024/4/3 17:35
+ * @description 自定义全局过滤器
+ */
+@Component
+@Slf4j
+public class MyGlobalFilter implements GlobalFilter, Ordered {
+    private static final String BEGIN_VISIT_TIME = "begin_visit_time";
+
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        //记录接口开始访问时间
+        exchange.getAttributes().put(BEGIN_VISIT_TIME, System.currentTimeMillis());
+        // 返回统计的各个接口给后台
+        return chain.filter(exchange)
+                .then(
+                        Mono.fromRunnable(() -> {
+                            Long beginVisitTime = exchange.getAttribute(BEGIN_VISIT_TIME);
+                            if (beginVisitTime != null) {
+                                log.info("访问接口主机： " + exchange.getRequest().getURI().getHost());
+                                log.info("访问接口端口： " + exchange.getRequest().getURI().getPort());
+                                log.info("访问接口URL： " + exchange.getRequest().getURI().getPath());
+                                log.info("访问接口URL后面的参数： " + exchange.getRequest().getURI().getRawQuery());
+                                log.info("访问接口时长： " + (System.currentTimeMillis() - beginVisitTime) + "毫秒");
+                                log.info("=====================================");
+                                System.out.println();
+                            }
+                        })
+                );
+    }
+
+    /**
+     * 数字越小，优先级越高
+     *
+     * @return
+     */
+    @Override
+    public int getOrder() {
+        return 0;
+    }
+}
+
+```
+
+##### 8.3.4 自定义条件过滤器
+
+步骤：
+
+①新建一个MyGatewayFilterFactory.java（必须以GatewayFilterFactory结尾），并继承AbstractGatewayFilterFactory
+
+### 九、Spring Cloud Alibaba
+
+* Spring Cloud Alibaba的版本不是最新的
+
+#### 9.1 Spring Cloud Alibaba Nacos
+
+Nacos是一个动态服务发现、配置管理、服务管理平台，Nacos 致力于解决微服务治理中的问题。Nacos 提供了服务注册、服务发现、配置管理、服务管理、服务网关等微服务治理功能，并支持基于 Spring Cloud 构建微服务应用。
+
+* Nacos作为注册中心，可以替代Eureka，作为配置中心，可以替代Config
+
+Nacos=Spring Cloud Consul
+
+1、安装下载
+
+https://nacos.io/zh-cn/docs/quick-start.html
+
+2、启动Nacos
+
+* Windows版本启动命令：startup.cmd -m standalone
+* Linux版本启动命令：sh startup.sh -m standalone
+
+启动后，访问http://localhost:8848/nacos/index.html，成功则配置没错
+
+![img_1.png](studyImgs/img_1.png)
+
+##### 9.1.1 服务注册中心
+
+步骤：
+
+①新建一个cloudalibaba-provider-payment9001模块(提供者模块)
+
+②加pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cloud24</artifactId>
+        <groupId>com.atguigu.cloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cloudalibaba-provider-payment9001</artifactId>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project-build-sourceEncoding>UTF-8</project-build-sourceEncoding>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.atguigu.cloud</groupId>
+            <artifactId>cloud-api-commons</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+    </dependencies>
+
+</project>
+
+```
+
+③写yml
+
+```yaml
+server:
+  port: 9001
+
+
+spring:
+  application:
+    name: nacos-payment-provider
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 #配置nacos地址
+```
+
+④主启动
+
+```java
+package com.atguigu.cloud;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
+/**
+ * @author QRH
+ * @date 2024/4/4 0:06
+ * @description TODO
+ */
+@SpringBootApplication
+@EnableDiscoveryClient
+public class Main9001 {
+    public static void main(String[] args) {
+        SpringApplication.run(Main9001.class, args);
+    }
+}
+
+```
+
+⑤controller
+
+```java
+package com.atguigu.cloud.controller;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * @author QRH
+ * @date 2024/4/4 0:10
+ * @description TODO
+ */
+@RestController
+public class PayAlibabaController {
+
+    @Value("${server.port}")
+    private String serverPort;
+
+    @GetMapping(value = "/pay/nacos/{id}")
+    public String getPayInfo(@PathVariable("id") Integer id) {
+        return "nacos registry, serverPort: " + serverPort + "\t id" + id;
+    }
+
+}
+
+```
+
+消费者模块的pom与提供者模块差不太多
+
+消费者模块：
+
+```xml
+
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+</dependency>
+
+<dependency>
+<groupId>org.springframework.cloud</groupId>
+<artifactId>spring-cloud-starter-loadbalancer</artifactId>
+</dependency>
+```
+
+```yml
+server:
+  port: 83
+
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+
+#消费者将要访问的微服务名称（nacos微服务提供者叫什么就写什么）
+service-url:
+  nacos-user-service: http://nacos-payment-provider
+
+
+```
+
+配置RestTemplate
+
+```java
+package com.atguigu.cloud.config;
+
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+
+/**
+ * @author QRH
+ * @date 2024/4/4 0:26
+ * @description TODO
+ */
+@Configuration
+public class RestTemplateConfig {
+    @Bean
+    @LoadBalanced
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
+}
+
+```
+
+controller
+
+```java
+package com.atguigu.cloud.controller;
+
+import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+/**
+ * @author QRH
+ * @date 2024/4/4 0:34
+ * @description TODO
+ */
+@RestController
+public class OrderNacosController {
+    @Resource
+    private RestTemplate restTemplate;
+
+    @Value("${service-url.nacos-user-service}")
+    private String serverURL;
+
+    @GetMapping(value = "/consumer/pay/nacos/{id}")
+    public String paymentInfo(@PathVariable("id") Integer id) {
+        String res = restTemplate.getForObject(serverURL + "/pay/nacos/" + id, String.class);
+
+        return res + "\t我是OrderNacosController83调用者......";
+    }
+}
+
+
+```
+
+##### 9.1.2 服务配置中心
+
+①新建模块(cloudalibaba-config-nacos-client3377)
+
+②改pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cloud24</artifactId>
+        <groupId>com.atguigu.cloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cloudalibaba-config-nacos-client3377</artifactId>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-bootstrap</artifactId>
+        </dependency>
+        <!--nacos-config-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+```
+
+③写yml
+
+**bootstrap.yml**
+
+```yml
+spring:
+  application:
+    name: nacos-config-client
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 #nacos服务注册中心地址
+      config:
+        server-addr: localhost:8848 #nacos作为配置中心的地址
+        file-extension: yaml #指定yml格式
+
+
+```
+
+**application.yml**
+
+```yml
+server:
+  port: 3377
+
+spring:
+  profiles:
+    active: dev
+
+```
+
+④主启动
+
+```java
+package com.atguigu.cloud;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
+
+@SpringBootApplication
+@EnableDiscoveryClient
+public class Main3377 {
+    public static void main(String[] args) {
+        SpringApplication.run(Main3377.class, args);
+    }
+}
+
+```
+
+⑤业务类
+
+**注意：@RefreshScope要加在controller类中才能实现动态更新，加载主启动类上不会实现动态更新，这与Consul的配置不同**
+
+```java
+package com.atguigu.cloud.controller;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+
+@RestController
+@RefreshScope
+public class NacosConfigController {
+
+    @Value("${config.info}")
+    private String configInfo;
+
+    @GetMapping(value = "/config/info")
+    public String getConfigInfo() {
+        return configInfo;
+    }
+}
+```
+
+### 十、Spring Cloud Sentinel
+
+Sentinel下载：https://github.com/alibaba/Sentinel/releases
+
+启动DashBoard命令：java -jar sentinel-dashboard-1.8.7.jar
+
+访问sentinel启动界面：http://localhost:8080/ (登录账号、密码都是：sentinel);
+
+步骤：
+
+① 创建模块(cloudalibaba-provider-payment8401)
+
+②改pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cloud24</artifactId>
+        <groupId>com.atguigu.cloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cloudalibaba-sentinel-service8401</artifactId>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.atguigu.cloud</groupId>
+            <artifactId>cloud-api-commons</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <!--hutool-->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+        <!--lombok-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.28</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--test-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+
+```
+
+③写yml
+
+```yaml
+server:
+  port: 8401
+
+spring:
+  application:
+    name: cloudalibaba-sentinel-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+      sentinel:
+        transport:
+          dashboard: localhost:8080 #sentinel dashboard控制台服务地址
+          port: 8719 #默认8179端口，假如被占会自动从8179开始一次+1扫描，直至找到未被占用的端口
+```
+
+④主启动
+
+```java
+package com.atguigu.cloud;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
+/**
+ * @author QRH
+ * @date 2024/4/4 13:34
+ * @description TODO
+ */
+@SpringBootApplication
+@EnableDiscoveryClient
+public class Main8401 {
+    public static void main(String[] args) {
+        SpringApplication.run(Main8401.class, args);
+    }
+}
+
+```
+
+⑤业务类
+
+```java
+package com.atguigu.cloud.controller;
+
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+
+@RestController
+public class FlowLimitController {
+
+    @GetMapping(value = "/testA")
+    public String testA() {
+        return "----testA";
+    }
+
+    @GetMapping(value = "/testB")
+    public String testB() {
+        return "----testB";
+    }
+
+
+}
+
+```
+
+⑥启动
+
+##### 10.1 流控规则
+
+##### 10.2 @SentinelSource注解
+
+该注解是写在`Service层的方法上`的
+
+##### 10.3 热点规则
+
+是什么？
+
+* 经常访问的数据，很多时候我们希望监控，我们希望对经常访问的数据进行`热点参数`的监控，即对经常访问的数据进行`限流`。
+
+```java
+ @GetMapping(value = "/testHotKey")
+@SentinelResource(value = "testHotKey", blockHandler = "dealHandlerTestHotKey")
+public String testHotKey(@RequestParam(value = "p1", required = false)String p1,
+@RequestParam(value = "p2", required = false)String p2){
+        return"-------testHotKey";
+        }
+
+public String dealHandlerTestHotKey(String p1,String p2,BlockException e){
+        return"------------dealHandlerTestHotKey 点击太快，限流了";
+        }
+```
+
+![img_2.pgn](studyImgs/img_2.png)
+
+##### 10.4 黑白名单控制
+
+* 黑白名单控制，就是对请求的ip进行限制，比如只允许白名单的ip访问，或者只允许黑名单的ip访问。
+
+需要重写RequestOriginParser.java，并设值参数名为serverName
+
+```java
+package com.atguigu.cloud.hander;
+
+import com.alibaba.csp.sentinel.adapter.spring.webmvc.callback.RequestOriginParser;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Component;
+
+
+@Component
+public class MyRequestOriginParser implements RequestOriginParser {
+    @Override
+    public String parseOrigin(HttpServletRequest httpServletRequest) {
+        return httpServletRequest.getParameter("serverName");
+    }
+}
+
+```
+
+业务类：
+
+```java
+package com.atguigu.cloud;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+
+@RestController
+@Slf4j
+public class EmpowerController {
+
+    @GetMapping(value = "/empower")
+    public String requestSentinel() {
+        log.info("测试Sentinel授权规则");
+        return "Sentinel授权规则";
+    }
+}
+
+```
+
+![img_3.png](studyImgs/img_3.png)
+
+localhost:8401/empower?serverName=test1或localhost:8401/empower?serverName=test2 的都不予通过，其他的可以访问。
+
+##### 10.5 规则持久化
+
+* 规则持久化，就是将规则持久化到数据库中，这样，当服务器重启的时候，这些规则就会自动加载到内存中。
+
+步骤：
+
+1. 引入依赖
+
+```xml
+
+<dependency>
+    <groupId>com.alibaba.csp</groupId>
+    <artifactId>sentinel-datasource-nacos</artifactId>
+</dependency>
+
+```
+
+2、改yml
+
+```yml
+
+spring:
+  cloud:
+    sentinel:
+      datasource:
+        ds1:
+          nacos:
+            server-addr: localhost:8848
+            dataId: ${spring.application.name}
+            groupId: DEFAULT_GROUP
+            data-type: json
+            rule-type: flow #flow:流控规则  degrade:降级规则  param-flow:参数流控规则
+```
+
+##### 10.5 Openfeign和Sentinel整合
+
+①提供者模块（cloudalibaba-provider-payment9001）引入依赖
+
+```xml
+
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+</dependency>
+
+<dependency>
+<groupId>org.springframework.cloud</groupId>
+<artifactId>spring-cloud-starter-openfeign</artifactId>
+</dependency>
+```
+
+②提供者模块（cloudalibaba-provider-payment9001）写yml
+
+```yml
+server:
+  port: 9001
+
+
+spring:
+  application:
+    name: nacos-payment-provider
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 #配置nacos地址
+  sentinel:
+    trasport:
+      dashboard: localhost:8080
+      port: 8719
+
+```
+
+③业务类
+
+**PayAlibabaController.java**
+
+```java
+@GetMapping(value = "/pay/nacos/get/{orderNo}")
+@SentinelResource(value = "getPayByOrder", blockHandler = "handlerBlockHandler")
+public ResultData getPayByOrder(@PathVariable("orderNo")String orderNo){
+        PayDTO payDTO=new PayDTO();
+        payDTO.setId(1024);
+        payDTO.setOrderNo(orderNo);
+        payDTO.setAmount(BigDecimal.valueOf(9.91));
+        payDTO.setPayNo("pay: "+IdUtil.fastUUID());
+        payDTO.setUserId(1);
+        return ResultData.success("查询返回值： "+payDTO);
+        }
+public ResultData handlerBlockHandler(@PathVariable("orderNo")String orderNo,Throwable e){
+        return ResultData.fail(ReturnCodeEnum.RC500.getCode(),"getPayByOrder服务不可用，触发sentinel流控配置规则");
+        }
+```
+
+④公共模块（cloud-api-commons）引入依赖、
+
+```xml
+
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+</dependency>
+
+<dependency>
+<groupId>org.springframework.cloud</groupId>
+<artifactId>spring-cloud-starter-openfeign</artifactId>
+</dependency>
+```
+
+⑤公共模块（cloud-api-commons）新建PayFeignSentinelApi.java
+
+```java
+package com.atguigu.cloud.apis;
+
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.atguigu.cloud.resp.ResultData;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+/**
+ * @author QRH
+ * @date 2024/4/5 12:41
+ * @description 用OpenFeign和Sentinel的整合
+ */
+@FeignClient(value = "nacos-payment-provider", fallback = PayFeignSentinelApiFallback.class)
+public interface PayFeignSentinelApi {
+
+    @GetMapping(value = "/pay/nacos/get/{orderNo}")
+    public ResultData getPayByOrder(@PathVariable("orderNo") String orderNo);
+}
+
+```
+
+Sentinel回调类
+
+```java
+package com.atguigu.cloud.apis;
+
+import com.atguigu.cloud.resp.ResultData;
+import com.atguigu.cloud.resp.ReturnCodeEnum;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+
+/**
+ * @author QRH
+ * @date 2024/4/5 12:44
+ * @description Sentinel调用失败的回调
+ */
+@Component
+public class PayFeignSentinelApiFallback implements PayFeignSentinelApi {
+    @Override
+    public ResultData getPayByOrder(@PathVariable("orderNo") String orderNo) {
+        return ResultData.fail(ReturnCodeEnum.RC500.getCode(), "getPayByOrder服务不可用，触发sentinel流控配置规则");
+    }
+}
+
+```
+
+⑥消费者模块（cloudalibaba-consumer-nacos-order83）引入以下依赖
+
+```xml
+
+<dependency>
+    <groupId>com.atguigu.cloud</groupId>
+    <artifactId>cloud-api-commons</artifactId>
+    <version>1.0-SNAPSHOT</version>
+</dependency>
+
+<dependency>
+<groupId>org.springframework.cloud</groupId>
+<artifactId>spring-cloud-starter-openfeign</artifactId>
+</dependency>
+
+<dependency>
+<groupId>com.alibaba.cloud</groupId>
+<artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+</dependency>
+```
+
+改yml
+
+```yml
+#激活feign对sentinel的支持
+feign:
+  sentinel:
+    enabled: true
+```
+
+主启动类添加@EnableFeignClients注解
+
+业务类：
+
+**OrderNacosController.java**
+
+```java
+    @Resource
+private PayFeignSentinelApi payFeignSentinelApi;
+
+@GetMapping(value = "/consumer/pay/nacos/get/{orderNo}")
+public ResultData getPayByOrder(@PathVariable("orderNo") String orderNo){
+        return payFeignSentinelApi.getPayByOrder(orderNo);
+        }
+```
+
+测试：
+
+启动83会报错：
+![img_4.png](studyImgs/img_4.png)
+
+导致原因：boot+cloud版本太高，alibab的sentinel版本与cloud版本不匹配，导致报错
+
+解决方案： 降低父工程版本
+![img_5.png](studyImgs/img_5.png)
+
+##### 10.6 Sentinel整合Gateway
+
+①新建模块(cloudalibaba-sentinel-gateway9528)
+
+②改pom
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cloud24</artifactId>
+        <groupId>com.atguigu.cloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>cloudalibaba-sentinel-gateway9528</artifactId>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.csp</groupId>
+            <artifactId>sentinel-transport-simple-http</artifactId>
+            <version>1.8.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.csp</groupId>
+            <artifactId>sentinel-spring-cloud-gateway-adapter</artifactId>
+            <version>1.8.6</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+```
+
+③写yml
+
+```yml
+server:
+  port: 9528
+
+
+spring:
+  application:
+    name: cloudalibaba-sentinel-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+    gateway:
+      routes:
+        - id: pay_routh1
+          uri: http://localhost:9001
+          predicates:
+            - Path=/pay/**
+```
+
+④主启动
+
+```java
+package com.atguigu.cloud;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
+/**
+ * @author QRH
+ * @date 2024/4/5 13:37
+ * @description TODO
+ */
+@SpringBootApplication
+@EnableDiscoveryClient
+public class Main9528 {
+    public static void main(String[] args) {
+        SpringApplication.run(Main9528.class, args);
+    }
+}
+
+```
+
+⑤业务类
+**GatewayConfiguration.java**
+
+```java
+package com.atguigu.cloud.config;
+
+import com.alibaba.csp.sentinel.adapter.gateway.common.rule.GatewayFlowRule;
+import com.alibaba.csp.sentinel.adapter.gateway.common.rule.GatewayRuleManager;
+import com.alibaba.csp.sentinel.adapter.gateway.sc.SentinelGatewayFilter;
+import com.alibaba.csp.sentinel.adapter.gateway.sc.callback.BlockRequestHandler;
+import com.alibaba.csp.sentinel.adapter.gateway.sc.callback.GatewayCallbackManager;
+import com.alibaba.csp.sentinel.adapter.gateway.sc.exception.SentinelGatewayBlockExceptionHandler;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import javax.annotation.PostConstruct;
+import java.util.*;
+
+/**
+ * @author QRH
+ * @date 2024/4/5 13:42
+ * @description TODO
+ */
+@Configuration
+public class GatewayConfiguration {
+    private final List<ViewResolver> viewResolvers;
+
+    private final ServerCodecConfigurer serverCodecConfigurer;
+
+    public GatewayConfiguration(ObjectProvider<List<ViewResolver>> viewResolversProvider, ServerCodecConfigurer serverCodecConfigurer) {
+        this.viewResolvers = viewResolversProvider.getIfAvailable(Collections::emptyList);
+        this.serverCodecConfigurer = serverCodecConfigurer;
+    }
+
+    @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
+    public SentinelGatewayBlockExceptionHandler sentinelGatewayBlockExceptionHandler() {
+        // Register the block exception handler for Spring Cloud Gateway.
+        return new SentinelGatewayBlockExceptionHandler(viewResolvers, serverCodecConfigurer);
+    }
+
+    @Bean
+    @Order(-1)
+    public GlobalFilter sentinelGatewayFilter() {
+        return new SentinelGatewayFilter();
+    }
+
+    @PostConstruct  //javax.annotation.PostConstruct
+    public void doInit() {
+        //自己写
+        initBlockHandler();
+
+    }
+
+    //处理+自定义
+    private void initBlockHandler() {
+        Set<GatewayFlowRule> rules = new HashSet<>();
+        rules.add(new GatewayFlowRule("pay_routh1").setCount(2).setIntervalSec(1));
+        GatewayRuleManager.loadRules(rules);
+
+        BlockRequestHandler handler = new BlockRequestHandler() {
+            @Override
+            public Mono<ServerResponse> handleRequest(ServerWebExchange serverWebExchange, Throwable throwable) {
+                Map<String, String> map = new HashMap<String, String>();
+                map.put("errorCode: ", HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase());
+                map.put("errorMsg: ", "请求太过频繁，系统忙不过来，出发限流（sentinel+gateway整合案例）");
+                return ServerResponse.status(HttpStatus.TOO_MANY_REQUESTS)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(BodyInserters.fromValue(map)
+                        );
+
+            }
+        };
+
+        GatewayCallbackManager.setBlockHandler(handler);
+    }
+
+}
+
+```
+
+最后测试
+http://localhost:9528/pay/nacos/765
+
+### 十一、Seata分布式事务
+
+1.Seata是什么？
+
+* Seata是阿里巴巴开源的分布式事务解决方案，在微服务架构下，通过 Seata 提供分布式事务管理功能，使开发人员可以快速完成分布式事务的开发。
+
+2.Seata分布式事务流程
+
+* 1.创建全局事务
+* 2.创建分支事务
+* 3.提交或回滚全局事务
+* 4.提交或回滚分支事务
+
+3.Seata分布式事务流程图
+![img_6.png](studyImgs/img_6.png)
+
+下载路径：https://github.com/apache/incubator-seata/releases/tag/v2.0.0
+
+更改seata的配置文件：(application.yml)
+
+![img_7.png](studyImgs/img_7.png)
+
+```yml
+#  Copyright 1999-2019 Seata.io Group.
+
+#
+
+#  Licensed under the Apache License, Version 2.0 (the "License");
+
+#  you may not use this file except in compliance with the License.
+
+#  You may obtain a copy of the License at
+
+#
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+#
+
+#  Unless required by applicable law or agreed to in writing, software
+
+#  distributed under the License is distributed on an "AS IS" BASIS,
+
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
+#  See the License for the specific language governing permissions and
+
+#  limitations under the License.
+
+
+
+server:
+  port: 7091
+
+
+
+spring:
+  application:
+    name: seata-server
+
+
+
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    path: ${log.home:${user.home}/logs/seata}
+  extend:
+    logstash-appender:
+      destination: 127.0.0.1:4560
+    kafka-appender:
+      bootstrap-servers: 127.0.0.1:9092
+      topic: logback_to_logstash
+
+console:
+  user:
+    username: seata
+    password: seata
+
+seata:
+  config:
+    type: nacos
+    nacos:
+      server-addr: 127.0.0.1:8848
+      namespace:
+      group: SEATA_GROUP #后续自己在nacos里面新建,不想新建SEATA_GROUP，就写DEFAULT_GROUP
+      username: nacos
+      password: nacos
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server
+      server-addr: 127.0.0.1:8848
+      group: SEATA_GROUP #后续自己在nacos里面新建,不想新建SEATA_GROUP，就写DEFAULT_GROUP
+      namespace:
+      cluster: default
+      username: nacos
+      password: nacos
+  store:
+    mode: db
+    db:
+      datasource: druid
+      db-type: mysql
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/seata?characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
+      user: root
+      password: root
+      min-conn: 10
+      max-conn: 100
+      global-table: global_table
+      branch-table: branch_table
+      lock-table: lock_table
+      distributed-lock-table: distributed_lock
+      query-limit: 1000
+      max-wait: 5000
+
+  #  server:
+  #    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
+  security:
+    secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
+    tokenValidityInMilliseconds: 1800000
+    ignore:
+      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/metadata/v1/**
+```
+
+先启动nacos服务器，再启动seata服务,最后访问seata
+
+![img_8.png](studyImgs/img_8.png)
+
+![img_10.png](studyImgs/img_10.png)
+
+![img_9.png](studyImgs/img_9.png)
+
+#### 11.1 测试用例
+
+步骤：
+
+1、创建三个业务数据库
+
+```sql
+create database seata_order;
+create database seata_storage;
+create database seata_account;
+
+```
+
+2、按照上述三个库分别创建undo_log回滚日志表
+
+```sql
+
+-- use seata_account;
+-- use  seata_order;
+use seata_storage;
+CREATE TABLE IF NOT EXISTS `undo_log`
+(
+    `branch_id`     BIGINT       NOT NULL COMMENT 'branch transaction id',
+    `xid`           VARCHAR(128) NOT NULL COMMENT 'global transaction id',
+    `context`       VARCHAR(128) NOT NULL COMMENT 'undo_log context,such as serialization',
+    `rollback_info` LONGBLOB     NOT NULL COMMENT 'rollback info',
+    `log_status`    INT(11)      NOT NULL COMMENT '0:normal status,1:defense status',
+    `log_created`   DATETIME(6)  NOT NULL COMMENT 'create datetime',
+    `log_modified`  DATETIME(6)  NOT NULL COMMENT 'modify datetime',
+    UNIQUE KEY `ux_undo_log` (`xid`, `branch_id`)
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 1
+  DEFAULT CHARSET = utf8mb4 COMMENT ='AT transaction mode undo table';
+ALTER TABLE `undo_log`
+    ADD INDEX `ix_log_created` (`log_created`);
+```
+
+3、按照上述三个表分别创建对应的表
+
+**seata_order库 t_order表**
+
+```sql
+CREATE TABLE t_order
+(
+    `id`         BIGINT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `user_id`    BIGINT(11)     DEFAULT NULL COMMENT '用户id',
+    `product_id` BIGINT(11)     DEFAULT NULL COMMENT '产品id',
+    `count`      INT(11)        DEFAULT NULL COMMENT '数量',
+    `money`      DECIMAL(11, 0) DEFAULT NULL COMMENT '金额',
+    `status`     INT(1)         DEFAULT NULL COMMENT '订单状态: 0:创建中; 1:已完结'
+) ENGINE = INNODB
+  AUTO_INCREMENT = 1
+  DEFAULT CHARSET = utf8;
+
+SELECT *
+FROM t_order;
+```
+
+** seata_account库t_account表**
+
+```sql
+CREATE TABLE t_account
+(
+    `id`      BIGINT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT 'id',
+    `user_id` BIGINT(11)     DEFAULT NULL COMMENT '用户id',
+    `total`   DECIMAL(10, 0) DEFAULT NULL COMMENT '总额度',
+    `used`    DECIMAL(10, 0) DEFAULT NULL COMMENT '已用账户余额',
+    `residue` DECIMAL(10, 0) DEFAULT '0' COMMENT '剩余可用额度'
+) ENGINE = INNODB
+  AUTO_INCREMENT = 2
+  DEFAULT CHARSET = utf8;
+
+INSERT INTO t_account(`id`, `user_id`, `total`, `used`, `residue`)
+VALUES ('1', '1', '1000', '0', '1000');
+
+SELECT *
+FROM t_account;
+```
+
+** seata_storage库t_storage表**
+
+```sql
+CREATE TABLE t_storage
+(
+    `id`         BIGINT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `product_id` BIGINT(11) DEFAULT NULL COMMENT '产品id',
+    `total`      INT(11)    DEFAULT NULL COMMENT '总库存',
+    `used`       INT(11)    DEFAULT NULL COMMENT '已用库存',
+    `residue`    INT(11)    DEFAULT NULL COMMENT '剩余库存'
+) ENGINE = INNODB
+  AUTO_INCREMENT = 1
+  DEFAULT CHARSET = utf8;
+
+INSERT INTO t_storage(`id`, `product_id`, `total`, `used`, `residue`)
+VALUES ('1', '1', '100', '0', '100');
+
+SELECT *
+FROM t_storage;
+```
+
+
+4、mybatis一键生成上述三个库
+
+5、公共模块（cloud-api-common）创建AccountFeignApi.java和StorageFeignApi.java
+
+6、新建订单Order微服务
+ 新建订单Storage微服务
+ 新建订单Account微服务
+
+7、测试
+
+http://localhost:2004/order/create?userId=1&productId=1&count=10&money=100
+
+出现报错，原因是spring+cloud版本太高与seata版本不兼容。
+
+![img_11.png](studyImgs/img_11.png)
+
+解决方案，降低spring+cloud版本
+
+
+#### 11.2 @GlobalTransation注解
+
+@GlobalTransation注解，在微服务中，我们使用@GlobalTransation注解来开启全局事务，
+
+

@@ -1,0 +1,42 @@
+server:
+  port: 2004
+
+spring:
+  application:
+    name: seata-order-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+
+  #        druid+mysql8 driver
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/seata_order?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.atguigu.springcloud.entities
+  configuration:
+    map-underscore-to-camel-case: true
+
+seata:
+  registry:
+    type: nacos
+    nacos:
+      server-addr: localhost:8848
+      namespace: ""
+      group: SEATA_GROUP
+  tx-service-group: default_tx_group
+  service:
+    vgroup-mapping: #点击源码分析
+      default_tx_group: default #事务组与tc服务集群的映射关系
+  data-source: AT
+
+logging:
+  level:
+    io:
+      seata: info
