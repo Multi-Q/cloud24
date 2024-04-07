@@ -1,5 +1,15 @@
 # SpringCloud学习笔记
 
+## 一、前言
+本项目必须得配置
+
+![img_12](studyImgs/img_12.png)
+
+本项目将学到以下技术
+
+![img_13](studyImgs/img_13.png)
+
+
 ## 第二天
 
 ### 一、时间格式转化
