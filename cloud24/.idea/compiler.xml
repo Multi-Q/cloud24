@@ -15,9 +15,12 @@
         <module name="cloud-gateway9527" />
         <module name="cloudalibaba-sentinel-gateway9528" />
         <module name="cloudalibaba-provider-payment9001" />
+        <module name="spring-security7" />
+        <module name="cloud-elsticsearch" />
         <module name="cloudalibaba-consumer-nacos-order83" />
         <module name="seata-account-service2003" />
         <module name="seata-storage-service2002" />
+        <module name="redis7" />
         <module name="mybatis_generator2024" />
         <module name="cloud-consumer-order80" />
         <module name="cloudalibaba-sentinel-service8401" />
@@ -27,5 +30,10 @@
     <bytecodeTargetLevel>
       <module name="seata-order-service2001" target="17" />
     </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="redis7" options="" />
+    </option>
   </component>
 </project>

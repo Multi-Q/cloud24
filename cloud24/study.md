@@ -1,6 +1,7 @@
 # SpringCloud学习笔记
 
 ## 一、前言
+
 本项目必须得配置
 
 ![img_12](studyImgs/img_12.png)
@@ -8,7 +9,6 @@
 本项目将学到以下技术
 
 ![img_13](studyImgs/img_13.png)
-
 
 ## 第二天
 
@@ -43,12 +43,13 @@ spring:
 接口统一返回值：<br>
 ①思路
 > 返回接口的类的标准定义格式：
->> * 1、code状态值：由后端统一定义各种返回结果的状态码
->> * 2、message描述：本次接口调用的结果描述
->> * 3、data数据：本次返回的数据
+> > * 1、code状态值：由后端统一定义各种返回结果的状态码
+> > * 2、message描述：本次接口调用的结果描述
+> > * 3、data数据：本次返回的数据
 >
 > 扩展:
->> * 1、接口调用时间之类---timestamp：接口调用时间
+>
+> > * 1、接口调用时间之类---timestamp：接口调用时间
 
 ②步骤
 > * 1、新建枚举类ReturnCodeEnum
@@ -3480,14 +3481,11 @@ SELECT *
 FROM t_storage;
 ```
 
-
 4、mybatis一键生成上述三个库
 
 5、公共模块（cloud-api-common）创建AccountFeignApi.java和StorageFeignApi.java
 
-6、新建订单Order微服务
- 新建订单Storage微服务
- 新建订单Account微服务
+6、新建订单Order微服务 新建订单Storage微服务 新建订单Account微服务
 
 7、测试
 
@@ -3499,9 +3497,301 @@ http://localhost:2004/order/create?userId=1&productId=1&count=10&money=100
 
 解决方案，降低spring+cloud版本
 
-
 #### 11.2 @GlobalTransation注解
 
 @GlobalTransation注解，在微服务中，我们使用@GlobalTransation注解来开启全局事务，
+
+### 十二、ElasticSearch
+
+ElasticSearch是一个基于Lucene构建的开源的分布式搜索服务器。
+
+Elasticsearch是一个基于Lucene的搜索服务器。它提供了一个分布式多用户能力的全文搜索引擎，基于RESTful
+web接口。Elasticsearch是用Java开发的，并作为Apache许可条款下的开放源码发布，是当前流行的企业级搜索引擎。设计用于云计算中，能够达到高可用。
+
+#### 12.1 倒排索引
+
+倒排索引，也叫倒排索引，是一种索引结构，用于快速查找包含特定单词的文档。
+
+elasticsearch采用倒序排序：
+
+* 文档（document）：每条数据就是一个文档
+* 词条（term）：文档按照语义划分为不同的词条
+
+什么是正向索引？
+
+* 基于文档id创建索引。根据id查询快，但是查询词条时`必须先`找到文档，而`后判断`是否包含词条
+
+什么是倒序排序？
+
+* 对文档内容分词，对词条创建索引，并记录词条所在文档的id，查询时`先根据`词条查询到文档id，而`后根据`文档id查询文档
+
+#### 12.2 IK分词器
+
+#### 12.3 索引库操作
+
+#### 12.4 DSL查询
+
+### 十三、Redis
+
+#### 13.1 主从集群
+
+全量同步和增量同步的区别？
+
+* 全量同步：master将完整内存数据生成rdb，发送rdb到slave
+* 增量同步：slave提交自己的offset到master，master获取repl_baklog中slave的offset之后的命令给slave
+
+什么时候执行全量同步？
+
+* slave节点第一次连接master节点时
+* slave结点断开时间太久，repl_baklog中的offset已经被覆盖时
+
+什么时候执行增量同步？
+
+* slave结点断开又恢复，并且在repl_baklog中能找到offset时
+
+#### 13.2 哨兵原理
+
+哨兵的作用：
+
+* 监控：sentinel会不断检查master和slave是否按照预期工作
+* 自动故障切换：如果master故障，sentinel会将一个slave提升为master。当故障实例恢复后也以新的master为主
+* 通知：当集群发生故障转移时，sentinel会将最新节点角色信息推送给redis客户端
+
+#### 13.3 分片集群
+
+住从何哨兵可以解决高可用、高并发问题，但有两个问题依然没有解决：
+
+* 海量数据存储问题
+* 高并发读写问题
+
+### 十四、Spring Security
+
+#### 14.1 初始使用Spring Security6
+
+1、引入jar
+
+```xml
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+<dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.thymeleaf.extras</groupId>
+    <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+</dependency>
+```
+
+2、编写启动类和controller
+
+```java
+
+@Controller
+public class IndexController {
+
+    @GetMapping("/")
+    public String index() {
+        return "index";
+    }
+
+}
+```
+
+3、写html模板
+
+```html
+
+<html xmlns:th="https://www.thymeleaf.org">
+
+<head>
+    <title>Hello Security</title>
+</head>
+
+<h1>Hello Security</h1>
+<a th:href="@{/logout}">退出登录</a>
+
+</html>
+```
+
+4、写yml
+```yml
+server:
+  port: 9090
+
+spring:
+  application:
+    name: spring-security
+
+    
+  security:
+    user:
+      name: admin  #默认名字为user
+      password: 123456 #不指定密码，则在启动时springsecurity会在控制台默认生成一个密码，以供登录用
+
+
+```
+
+5、启动测试
+
+#### 14.2 Java自动配置
+
+```java
+package com.atguigu.security.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+
+/**
+ * @author QRH
+ * @date 2024/4/29 14:13
+ * @description TODO
+ */
+@Configuration
+//@EnableWebSecurity //开启spring security的自定义配置(springboot项目可以省略这个注解，非springboot项目必须加）
+public class WebSecurityConfig {
+  @Bean
+  public UserDetailsService userDetailsService() {
+    InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+    manager.createUser(
+            User.withDefaultPasswordEncoder()
+                    .username("user")
+                    .password("123456")
+                    .roles("USER")
+                    .build()
+    );
+    return manager;
+  }
+
+}
+
+```
+
+#### 14.3 基于数据库的用户验证功能
+
+1、创建DBUserDetailManager.java
+
+```java
+package com.atguigu.security.config;
+
+import com.atguigu.security.entity.User;
+import com.atguigu.security.mapper.UserMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import jakarta.annotation.Resource;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * @author QRH
+ * @date 2024/4/29 15:29
+ * @description TODO
+ */
+public class DBUserDetailManager implements  UserDetailsService {
+    @Resource
+    private UserMapper userMapper;
+
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<User>().eq(User::getUsername, username);
+
+        User user = userMapper.selectOne(wrapper);
+
+        if (user==null){
+            throw new UsernameNotFoundException("用户不存在");
+        }else{
+            Collection<GrantedAuthority> authorities = new ArrayList<>();
+            return new org.springframework.security.core.userdetails.User(
+                    user.getUsername(),
+                    user.getPassword(),
+                    user.getEnabled(),
+                    true, //用户账号是否过期
+                    true,//用户凭证是否过期
+                    true,//用户是否被锁定
+                    authorities//权限列表
+            );
+        }
+    }
+}
+
+```
+
+2、修改WebSecurityConfig.java
+```java
+package com.atguigu.security.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+
+/**
+ * @author QRH
+ * @date 2024/4/29 14:13
+ * @description TODO
+ */
+@Configuration
+//@EnableWebSecurity //开启spring security的自定义配置(springboot项目可以省略这个注解，非springboot项目必须加）
+public class WebSecurityConfig {
+//    @Bean
+//    public UserDetailsService  userDetailsService(){
+//        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+//        manager.createUser(
+//              User.withDefaultPasswordEncoder()
+//                      .username("user")
+//                      .password("123456")
+//                      .roles("USER")
+//                      .build()
+//      );
+//        return manager;
+//    }
+
+
+  //获取直接给DBUserDetailManager添加@Component注解，下面的代码就不用写了
+    @Bean
+    public UserDetailsService userDetailsService(){
+        return new DBUserDetailManager();
+    }
+
+}
+
+```
+
+#### 14.3 密码加密方式
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

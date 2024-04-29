@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: redis7
+
+  swagger2:
+    enabled: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+    #      redis单机
+
+  data:
+    redis:
+      database: 0
+      host: 192.168.177.178
+      port: 6379
+      password: redis
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1ms
+          max-idle: 8
+          min-idle: 0
+
+server:
+  port: 7777
+
+

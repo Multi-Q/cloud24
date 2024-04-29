@@ -1,0 +1,24 @@
+server:
+  port: 9090
+
+spring:
+  application:
+    name: spring-security
+
+
+  security:
+    user:
+      name: admin
+      password: 123456
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/db2024?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+
+#    //打印日志
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
