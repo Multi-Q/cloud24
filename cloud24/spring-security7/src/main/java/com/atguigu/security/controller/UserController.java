@@ -3,6 +3,7 @@ package com.atguigu.security.controller;
 import com.atguigu.security.entity.User;
 import com.atguigu.security.service.UserService;
 import jakarta.annotation.Resource;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

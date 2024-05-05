@@ -19,20 +19,37 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebSecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests(
-                authorize->authorize.
+                authorize -> authorize.
                         //对所有请求开启授权保护
-                        anyRequest()
+                                anyRequest()
                         //已认证的请求会被自动授权
                         .authenticated()
-        )
+                )
                 //使用表单授权方式
-                .formLogin(Customizer.withDefaults())
-        //使用基本授权方式
-        //.httpBasic(Customizer.withDefaults())
-                .csrf(csrf->csrf.disable())
-        .build();
+//                .formLogin(Customizer.withDefaults())
+                //开启自定义表单页
+                .formLogin(form -> {
+                    form.loginPage("/login").permitAll()
+                            .successHandler(new MyAuthenticationSuccessHandler())//认证成功时的处理
+                            .failureHandler(new MyAuthenticationFailureHandler());
+                })
+                .logout(logout -> {
+                    logout.logoutSuccessHandler(new MyLogoutSuccessHandler())
+
+                    ;
+                })
+                .exceptionHandling(
+                        ex -> {
+                            ex.authenticationEntryPoint(new MyAuthenticationEntryPoint());
+                        })
+                //使用基本授权方式
+                //.httpBasic(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
+                //跨域
+                .cors(cors -> cors.disable())
+                .build();
     }
 
 

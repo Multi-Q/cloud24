@@ -71,6 +71,7 @@ public class OrderServiceImpl implements OrderService {
             criteria.andEqualTo("userId",orderFromDB.getUserId());
             criteria.andEqualTo("status",0);
 
+
             int updateResult = orderMapper.updateByExampleSelective(orderFromDB, whereCondition);
 
             log.info("-------> 修改订单状态完成"+"\t"+updateResult);

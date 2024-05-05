@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.util.Arrays;
+
 /**
  * @author QRH
  * @date 2024/4/29 15:00
@@ -22,4 +24,7 @@ public class User {
     private String password;
     @TableField(value = "enabled")
     private Boolean enabled;
+
+
+
 }

@@ -19,6 +19,7 @@
         <module name="cloud-elsticsearch" />
         <module name="cloudalibaba-consumer-nacos-order83" />
         <module name="seata-account-service2003" />
+        <module name="spring-cloud-kafka" />
         <module name="seata-storage-service2002" />
         <module name="redis7" />
         <module name="mybatis_generator2024" />
