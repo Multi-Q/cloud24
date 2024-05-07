@@ -6,7 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.util.Arrays;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * @author QRH
@@ -16,7 +17,7 @@ import java.util.Arrays;
 @Data
 @TableName(value = "security_user")
 public class User {
-    @TableId(value = "id",type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     @TableField(value = "username")
     private String username;
@@ -24,7 +25,6 @@ public class User {
     private String password;
     @TableField(value = "enabled")
     private Boolean enabled;
-
 
 
 }

@@ -39,6 +39,8 @@
     <file url="file://$PROJECT_DIR$/spring-cloud-kafka/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring-security7/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring-security7/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/z-design-pattern/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/z-design-pattern/src/main/resources" charset="UTF-8" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>

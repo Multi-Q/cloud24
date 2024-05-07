@@ -28,6 +28,7 @@
         <module>spring-security7</module>
         <module>cloud-elsticsearch</module>
         <module>spring-cloud-kafka</module>
+        <module>z-design-pattern</module>
     </modules>
 
     <packaging>pom</packaging>

@@ -3620,6 +3620,7 @@ public class IndexController {
 ```
 
 4、写yml
+
 ```yml
 server:
   port: 9090
@@ -3628,7 +3629,7 @@ spring:
   application:
     name: spring-security
 
-    
+
   security:
     user:
       name: admin  #默认名字为user
@@ -3663,18 +3664,18 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 @Configuration
 //@EnableWebSecurity //开启spring security的自定义配置(springboot项目可以省略这个注解，非springboot项目必须加）
 public class WebSecurityConfig {
-  @Bean
-  public UserDetailsService userDetailsService() {
-    InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-    manager.createUser(
-            User.withDefaultPasswordEncoder()
-                    .username("user")
-                    .password("123456")
-                    .roles("USER")
-                    .build()
-    );
-    return manager;
-  }
+    @Bean
+    public UserDetailsService userDetailsService() {
+        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+        manager.createUser(
+                User.withDefaultPasswordEncoder()
+                        .username("user")
+                        .password("123456")
+                        .roles("USER")
+                        .build()
+        );
+        return manager;
+    }
 
 }
 
@@ -3706,7 +3707,7 @@ import java.util.List;
  * @date 2024/4/29 15:29
  * @description TODO
  */
-public class DBUserDetailManager implements  UserDetailsService {
+public class DBUserDetailManager implements UserDetailsService {
     @Resource
     private UserMapper userMapper;
 
@@ -3717,9 +3718,9 @@ public class DBUserDetailManager implements  UserDetailsService {
 
         User user = userMapper.selectOne(wrapper);
 
-        if (user==null){
+        if (user == null) {
             throw new UsernameNotFoundException("用户不存在");
-        }else{
+        } else {
             Collection<GrantedAuthority> authorities = new ArrayList<>();
             return new org.springframework.security.core.userdetails.User(
                     user.getUsername(),
@@ -3737,6 +3738,7 @@ public class DBUserDetailManager implements  UserDetailsService {
 ```
 
 2、修改WebSecurityConfig.java
+
 ```java
 package com.atguigu.security.config;
 
@@ -3768,9 +3770,9 @@ public class WebSecurityConfig {
 //    }
 
 
-  //获取直接给DBUserDetailManager添加@Component注解，下面的代码就不用写了
+    //获取直接给DBUserDetailManager添加@Component注解，下面的代码就不用写了
     @Bean
-    public UserDetailsService userDetailsService(){
+    public UserDetailsService userDetailsService() {
         return new DBUserDetailManager();
     }
 
@@ -3782,18 +3784,909 @@ public class WebSecurityConfig {
 
 #### 14.5 前后端分离
 
+### 十五、Java设计模式
 
+#### 15.1 单例模式
 
+单例模式有个特点：
 
+* 1、无参构造器`私有化`
 
+* 2、类中提供一个静态的`成员变量`
 
+* 3、提供一个`静态的函数`供外部获取对象实例
 
+eg:
 
+```java
+public class Singleton {
 
+    private Singleton() {
+    }
 
+    private static Singleton instant;
 
+    public static Singleton getInstant() {
+        return instant;
+    }
+}
+```
 
+##### 15.1.1 饿汉式（静态常量法）
 
+```java
+package com.design.pattern.singleton;
 
+/**
+ * @author QRH
+ * @date 2024/5/6 14:40
+ * @description 单列模式中的饿汉式（静态常量）法
+ *
+ * 优点：写法简单，在类装载时就完成实例化，避免了线程同步的问题<br/>
+ * 缺点：在类装载时就完成实例化，没有达到延迟加载(Lazy Load)的效果，如果这个实例自始至终没有使用，则会造成内存浪费<br/>
+ *
+ *
+ */
+public class _1HungryStaticInstant {
+    public static void main(String[] args) {
+        Singleton instance1 = Singleton.getInstance();
+        Singleton instance2 = Singleton.getInstance();
 
+        System.out.println(instance1 == instance2); //true
+
+        System.out.println(instance1.hashCode());//instant1和instant2的哈希值一样
+        System.out.println(instance2.hashCode());//instant1和instant2的哈希值一样
+    }
+}
+
+class Singleton {
+
+    //1、私有化无参构造器
+    private Singleton() {
+    }
+
+    //2、将该变量用final修饰，并初始化
+    private final static Singleton instant = new Singleton();
+
+    //3、提供一个静态函数供外部获取该类的实例对象
+    public static Singleton getInstance() {
+        return instant;
+    }
+
+}
+```
+
+**优缺点：**
+
+* 优点：写法简单，在`类装载时完成初始化`，避免了`线程同步`问题。
+
+* 缺点：在类装载时就完成初始化，没有达到`懒加载（Lazy Loading)`的效果，如果自始至终都没有使用过这个实例，则会`造成内存浪费`。
+
+* 这种基于类加载机制避免了多线程的同步问题，不过，instant在类加载时就实例化，在单例模式中大多数都是调用getInstant方法，
+  但是导致类加载的原因又跟多种，因此不能确定有其他方式（或其他的静态方法）到桌子类加载，这时候初始化instant就没有达到懒加载的效果。
+
+* 结论：这种单例模式`可用`，但可能造成内存浪费
+
+##### 15.1.2 饿汉式（静态代码块法）
+
+```java
+package com.design.pattern.singleton;
+
+/**
+ * @author QRH
+ * @date 2024/5/6 15:09
+ * @description 单例模式饿汉式（静态代码块）法
+ *
+ * 优点：写法简单，在类装载时就完成实例化，避免了线程同步的问题<br/>
+ * 缺点：在类装载时就完成实例化，没有达到延迟加载(Lazy Load)的效果，如果这个实例自始至终没有使用，则会造成内存浪费<br/>
+ *
+ */
+public class _2HungryStaticBlock {
+    public static void main(String[] args) {
+        Singleton2 instant1 = Singleton2.getInstance();
+        Singleton2 instance2 = Singleton2.getInstance();
+
+        System.out.println(instant1 == instance2); //true
+
+        System.out.println(instant1.hashCode());//instant1和instant2的哈希值一样
+        System.out.println(instance2.hashCode());//instant1和instant2的哈希值一样
+    }
+}
+
+class Singleton2 {
+
+    //1、私有化无参构造器
+    private Singleton2() {
+    }
+
+    //2、声明静态成员变量
+    private static Singleton2 instant;
+
+    //3、静态代码块内初始化instant
+    static {
+        instant = new Singleton2();
+    }
+
+    //4、提供静态方法供外部获取该实例对象
+    public static Singleton2 getInstance() {
+        return instant;
+    }
+}
+
+```
+
+**优缺点：**
+
+* 优点：写法简单，在`类装载时完成初始化`，避免了`线程同步`问题。
+
+* 缺点：在类装载时就完成初始化，没有达到`懒加载（Lazy Loading)`的效果，如果自始至终都没有使用过这个实例，则会`造成内存浪费`。
+
+* 这种方式和上面`饿汉式（静态常量法）`优缺点一样，只不过将实例化放到了静态代码块内，也就是在类装载时就执行静态代码块内的代码，初始化实例。
+
+* 结论：这种单例模式`可用`，但可能造成内存浪费
+
+##### 15.1.3 懒汉式（线程不安全—）
+
+```java
+package com.design.pattern.singleton;
+
+/**
+ * @author QRH
+ * @date 2024/5/6 15:20
+ * @description 单例模式懒汉式（线程不安全）
+ *
+ * 优点：起到懒加载的效果，但是只能在单线程中使用。<br/>
+ * 缺点：如果在多线程下，一个线程进入if(instant==null)判断语句块，还未来得及往下执行，另一个线程也通过了这个判断语句，这时便会产生多个实例。
+ * 所以多线程环境下不可以使用这种方式<br/>
+ *
+ *实际开发中，不要使用这种方式
+ */
+public class _3LazyThreadUnsafe {
+    public static void main(String[] args) {
+        Singleton3 instance1 = Singleton3.getInstance();
+        Singleton3 instance2 = Singleton3.getInstance();
+
+        System.out.println(instance1 == instance2);//true
+
+        System.out.println(instance1.hashCode());//instant1和instant2的哈希值一样
+        System.out.println(instance2.hashCode());//instant1和instant2的哈希值一样
+    }
+}
+
+class Singleton3 {
+    //1、私有化无参构造器
+    private Singleton3() {
+    }
+
+    ;
+
+    //2、声明一个静态成员变量
+    private static Singleton3 instant;
+
+    //3、提供外部访问函数，当使用到该方法时才去实例化对象
+    public static Singleton3 getInstance() {
+        if (instant == null) {
+            instant = new Singleton3();
+        }
+        return instant;
+    }
+}
+
+```
+
+**优缺点：**
+
+* 优点：起到懒加载的效果，但是只能在`单线程`中使用。
+
+* 缺点：如果在多线程下，一个线程进入if(instant==null)判断语句块，还未来得及往下执行，另一个线程也通过了这个判断语句，这时便会`产生多个实例`。 所以多线程环境下不可以使用这种方式
+
+* 结论：实际开发中，不要使用这种方式
+
+##### 15.1.4 懒汉式（线程安全，同步方法）
+
+```java
+package com.design.pattern.singleton;
+
+/**
+ * @author QRH
+ * @date 2024/5/6 15:31
+ * @description 懒汉式（线程安全，同步方法）
+ *
+ *
+ */
+public class _4LazyThreadSafeAndSynchronizedMethod {
+    public static void main(String[] args) {
+        Singleton4 instance1 = Singleton4.getInstance();
+        Singleton4 instance2 = Singleton4.getInstance();
+
+        System.out.println(instance1 == instance2);//true
+
+        System.out.println(instance1.hashCode());//instant1和instant2的哈希值一样
+        System.out.println(instance2.hashCode());//instant1和instant2的哈希值一样
+
+    }
+}
+
+class Singleton4 {
+
+    //1、私有化无参构造器
+    private Singleton4() {
+    }
+
+    //2、声明静态成员变量
+    private static Singleton4 instant;
+
+    //3、对外提供方法实例化对象，不过该方法要用synchronized修饰
+    public static synchronized Singleton4 getInstance() {
+        if (instant == null) {
+            instant = new Singleton4();
+        }
+        return instant;
+    }
+}
+
+```
+
+**优缺点：**
+
+* 优点：`解决了`线程安全问题。
+
+* 缺点：`效率太低`，每个线程想获得实例的时候，执行getInstant方法都要进行同步。而其实这个方法`只执行一次实例化`代码就够了，后面想获得这个实例，直接return就行了。方法同步效率太低。
+
+* 结论：实际开发中，`不推荐使用`这种方式
+
+##### 15.1.5 懒汉式（线程安全，同步代码块）
+
+```java
+package com.design.pattern.singleton;
+
+/**
+ * @author QRH
+ * @date 2024/5/6 15:40
+ * @description 懒汉式（线程安全，同步代码块）
+ * 优点：解决了线程安全问题。<br/>
+ * 缺点：效率太低，每个线程想获得实例的时候，执行getInstant方法都要进行同步。
+ *      而其实这个方法执行一次实例化代码就够了，后面想获得这个实例，直接return就行了。方法同步效率太低。<br/>
+ * 结论：实际开发中，不推荐使用这种方式
+ */
+public class _5LazyThreadSafeAndSynchronizedBlock {
+    public static void main(String[] args) {
+
+        Singleton5 instance1 = Singleton5.getInstance();
+        Singleton5 instance2 = Singleton5.getInstance();
+
+        System.out.println(instance1 == instance2);//true
+
+        System.out.println(instance1.hashCode());//instant1和instant2的哈希值一样
+        System.out.println(instance2.hashCode());//instant1和instant2的哈希值一样
+    }
+}
+
+class Singleton5 {
+    //1、私有化无参构造器
+    private Singleton5() {
+    }
+
+    //2、声明静态成员变量
+    private static Singleton5 instant;
+
+    //3、提供外部获取实例的方法，这个方法内部使用同步锁
+    public static Singleton5 getInstance() {
+        if (instant == null) {
+            synchronized (Singleton5.class) {
+                instant = new Singleton5();
+            }
+        }
+        return instant;
+    }
+}
+```
+
+**优缺点：**
+
+* 优点：`解决了`线程安全问题。
+
+* 缺点：`效率太低`，每个线程想获得实例的时候，执行getInstant方法都要进行同步。而其实这个方法`只执行一次实例化`代码就够了，后面想获得这个实例，直接return就行了。方法同步效率太低。
+
+* 结论：实际开发中，`不推荐使用`这种方式
+
+##### 15.1.6 双重检查
+
+```java
+package com.design.pattern.singleton;
+
+/**
+ * @author QRH
+ * @date 2024/5/6 15:46
+ * @description 单例模式双重检查
+ * 优点：双重检查概念是多线程开发中常使用到的，如代码所示，使用了两次if(instant==null)检查，这样可以保证线程安全。
+这样代码只用执行一次，后面再访问时，判断if(instant==null)，直接return实例化对象，也避免了反复进行方法同步<br/>
+ * 线程安全：延迟加载，效率较高。<br/>
+ * 结论：实际开发中，推荐这种方式
+ */
+public class _6DoubleCheck {
+    public static void main(String[] args) {
+        Singleton6 instance1 = Singleton6.getInstance();
+        Singleton6 instance2 = Singleton6.getInstance();
+
+        System.out.println(instance1 == instance2);//true
+
+        System.out.println(instance1.hashCode());//instant1和instant2的哈希值一样
+        System.out.println(instance2.hashCode());//instant1和instant2的哈希值一样
+    }
+}
+
+class Singleton6 {
+    //1、私有化无参构造器
+    private Singleton6() {
+    }
+
+    //2、声明静态成员变量
+    private static Singleton6 instant;
+
+    //提供静态共有方法，加入双重检查代码，解决线程安全问题，同时解决懒加载问题，以及同步效率问题
+    public static Singleton6 getInstance() {
+        if (instant == null) {
+            synchronized (Singleton6.class) {
+                if (instant == null) {
+                    instant = new Singleton6();
+                }
+            }
+        }
+        return instant;
+    }
+}
+```
+
+**优缺点：**
+
+* 优点：双重检查概念是多线程开发中常使用到的，如代码所示，使用了两次if(instant==null)检查，这样可以保证线程安全。 这样代码`只用执行一次`，后面再访问时，判断if(instant==null)
+  ，直接return实例化对象，也避免了`反复`进行方法同步
+* `线程安全`,`延迟加载`，`效率较高`。
+* 结论：实际开发中，<span style="font-size:18px;font-weight:bolder;color:red;>推荐</span>这种方式
+
+##### 15.1.7 静态内部类
+
+```java
+package com.design.pattern.singleton;
+
+/**
+ * @author QRH
+ * @date 2024/5/6 16:00
+ * @description 静态内部类
+ * * 这种采用类装载机制来保证初始化实例时只有一个线程。
+ * * 静态内部类方式在Singleton7类被加载时并不会立即实例化，而是需要实例化时，调用getInstant方法，才会状态SingletonInstance类，从完成Singleton的实例化。
+ * * 类的静态属性只会在第一次加载类的时候，所以，jvm帮我们保证了线程的安全性，在类进行初始化时，别的线程是无法进入的。
+ * * `线程安全`,`利用静态内部类实现延迟加载`，`效率高`。
+ * * 结论：实际开发中，<span style="font-size:18px;font-weight:bolder;color:red;>推荐</span>这种方式
+ */
+public class _7StaticInnerClass {
+    public static void main(String[] args) {
+
+        Singleton7 instance1 = Singleton7.getInstance();
+        Singleton7 instance2 = Singleton7.getInstance();
+
+        System.out.println(instance1 == instance2);//true
+
+        System.out.println(instance1.hashCode());//instant1和instant2的哈希值一样
+        System.out.println(instance2.hashCode());//instant1和instant2的哈希值一样
+
+    }
+}
+
+class Singleton7 {
+    //1、私有化无参构造器
+    private Singleton7() {
+    }
+
+    //2、声明静态成员变量，不过改变量要用volatile修饰
+    private static volatile Singleton7 instant;
+
+    //3、创建静态内部类
+    private static class SingletonInstance {
+        private final static Singleton7 INSTANT = new Singleton7();
+    }
+
+    //4、提供静态的共有方法，放回SingletonInstance.INSTANT，该方法用synchronized修饰
+    public static synchronized Singleton7 getInstance() {
+        return SingletonInstance.INSTANT;
+    }
+}
+```
+
+**优缺点：**
+
+* 这种采用类装载机制来保证初始化实例时只有一个线程。
+* 静态内部类方式在Singleton7类被加载时并不会立即实例化，而是需要实例化时，调用getInstant方法，才会状态SingletonInstance类，从完成Singleton的实例化。
+* 类的静态属性只会在第一次加载类的时候，所以，jvm帮我们保证了线程的安全性，在类进行初始化时，别的线程是无法进入的。
+* `线程安全`,`利用静态内部类实现延迟加载`，`效率高`。
+* 结论：实际开发中，<span style="font-size:18px;font-weight:bolder;color:red;>推荐</span>这种方式
+
+##### 15.1.8 枚举
+
+```java
+package com.design.pattern.singleton;
+
+/**
+ * @author QRH
+ * @date 2024/5/6 16:14
+ * @description 单例模式-枚举
+ *
+ * 借助jdk1.5中添加的枚举类来实现单例模式，不仅能避免多线程同步的问题，而且还能防止反序列化重新建新的对象
+ *
+ * 推荐使用
+ */
+public class _8enum {
+    public static void main(String[] args) {
+        Singleton8 instant1 = Singleton8.INSTANT;
+        Singleton8 instant2 = Singleton8.INSTANT;
+
+        System.out.println(instant1 == instant2);
+
+        System.out.println(instant1.hashCode());
+        System.out.println(instant2.hashCode());
+
+        instant1.sayOK();
+    }
+}
+
+enum Singleton8 {
+    INSTANT;
+
+    public void sayOK() {
+        System.out.println("ok~");
+    }
+}
+
+```
+
+**优缺点：**
+
+* 借助jdk1.5中添加的枚举类来实现单例模式，不仅能避免多线程同步的问题，而且还能防止反序列化重新建新的对象
+
+* 推荐使用
+
+##### 15.1.9 注意事项和细节
+
+* 单例模式保证了系统内存中该类只存在一个对象，节省了系统资源，对于一些需要频繁创建销毁的对象，使用单例模式可以提供啊系统性能
+* 党项实例化一个单例类时，必须记住使用相应的获取对象的方法，而不是使用new
+* 单例模式的使用场景：①需要频繁进行创建和销毁的对象；②创建对象时耗时过多或耗时资源过多，单用经常用到的对象； ③工具类对象；④频繁访问数据库或文件的对象（如数据源、session工厂）
+
+#### 15.2 建造者模式
+
+建造者模式有四个角色：
+
+①Product（产品角色）：一个具体的产品对象
+
+②Builder（抽象建造者）：创建一个Product对象的各个部件指定的`接口/抽象类`
+
+③ConcreteBuilder（具体建造者）：`实现接口`，`构建和装配`各个部件
+
+④Direct（指挥者）：`构建`一个使用Builder接口的对象，他主要是用于创建一个复杂的对象，主要有两个作用：一、`隔离`客户与对象的生产关系；二、负责`控制`产品对象的生产过程
+
+##### 15.2.1 实现步骤
+
+①创建一个产品角色
+
+```java
+package com.design.pattern.builder.pojo;
+
+public class House {
+    private String base;
+    private String wall;
+    private String roofed;
+
+    public String getBase() {
+        return base;
+    }
+
+    public void setBase(String base) {
+        this.base = base;
+    }
+
+    public String getWall() {
+        return wall;
+    }
+
+    public void setWall(String wall) {
+        this.wall = wall;
+    }
+
+    public String getRoofed() {
+        return roofed;
+    }
+
+    public void setRoofed(String roofed) {
+        this.roofed = roofed;
+    }
+}
+
+```
+
+②创建建造者对象
+
+```java
+package com.design.pattern.builder.abstracts;
+
+import com.design.pattern.builder.pojo.House;
+
+public abstract class HouseBuilder {
+    protected static House house = new House();
+
+    //打地基
+    public abstract void buildBase();
+
+    //建墙
+    public abstract void buildWall();
+
+    //封顶
+    public abstract void roofed();
+
+    public House buildHouse() {
+        return house;
+    }
+}
+
+```
+
+③创建具体建造者对象
+
+```java
+package com.design.pattern.builder.extend ;
+
+import com.design.pattern.builder.abstracts.HouseBuilder;
+
+public class CommonHouse extends HouseBuilder {
+    @Override
+    public void buildBase() {
+        System.out.println("Common-打地基5m");
+    }
+
+    @Override
+    public void buildWall() {
+        System.out.println("Common-建墙10m");
+    }
+
+    @Override
+    public void roofed() {
+        System.out.println("Common-封顶");
+    }
+}
+
+```
+
+```java
+package com.design.pattern.builder.extend ;
+
+import com.design.pattern.builder.abstracts.HouseBuilder;
+
+public class HighBuildingHouse extends HouseBuilder {
+
+    @Override
+    public void buildBase() {
+        System.out.println("HighBuilding-打地基100m");
+    }
+
+    @Override
+    public void buildWall() {
+        System.out.println("HighBuilding-建墙20m");
+    }
+
+    @Override
+    public void roofed() {
+        System.out.println("HighBuilding-封顶");
+    }
+}
+
+```
+
+④创建指挥者对象
+
+```java
+package com.design.pattern.builder.director;
+
+import com.design.pattern.builder.pojo.House;
+import com.design.pattern.builder.abstracts.HouseBuilder;
+ 
+public class HouseDirector {
+    protected HouseBuilder houseBuilder = null;
+
+    public HouseDirector(HouseBuilder houseBuilder) {
+        this.houseBuilder = houseBuilder;
+    }
+
+    public void setHouseBuilder(HouseBuilder houseBuilder) {
+        this.houseBuilder = houseBuilder;
+    }
+
+    //交给指挥者来做
+    public House constructHouse() {
+        houseBuilder.buildBase();
+        houseBuilder.buildWall();
+        houseBuilder.roofed();
+
+        return houseBuilder.buildHouse();
+    }
+}
+
+```
+
+⑤测试
+
+```java
+package com.design.pattern.builder;
+
+import com.design.pattern.builder.abstracts.HouseBuilder;
+import com.design.pattern.builder.director.HouseDirector;
+import com.design.pattern.builder.extend.CommonHouse;
+import com.design.pattern.builder.extend.HighBuildingHouse;
+import com.design.pattern.builder.pojo.House;
+ 
+public class Main {
+    public static void main(String[] args) {
+       //件普通房子
+        CommonHouse commonHouse = new CommonHouse();
+        HouseDirector houseDirector = new HouseDirector(commonHouse);
+        House house = houseDirector.constructHouse();
+
+        System.out.println("==========输出过程==========");
+
+        //盖高楼
+        HighBuildingHouse highBuildingHouse = new HighBuildingHouse();
+        houseDirector.setHouseBuilder(highBuildingHouse);
+        House house1 = houseDirector.constructHouse();
+        System.out.println("==========输出过程==========");
+
+    }
+}
+
+```
+
+##### 15.2.2 细节与说明
+
+* 客户端`不必知道产品内部组成的细节`，将产品本身与产品的`创建过程解耦`，使得相同的创建过程可以创建不同的产品对象
+* 每一个具体创建者都`相对独立`，而与其他的具体建造者无关，因此可以很方便地替换具体建造者或增加新的具体建造者，用户使用不同的具体建造者即可得到不同的产品对象
+* 可以更加精细地控制产品的创建过程，将复杂产品的创建`步骤分解`在不同的方法中，使得创建过程更加清晰，也方便使用程序来控制创建过程
+* 增加新的具体建造者无需修改原有类库的代码，指挥者类针对抽象建造者类编程，系统扩展方便，符合“开闭原则”
+* 建造者模式所创建的产品一般具有`较多的共同点`，其`组成部分相似`，如果产品之间的差异性很大，则不适合使用建造者模式，因此其适用范围受到一定的`限制`
+* 如果产品的内部变化复杂，可能会导致需要定义很多具体建造者类来实现这种变化，导致系统变得庞大，因此在这种情况下，要考虑是否选择建造者模式
+
+抽象工厂模式和建造者模式的区别：
+* 抽象工厂模式实现对`产品家族`的创建，一个产品家族是这样的一系列产品：具有不同分类维度的产品组合，采用抽象工厂模式`不需要关系构建过程`，只关心什么产品由什么工厂生产即可。<br>
+而建造者模式则是要求按照`指定的蓝图`建造产品，它的主要目的是通过`组装零配件`而生产的一个新产品
+
+#### 15.3 代理模式
+
+代理模式：为一个对象`提供一个替身`，以控制对这个对象的访问。即通过代理对象访问目标对象，这样做的好处是：可以在目标对象实现的基础上，`增强额外的功能操作`，即扩展目标对象的功能
+
+被代理的对象可以是`远程对象`、`创建开销大的对象`或`需要安全控制的对象`
+
+带模式有不同的形式，主要有三种：**静态代理**、**动态代理**（JDK代理、接口代理）和**Cglib代理**（可以在内存动态创建对象，而不需要实现接口，它属于动态代理的范畴）
+
+##### 15.3.1 静态代理
+
+静态代理在使用时，需要定义`接口或父类`，被代理对象（即目标对象）与代理对象一起`实现相同的接口`或者`继承相同父类`
+
+①创建接口
+
+```java
+package com.design.pattern.proxy.statics;
+
+/**
+ * @author QRH
+ * @date 2024/5/7 16:48
+ * @description 接口，目标对象和代理对象都要实现这个接口
+ */
+public interface ITeacherDao {
+    //授课方法
+   public void teach();
+}
+
+```
+
+②创建被代理对象（目标对象），同时实现这个接口
+
+```java
+package com.design.pattern.proxy.statics;
+
+/**
+ * @author QRH
+ * @date 2024/5/7 16:50
+ * @description 被代理对象，即目标对象
+ */
+public class TeacherDao implements ITeacherDao{
+    @Override
+    public void teach() {
+        System.out.println("================老师授课中。。。。。");
+    }
+}
+
+```
+
+③创建代理对象，同时实现接口
+
+```java
+package com.design.pattern.proxy.statics;
+
+/**
+ * @author QRH
+ * @date 2024/5/7 16:49
+ * @description 代理对象
+ */
+public class TeacherDaoProxy implements ITeacherDao {
+
+    private ITeacherDao target; //目标对象，通过接口来聚合
+
+    public TeacherDaoProxy(ITeacherDao iTeacherDao) {
+        this.target = iTeacherDao;
+    }
+
+    @Override
+    public void teach() {
+        System.out.println("开始代理，完成某些操作。。。。。");
+        this.target.teach();
+        System.out.println("提交。。。。");
+    }
+}
+
+```
+
+④测试
+
+```java
+package com.design.pattern.proxy.statics;
+
+import com.design.pattern.proxy.statics.TeacherDao;
+import com.design.pattern.proxy.statics.TeacherDaoProxy;
+
+/**
+ * @author QRH
+ * @date 2024/5/7 16:47
+ * @description TODO
+ */
+public class Main {
+    public static void main(String[] args) {
+        //创建目标对象
+        TeacherDao teacherDao = new TeacherDao();
+
+        //创建代理对象，同时将目标对象交给代理对象
+        TeacherDaoProxy proxy = new TeacherDaoProxy(teacherDao);
+
+        //执行的是被代理对象的方法
+        proxy.teach();
+    }
+}
+
+```
+
+**优缺点：**
+
+* 优点：在不修改目标对象的功能前提下，能通过代理对象对目标功能扩展
+* 缺点：因为代理对象需要与目标对象实现一样的接口，所以会有很多代理类
+* 一旦接口增加方法，目标对象与代理对象都要维护
+
+##### 15.3.2 动态代理
+
+动态代理也叫jdk代理或接口代理。动态代理`不需要实现接口`，但`目标对象需要实现接口`，否者不能动态代理
+
+代理对象的生成，是利用JDK的API，动态的在内存中构建代理对象
+
+①创建接口
+
+```java
+package com.design.pattern.proxy.dynamic;
+
+/**
+ * @author QRH
+ * @date 2024/5/7 17:10
+ * @description 接口
+ */
+public interface ITeacherDao2 {
+    void teach();
+    void sayHello(String name);
+}
+
+```
+
+②创建目标对象，同时实现接口
+
+```java
+package com.design.pattern.proxy.dynamic;
+
+/**
+ * @author QRH
+ * @date 2024/5/7 17:12
+ * @description 目标对象
+ */
+public class TeacherDao2 implements ITeacherDao2{
+    @Override
+    public void teach() {
+        System.out.println("------老师上课中。。。。");
+    }
+
+    @Override
+    public void sayHello(String name) {
+        System.out.println("hello， "+name);
+    }
+}
+
+```
+
+③创建代理对象
+
+```java
+package com.design.pattern.proxy.dynamic;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+
+/**
+ * @author QRH
+ * @date 2024/5/7 17:13
+ * @description 代理对象
+ */
+public class ProxyFactory {
+
+    //目标对象
+    private Object target;
+
+    public ProxyFactory(Object target) {
+        this.target = target;
+    }
+
+    /**
+     * 给目标对象生成一个代理对象
+     *
+     * public static Object Proxy.newProxyInstance(ClassLoader loader,
+     *                                              Class<?>[] interfaces,
+     *                                              InvocationHandler h)
+     *
+     *   ClassLoader loader:指定当前目标对象使用的类加载器，获取加载器的方法固定
+     *   Class<?>[] interfaces:目标对象实现的接口类型，使用泛型方法确认类型
+     *   InvocationHandler h：事情处理，执行目标对象的方法时，会触发事情处理器方法，会把当前的目标对象方法作为参数传入
+     * @return
+     */
+    public Object getProxyInstance() {
+        return Proxy.newProxyInstance(target.getClass().getClassLoader(),
+                target.getClass().getInterfaces(),
+                new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        System.out.println("JDK代理开始~~");
+                        //反射机制调用目标对象的方法
+                        Object invoke = method.invoke(target, args);
+                        System.out.println("JDK代理提交。。");
+                        return invoke;
+                    }
+                }
+        );
+    }
+}
+
+```
+
+④测试
+
+```java
+package com.design.pattern.proxy.dynamic;
+
+public class Main2 {
+    public static void main(String[] args) {
+        //声明目标对象
+        ITeacherDao2 teacherDao2 = new TeacherDao2();
+
+        //把目标对象交给代理对象,获得代理实例
+        ITeacherDao2 proxyInstance =(ITeacherDao2) new ProxyFactory(teacherDao2).getProxyInstance();
+
+//        System.out.println(proxyInstance.getClass());
+
+        proxyInstance.teach();
+
+        proxyInstance.sayHello("zs");
+    }
+}
+
+```
 
