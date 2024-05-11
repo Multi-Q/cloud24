@@ -29,6 +29,7 @@
         <module>cloud-elsticsearch</module>
         <module>spring-cloud-kafka</module>
         <module>z-design-pattern</module>
+        <module>spring-cloud-rabbitmq</module>
     </modules>
 
     <packaging>pom</packaging>
