@@ -4690,3 +4690,6 @@ public class Main2 {
 
 ```
 
+### 十六、RabbitMQ
+
+

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>spring-cloud-rabbitmq</artifactId>
+        <groupId>com.atguigu.cloud</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>publisher</artifactId>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
+
+    <build>
+        <!-- 定义编译源代码时使用的Java版本 -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version> <!-- 使用最新的版本或者适合你项目的版本 -->
+                <configuration>
+                    <source>17</source> <!-- 源代码使用的JDK版本 -->
+                    <target>17</target> <!-- 需要生成的目标class文件的编译版本 -->
+                    <encoding>UTF-8</encoding> <!-- 设置源文件编码 -->
+                </configuration>
+            </plugin>
+
+            <!-- Maven Assembly 插件用于创建包含项目依赖的jar包 -->
+            <!-- 如果你想要生成一个包含所有依赖的jar（胖jar），可以使用此插件 -->
+            <!-- 但更推荐使用maven-shade-plugin，因为它处理依赖冲突更智能 -->
+
+            <!-- Maven Shade 插件配置，用于创建一个可执行的jar，包含所有依赖 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version> <!-- 使用最新的版本 -->
+                <executions>
+                    <execution>
+                        <phase>package</phase> <!-- 在打包阶段执行 -->
+                        <goals>
+                            <goal>shade</goal> <!-- 执行shade目标 -->
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.example.publisher.MainPublisher</mainClass> <!-- 设置主类 -->
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

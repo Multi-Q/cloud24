@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite tests="1" failures="1" name="com.example.publisher.PublisherTest" time="0.01" errors="0" skipped="0">
+  <properties>
+    <property name="idea.version" value="2021.1.3"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="java.vm.version" value="17.0.7+8-LTS-224"/>
+    <property name="sun.boot.library.path" value="F:\Java\jdk-17\bin"/>
+    <property name="maven.multiModuleProjectDirectory" value="F:\Ideal_Projects\Cloud24\cloud24\spring-cloud-rabbitmq\publisher"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="guice.disable.misplaced.annotation.check" value="true"/>
+    <property name="path.separator" value=";"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="sun.os.patch.level" value=""/>
+    <property name="user.script" value=""/>
+    <property name="user.country" value="CN"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="user.dir" value="F:\Ideal_Projects\Cloud24\cloud24\spring-cloud-rabbitmq\publisher"/>
+    <property name="java.vm.compressedOopsMode" value="32-bit"/>
+    <property name="java.runtime.version" value="17.0.7+8-LTS-224"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.io.tmpdir" value="C:\Users\qrh19\AppData\Local\Temp\"/>
+    <property name="line.separator" value="
+"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="user.variant" value=""/>
+    <property name="os.name" value="Windows 10"/>
+    <property name="maven.ext.class.path" value="E:\JetBrains\IntelliJ IDEA 2021.1.3\plugins\maven\lib\maven-event-listener.jar"/>
+    <property name="classworlds.conf" value="F:\Maven\apache-maven-3.6.3\bin\m2.conf"/>
+    <property name="sun.jnu.encoding" value="GBK"/>
+    <property name="java.library.path" value="F:\Java\jdk-17\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;E:\VMware\VMware Workstation\bin\;C:\Program Files\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;F:\Node\nodejs20100\;F:\Node\nodejs20100\node_global;F:\Maven\apache-maven-3.6.3\bin;F:\Java\jdk-17\bin;F:\NetSarang\Xshell 7\;F:\NetSarang\Xftp 7\;F:\MySQL\mysql-8.0.31-winx64\mysql-8.0.31-winx64\bin;C:\Program Files (x86)\dotnet\;C:\Program Files\Bandizip\;F:\FFmpeg;F:\Git\Git\cmd;F:\Python\Python312\Scripts\;F:\Python\Python312\;C:\Users\qrh19\AppData\Local\Microsoft\WindowsApps;F:\Maven\apache-maven-3.6.3\bin;e:\Microsoft VS Code\bin;E:\JetBrains\WebStorm 2021.1.3\bin;;C:\Users\qrh19\AppData\Local\GitHubDesktop\bin;E:\JetBrains\PyCharm 2021.1.3\bin;;F:\Node\nodejs20100;;."/>
+    <property name="maven.conf" value="F:\Maven\apache-maven-3.6.3/conf"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="java.class.version" value="61.0"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="maven.repo.local" value="F:\Maven\maven-repository"/>
+    <property name="os.version" value="10.0"/>
+    <property name="user.home" value="C:\Users\qrh19"/>
+    <property name="user.timezone" value="Asia/Shanghai"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.specification.version" value="17"/>
+    <property name="user.name" value="qrh19"/>
+    <property name="java.class.path" value="F:\Maven\apache-maven-3.6.3\boot\plexus-classworlds-2.6.0.jar;F:\Maven\apache-maven-3.6.3\boot\plexus-classworlds.license"/>
+    <property name="java.vm.specification.version" value="17"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="sun.java.command" value="org.codehaus.classworlds.Launcher -Didea.version=2021.1.3 -s F:\Maven\apache-maven-3.6.3\conf\settings.xml -Dmaven.repo.local=F:\Maven\maven-repository test"/>
+    <property name="java.home" value="F:\Java\jdk-17"/>
+    <property name="user.language" value="zh"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="java.version" value="17.0.7"/>
+    <property name="native.encoding" value="GBK"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="maven.home" value="F:\Maven\apache-maven-3.6.3"/>
+    <property name="file.separator" value="\"/>
+    <property name="java.version.date" value="2023-04-18"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="sun.cpu.isalist" value="amd64"/>
+  </properties>
+  <testcase classname="com.example.publisher.PublisherTest" name="com.example.publisher.PublisherTest.testSendObject" time="0.01">
+    <failure message="Cannot invoke &quot;org.springframework.amqp.rabbit.core.RabbitTemplate.convertAndSend(String, Object)&quot; because &quot;this.rabbitTemplate&quot; is null" type="java.lang.NullPointerException">java.lang.NullPointerException: Cannot invoke &quot;org.springframework.amqp.rabbit.core.RabbitTemplate.convertAndSend(String, Object)&quot; because &quot;this.rabbitTemplate&quot; is null
+	at com.example.publisher.PublisherTest.testSendObject(PublisherTest.java:80)
+</failure>
+  </testcase>
+</testsuite>
