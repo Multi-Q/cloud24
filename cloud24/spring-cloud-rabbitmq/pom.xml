@@ -14,6 +14,10 @@
     <modules>
         <module>consumer</module>
         <module>publisher</module>
+        <module>atguigu-consumer</module>
+        <module>atguigu-producer</module>
+        <module>atguigu-confirm-producer</module>
+        <module>atguigu-confirm-consumer</module>
 
     </modules>
 

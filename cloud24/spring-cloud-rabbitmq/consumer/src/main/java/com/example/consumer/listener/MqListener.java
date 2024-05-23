@@ -71,8 +71,6 @@ public class MqListener {
     @RabbitListener(queues = "topic.queue2")
     public void topicQueue2(String message) {
         System.out.println("【消费者2】接收到消息：topic.queue2---" + message);
-
-
     }
 
 

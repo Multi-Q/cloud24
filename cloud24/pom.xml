@@ -30,6 +30,7 @@
         <module>spring-cloud-kafka</module>
         <module>z-design-pattern</module>
         <module>spring-cloud-rabbitmq</module>
+        <module>z-juc</module>
     </modules>
 
     <packaging>pom</packaging>

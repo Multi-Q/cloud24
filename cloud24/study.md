@@ -4692,4 +4692,1324 @@ public class Main2 {
 
 ### 十六、RabbitMQ
 
+#### 16.1 RabbitMQ结构
+![img_14.png](studyImgs/img_14.png)
+
+#### 16.2 RabbitMQ安装
+* Windows安装：
+
+需要下载erlong，再安装rabbitmq，启动时需要点击`RabbitMQ Service-start.bat`开启cmd窗口，窗口不能关闭。
+
+然后输入网址:localhost:15672进入后台
+
+![img_15.png](studyImgs/img_15.png)
+
+![img_16.png](studyImgs/img_16.png)
+
+![img_17.png](studyImgs/img_17.png)
+
+
+* Docker安装：
+
+```shell
+#拉取镜像
+docker pull rabbitm1:3.13-management
+
+#-d: 后台运行docker容器
+#--name：设置容器名称
+#-p：映射端口号，格式：“宿主机端口号：容器内端口号”。5672供客户端程序访问，15672供后台管理界面访问
+#-v：卷映射目录
+#-e：设置容器内环境变量，这里设置了登录rabbit管理后台默认用户和密码
+
+docker run -d \
+--name rabbitmq \
+-p 5672:5672 \
+-p 15672:15672 \
+-v rabbitmq-plugin:/plugins \
+-e RABBITMQ_DEFAULT_USER=guest \
+-e RABBITMQ_DEFAULT_PASS=123456 \
+rabbitmq:3.13-management
+
+```
+
+#### 16.3 RabbitMQ通信模式种类
+
+![img_18.jpg](studyImgs/img_18.jpg)
+
+#### 16.4 SpringBoot整合RabbitMQ
+
+基本思路：
+
+>搭建环境
+>
+>基础设定：交换机名称、队列名称、绑定关系
+>
+>发送消息：使用RestTemplate
+>
+>接收消息：使用@RabbitListener注解
+
+**消费者模块**
+
+1、创建消费者模块（atguigu-consumer）和生产者模块（atguigu-provider），并引入依赖
+
+```xml
+  <dependencies>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-amqp</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <artifactId>jackson-dataformat-xml</artifactId>
+  </dependency>
+
+
+</dependencies>
+
+```
+
+2、配置文件（消费者模块和生产者模块配置都相同）
+```yml
+server:
+  port: 8085 #消费者模块和生产者模块端口号要不相同才行
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+
+```
+
+3、消费者模块创建一个类
+```java
+package com.atguigu.mq.com.atguigu.mq.listener;
+
+import com.rabbitmq.client.Channel;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Component;
+
+/**
+ * @author QRH
+ * @date 2024/5/21 11:54
+ * @description TODO
+ */
+@Component
+public class MyMessageListener {
+  public static final String EXCHANGE_DIRECT="exchange.direct.order";
+  public static final String ROUTING_KEY="order";
+  public static final String QUEUE_NAME="queue.order";
+
+  @RabbitListener(
+          bindings = {
+                  @QueueBinding(
+                          value = @Queue(value = QUEUE_NAME),
+                          exchange = @Exchange(value = EXCHANGE_DIRECT),
+                          key = {ROUTING_KEY}
+                  )
+          }
+  )
+  public void processMessage(String dataString, Message message, Channel channel){
+    System.out.println(dataString);
+    System.out.println(message.toString());
+    System.out.println(channel.toString());
+  }
+}
+
+```
+
+4、生产者模块创建测试类，测试发送消息
+```java
+package com.atguigu.mq;
+
+import jakarta.annotation.Resource;
+import org.junit.jupiter.api.Test;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
+
+/**
+ * @author QRH
+ * @date 2024/5/21 13:53
+ * @description TODO
+ */
+@SpringBootTest
+public class RabbitMQTest {
+    public static final String EXCHANGE_DIRECT="exchange.direct.order";
+    public static final String ROUTING_KEY="order";
+    public static final String QUEUE_NAME="queue.order";
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
+
+
+
+    @Test
+    public void testSendMessage() {
+        rabbitTemplate.convertAndSend(EXCHANGE_DIRECT, ROUTING_KEY, "hello,rabbitmq atguigu");
+    }
+
+
+
+}
+
+```
+
+#### 16.5 消费确认机制
+
+**新建一个生产者模块（atguigu-confirm-producer）**
+
+配置yml
+```yml
+server:
+  port: 8087
+
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    publisher-confirm-type: correlated #交换机确认
+    publisher-returns: true #队列确认
+```
+
+创建配置类
+```java
+package com.atuigu.mq.config;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.ReturnedMessage;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * @author QRH
+ * @date 2024/5/21 14:07
+ * @description TODO
+ */
+@Configuration
+@Slf4j
+public class RabbitConfig implements RabbitTemplate.ConfirmCallback,RabbitTemplate.ReturnsCallback {
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
+    
+    @PostConstruct
+    public void initRabbitTemplate() {
+        //设置确认回调
+        rabbitTemplate.setConfirmCallback(this);
+        //设置失败回调
+        rabbitTemplate.setReturnsCallback(this);
+    }
+    
+    @Override
+    public void confirm(CorrelationData correlationData, boolean ack, String cause) {
+        //消息发送到交换机成功或失败时调用这个方法
+        log.info("confirm() 回调函数打印correlationData： "+correlationData);
+        log.info("confirm() 回调函数打印ack： "+ack);
+        log.info("confirm() 回调函数打印cause： "+cause);
+    }
+
+    @Override
+    public void returnedMessage(ReturnedMessage returnedMessage) {
+        //发送到队列失败才调用的方法
+        log.info("returnedMessage() 回调函数打印消息主体： "+new String(returnedMessage.getMessage().getBody()));
+        log.info("returnedMessage() 回调函数打印应答码： "+returnedMessage.getReplyCode());
+        log.info("returnedMessage() 回调函数打印描述： "+returnedMessage.getReplyText());
+        log.info("returnedMessage() 回调函数打印消息使用的交换机： "+returnedMessage.getExchange());
+        log.info("returnedMessage() 回调函数打印消息使用的路由键： "+returnedMessage.getRoutingKey());
+    }
+}
+
+```
+
+**新建一个消费者模块（atguigu-confirm-consumer）**
+
+```yml
+
+server:
+  port: 8088
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: manual #把消息设置为手动确认
+```
+
+```java
+package com.atguigu.mq.listener;
+
+import com.rabbitmq.client.Channel;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+
+/**
+ * @author QRH
+ * @date 2024/5/21 14:37
+ * @description TODO
+ */
+@Component
+@Slf4j
+public class MyMessageListener {
+
+    @RabbitListener(queues = {"queue.order"})
+    public void processMessage(String dataString, Message message, Channel channel) {
+        //获取当前消息的deliverTag
+        long deliveryTag = message.getMessageProperties().getDeliveryTag();
+        try {
+            log.info("消费端 消息内容： " + dataString);
+            //操作成功，返回ack
+            channel.basicAck(deliveryTag, false);
+
+        } catch (Exception e) {
+            //获取消息是否是重复投递的
+            Boolean redelivered = message.getMessageProperties().getRedelivered();
+            
+            //操作失败，返回nack信息
+            //requeue 控制消息是否重新放回队列
+            try {
+                if (redelivered) {
+                    //重复投递，说明已经重试过一次了，不需要重新投递
+                    channel.basicNack(deliveryTag, false, false);
+                } else {
+                    channel.basicNack(deliveryTag, false, true);
+                }
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        } finally {
+        }
+    }
+}
+
+```
+
+##### 16.6 死信和死信队列
+
+* 死信：当一个消费无法被消费，他就成了死信。
+
+死信产生的原因大致有三种：<br>
+1、拒绝：消费者拒接消息，basicNack()/basicReject()，并不会把消息重新放入原目标队列，即requeue=false<br>
+2、溢出：队列中消息数量到达限制。比如队列最大只能存储10条数据，且现在已经存储了10条，此时再发送一条消息进来，根据先进先出原则，队列中最早的消息会变成死信。<br>
+3、超时：消息到达超时时间未被消费。
+
+死信的处理方式大致有三种：<br>
+1、丢弃：对不重要的消息直接丢弃，不做处理。<br>
+2、入库：把死信写入数据库，日后再处理。<br>
+3、监听：消息变成死信后进入死信队列，我们专门设置消费端监听死信队列，做后续处理（通常采用）。
+
+##### 16.7 延迟队列
+
+实现方案：<br>
+1、<br>
+2、插件
+
+
+
+### 十七、JUC并发编程
+
+> java.util.concurrent.*
+
+#### 17.1 并发与并行
+
+并发：`同一个实体上的多个事件`，是在`同一台处理器`上“同时”处理多个任务，同一时刻，其实只有一个事件在发生。
+
+并行：`在不同实体上的多个事件`，是在`多台处理器`上同时处理多个任务，同一时刻，大家真的都在做事情，你做你的
+
+##### 17.1.1 CompletableFuture
+
+Future接口（FutureTask实现类）定义了操作`异步线程`执行一些方法，如获取一步任务的执行结果、取消任务的执行、判断任务是否被取消、判断任务执行是否完毕等。
+
+一句话，Future可以为`主线程`开启一个分支任务，专门处理一些耗时的操作，比如网络请求、数据库查询、文件读取等。
+
+FutureTask的优缺点：
+
+缺点：
+
+1、get()阻塞。一旦调用get()方法求结果，如果计算没有完成容易导致程序阻塞。
+
+2、isDone()轮询，轮询方式会耗费无谓的CPU资源，而且也不见得能及时得到计算结果。如果想要一步获取结果，通常会议轮询的方式去获取结果，尽量不阻塞。
+
+优点：
+。。。。
+
+
+* CompletableFuture为什么出现？
+
+CompletableFuture提供了一种观察者模式类似的机制，通过回调函数来处理异步任务的结果。
+
+** CompletableFuture是Future的增强版，减少阻塞和轮询，可以传入回调对象，当异步任务完成或发生异常时，自动调用回调对象的回调方法 **
+
+使用CompletableFuture不建议使用`new`创建对象，而是使用`静态方法`来创建。
+
+如：
+
+`需要`返回值的，使用`supplyAsync()`方法:
+
+> public static <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier);
+> public static <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier, Executor executor); 
+
+`不需要`返回值的，使用`runAsync()`方法:
+> public static CompletableFuture<Void> runAsync(Runnable runnable);
+> public static CompletableFuture<Void> runAsync(Runnable runnable, Executor executor);
+
+上述Executor executor参数说明：如果没有指定Executor的方法，直接使用默认的ForkJoinPool.commonPool()作为他的线程池执行异步代码；
+如果指定线程池，则使用我们自定义的或者特别指定的线程池执行异步代码。
+
+```java
+package com.future;
+
+import java.util.concurrent.*;
+
+/**
+ * @author QRH
+ * @date 2024/5/18 18:32
+ * @description TODO
+ */
+public class CompletableFutureBuilderDemo {
+
+    public static void main(String[] args) throws Exception {
+
+        ExecutorService threadPool = Executors.newFixedThreadPool(3);
+
+        /**
+         //无返回值的
+        CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(() -> {
+            System.out.println(Thread.currentThread().getName());
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        System.out.println(completableFuture.get());
+
+        System.out.println("--------------------------------");
+
+        CompletableFuture<Void> completableFuture2 = CompletableFuture.runAsync(() -> {
+            System.out.println(Thread.currentThread().getName());
+            try {
+                TimeUnit.MILLISECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        },threadPool);
+        System.out.println(completableFuture2.get());
+        **/
+
+
+        //有返回值的
+        CompletableFuture<String> supplyAsync = CompletableFuture.supplyAsync(() -> {
+            System.out.println(Thread.currentThread().getName());
+            try {
+                TimeUnit.MILLISECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "Hello supplyAsync";
+        });
+        System.out.println(supplyAsync.get());
+
+        System.out.println("---------------------------");
+
+        CompletableFuture<String> supplyAsync2 = CompletableFuture.supplyAsync(() -> {
+            System.out.println(Thread.currentThread().getName());
+            try {
+                TimeUnit.MILLISECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return   "Hello supplyAsync 我有线程池";
+        }, threadPool);
+        System.out.println(supplyAsync2.get());
+
+
+        threadPool.shutdown();
+    }
+}
+
+```
+
+CompleteableFuture的优点：
+
+1、一步任务结束时，会自动回调某个对象的方法。
+
+2、主线程设置好回调后，不再关心一步任务的执行，异步任务之间可以顺序执行。
+
+3、异步任务出错时，会自动调用某个对象的方法。
+
+```java
+package com.future;
+
+import java.util.concurrent.*;
+
+/**
+ * @author QRH
+ * @date 2024/5/18 18:32
+ * @description TODO
+ */
+public class CompletableFutureUseDemo {
+
+    public static void main(String[] args) throws Exception {
+
+        ExecutorService threadPool = Executors.newFixedThreadPool(3);
+
+        try {
+            CompletableFuture.supplyAsync(()->{
+                System.out.println(Thread.currentThread().getName());
+                int res = ThreadLocalRandom.current().nextInt(10);
+                try{TimeUnit.MILLISECONDS.sleep(1);}catch (Exception e){e.printStackTrace();}
+                System.out.println("----1秒后出结果： "+res);
+                return res>5 ? res/0 : res;
+            },threadPool).whenComplete((v,e)->{
+               if(e==null){
+                   System.out.println("----计算完成，更新系统value= "+v);
+               }
+            }).exceptionally(e->{
+                e.printStackTrace();
+                System.out.println("异常情况： "+e.getCause()+"\t"+e.getMessage());
+                return null;
+            });
+
+            System.out.println(Thread.currentThread().getName() + "现成先去忙其他任务");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            threadPool.shutdown();
+        }
+
+        //主线程不要立刻结束，否则CompletableFuture默认使用的线程会立刻关闭，这里设置暂停3秒
+        //try{TimeUnit.MILLISECONDS.sleep(5);}catch (Exception e){e.printStackTrace();}
+    }
+}
+
+```
+
+##### 17.1.2 CompletableFuture的的api
+
+CompletableFuture的的api可以划分为五种：
+
+** 1、获得结果和触发计算**
+
+>* get()：同步获取结果，如果任务完成，则获取其结果；如果任务异常完成，则抛出异常。
+>* get(long timeout, TimeUnit unit)：同步获取结果，如果任务完成，则获取其结果；如果任务异常完成，则抛出异常；如果超过指定的时间仍然未完成，则抛出超时异常。
+>* join()：同步获取结果，如果任务完成，则获取其结果；如果任务异常完成，则抛出异常。
+>* getNow(T valueIfAbsent)：同步获取结果，如果任务完成，则返回计算结果；如果任务异常完成，则抛出异常；如果任务尚未完成，则返回指定的默认值valueIfAbsent。
+>* complete(T value)：将任务状态设置为完成，并返回结果。
+
+```java
+public static void main(String[] args) {
+        CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                TimeUnit.MILLISECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "abc";
+        });
+
+        /**
+        //getNow("默认值")如果没计算完成，则返回给定的默认值，否则则返回计算结果
+        System.out.println(completableFuture.getNow("xxx"));
+        try { TimeUnit.MILLISECONDS.sleep(3); } catch (InterruptedException e) {  e.printStackTrace();  }
+        System.out.println(completableFuture.getNow("xxx"));
+        **/
+
+        /**
+        //complete("打断值"):如果打断计算，则把默认值给打断方法，否则不打断，返回计算结果
+         
+//        try { TimeUnit.MILLISECONDS.sleep(1); } catch (InterruptedException e) {  e.printStackTrace();  }
+//        System.out.println(completableFuture.complete("打断值")+"\t"+completableFuture.join());
+
+        try { TimeUnit.MILLISECONDS.sleep(2); } catch (InterruptedException e) {  e.printStackTrace();  }
+        System.out.println(completableFuture.complete("打断值")+"\t"+completableFuture.join());
+         
+        **/
+    }
+
+```
+
+** 2、对计算结果进行处理**
+
+>* thenApply(Function fn)：当任务完成时，执行fn，并把结果作为参数传递给fn。
+>* handle(BiFunction fn)：当任务完成时，执行fn，并把结果作为参数传递给fn。
+
+注：
+
+* thenApply()：由于存在依赖关系（当前步错，不走下一步），当前步骤有异常的话就叫停
+* handle():有异常也可以往下一步走，根据带的异常参数可以进一步处理
+
+```java
+package com.future;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * @author QRH
+ * @date 2024/5/19 12:35
+ * @description TODO
+ */
+public class CompletableFutureApi2Demo {
+    public static void main(String[] args) {
+
+        ExecutorService threadPool = Executors.newFixedThreadPool(3);
+
+        /**
+        try {
+            CompletableFuture.supplyAsync(() -> {
+                        try {  TimeUnit.MILLISECONDS.sleep(1); } catch (InterruptedException e) {  e.printStackTrace(); }
+                        return 1;
+                    }
+                    , threadPool)
+                    .thenApply(f -> {
+                        System.out.println("2222");
+                        return f + 2;
+                    })
+                    .thenApply(f -> {
+                        System.out.println("3333");
+                        return f + 2;
+                    })
+                    .whenComplete((v, e) -> {
+                        if (e == null) {  System.out.println("---计算结果： " + v);  }
+                    })
+                    .exceptionally(e -> {
+                        System.out.println("----计算异常： " + e.getMessage());
+                        return null;
+                    });
+            System.out.println(Thread.currentThread().getName() + "----主线程先去忙其他任务");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            threadPool.shutdown();
+        }
+        **/
+
+        try {
+            CompletableFuture.supplyAsync(() -> {
+                        try {  TimeUnit.MILLISECONDS.sleep(1); } catch (InterruptedException e) {  e.printStackTrace(); }
+                        System.out.println("111");
+                        return 1;
+                    }
+                    , threadPool)
+                    .handle((f,e) -> {
+                        int i = 10 / 0;
+                        System.out.println("2222");
+                        return f + 2;
+                    })
+                    .handle((f,e) -> {
+                        System.out.println("3333");
+                        return f + 2;
+                    })
+                    .whenComplete((v, e) -> {
+                        if (e == null) {  System.out.println("---计算结果： " + v);  }
+                    })
+                    .exceptionally(e -> {
+                        System.out.println("----计算异常： " + e.getMessage());
+                        return null;
+                    });
+            System.out.println(Thread.currentThread().getName() + "----主线程先去忙其他任务");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            threadPool.shutdown();
+        }
+
+    }
+}
+
+```
+
+** 3、对计算结果进行消费**
+
+>* thenAccept(Consumer action)：接受任务的处理结果，并进行消费，无返回结果。
+
+执行顺序：
+** thenRun() > thenAccept() > thenApply() **
+
+* thenRun(Runnnable runnable):任务A执行完执行任务B，并且`B不需要A的结果`
+* thenAccept(Consumer action):任务A执行完执行任务B，B需要A的结果，但是任务`B无返回值`
+* thenApply(Function fn):任务A执行完执行任务B，B需要A的结果，同时任务`B有返回值`
+
+```java
+package com.future;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * @author QRH
+ * @date 2024/5/19 12:35
+ * @description TODO
+ */
+public class CompletableFutureApi3Demo {
+  public static void main(String[] args) {
+
+    /**
+
+     CompletableFuture.supplyAsync(()->{
+     return 1;
+     })
+     .thenAccept(r->{
+     System.out.println(r);
+     });
+
+     System.out.println(Thread.currentThread().getName()+"--------main线程忙其他业务");
+     **/
+
+
+    CompletableFuture.supplyAsync(() -> "Hello Accept").thenRun(() -> {
+    }).join();
+
+    CompletableFuture.supplyAsync(() -> "Hello A2").thenAccept(System.out::println).join();
+
+    System.out.println(CompletableFuture.supplyAsync(() -> "Hello A3").thenApply(r -> r + "  B").join());
+
+  }
+}
+
+```
+
+**thenRun()和thenRunAsync()区别**
+> 1、没有传入自定义线程池，都是用默认的ForkJoinPool.commonPool()线程池。
+> 
+> 2、传入了一个自定义线程池：
+> 
+> 如果执行第一个任务的时候，传入了一个自定义线程池：
+> 
+> 调用thenRun()方法执行第二个任务时，则第二个任务和第一个任务共用同一个线程池。
+> 
+> 调用thenRunAsync()执行第二个任务时，则第一个任务使用的是自己传入的线程池，第二个任务使用的是ForkJoin线程池
+> 
+> 
+> 注：有可能处理太快，系统优化切换原则，直接使用main线程处理
+
+```java
+package com.future;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * @author QRH
+ * @date 2024/5/19 12:35
+ * @description TODO
+ */
+public class CompletableFutureApi4Demo {
+    public static void main(String[] args) {
+        ExecutorService threadPool = Executors.newFixedThreadPool(5);
+
+        /**
+        //没有使用自定义线程池
+        try {
+            CompletableFuture<Void> cf = CompletableFuture.supplyAsync(() -> {
+                try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                System.out.println("任务1 " + Thread.currentThread().getName());
+                return 1;
+            })
+                    .thenRun(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务2 " + Thread.currentThread().getName());
+                    })
+                    .thenRun(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务3 " + Thread.currentThread().getName());
+                    })
+                    .thenRun(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务4 " + Thread.currentThread().getName());
+                    });
+
+            System.out.println(cf.get(2L, TimeUnit.SECONDS));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            threadPool.shutdown();
+        }
+        **/
+
+        /**
+        //使用自定义线程池
+        try {
+            CompletableFuture<Void> cf = CompletableFuture.supplyAsync(() -> {
+                try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                System.out.println("任务1 " + Thread.currentThread().getName());
+                return 1;
+            },threadPool)
+                    .thenRun(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务2 " + Thread.currentThread().getName());
+                    })
+                    .thenRun(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务3 " + Thread.currentThread().getName());
+                    })
+                    .thenRun(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务4 " + Thread.currentThread().getName());
+                    });
+
+            System.out.println(cf.get(2L, TimeUnit.SECONDS));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            threadPool.shutdown();
+        }
+        **/
+
+
+        /**
+        //第一个任务使用自定义线程池，第2个任务使用thenRunAsync()且不自定义线程池
+        try {
+            CompletableFuture<Void> cf = CompletableFuture.supplyAsync(() -> {
+                try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                System.out.println("任务1 " + Thread.currentThread().getName());
+                return 1;
+            },threadPool)
+                    .thenRunAsync(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务2 " + Thread.currentThread().getName());
+                    })
+                    .thenRun(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务3 " + Thread.currentThread().getName());
+                    })
+                    .thenRun(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务4 " + Thread.currentThread().getName());
+                    });
+
+            System.out.println(cf.get(2L, TimeUnit.SECONDS));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            threadPool.shutdown();
+        }
+        **/
+
+
+        /**
+        //使用thenRunAsync（）并使用自定义线程池
+        try {
+            CompletableFuture<Void> cf = CompletableFuture.supplyAsync(() -> {
+                try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                System.out.println("任务1 " + Thread.currentThread().getName());
+                return 1;
+            })
+                    .thenRunAsync(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务2 " + Thread.currentThread().getName());
+                    },threadPool)
+                    .thenRun(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务3 " + Thread.currentThread().getName());
+                    })
+                    .thenRun(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务4 " + Thread.currentThread().getName());
+                    });
+
+            System.out.println(cf.get(2L, TimeUnit.SECONDS));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            threadPool.shutdown();
+        }
+         **/
+
+        try {
+            CompletableFuture<Void> cf = CompletableFuture.supplyAsync(() -> {
+                //try{  TimeUnit.MILLISECONDS.sleep(20);}catch (InterruptedException e){e.printStackTrace();}
+                System.out.println("任务1 " + Thread.currentThread().getName());
+                return 1;
+            },threadPool)
+                    .thenRun(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(1);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务2 " + Thread.currentThread().getName());
+                    })
+                    .thenRun(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(1);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务3 " + Thread.currentThread().getName());
+                    })
+                    .thenRun(() -> {
+                        try{  TimeUnit.MILLISECONDS.sleep(1);}catch (InterruptedException e){e.printStackTrace();}
+                        System.out.println("任务4 " + Thread.currentThread().getName());
+                    });
+
+            System.out.println(cf.get(2L, TimeUnit.SECONDS));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            threadPool.shutdown();
+        }
+    }
+
+
+
+}
+
+```
+
+** 5、对两个结果进行合并**
+
+* thenCombine():两个任务都完成之后，最终吧两个任务的结果一起交给thenCombine（）处理。先完成的的先等着，等待其他分支任务完成。
+
+```java
+package com.future;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * @author QRH
+ * @date 2024/5/19 12:35
+ * @description TODO
+ */
+public class CompletableFutureApi5Demo {
+    public static void main(String[] args) {
+        CompletableFuture<Integer> cf1 = CompletableFuture.supplyAsync(() -> {
+            System.out.println(Thread.currentThread().getName() + "\t--启动");
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return 10;
+        });
+
+        CompletableFuture<Integer> cf2= CompletableFuture.supplyAsync(() -> {
+            System.out.println(Thread.currentThread().getName() + "\t--启动");
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return 30;
+        });
+
+
+        CompletableFuture<Integer> res = cf1.thenCombine(cf2, (r1, r2) -> {
+            System.out.println("----开始两个结果合并");
+            return r1 + r2;
+        });
+
+        System.out.println(res.join());
+
+
+    }
+
+
+}
+
+```
+
+#### 17.2 锁
+
+##### 17.2.1 乐观锁和悲观锁
+
+**悲观锁**：认为自己在使用数据的时候一定有别的线程来修改数据，因此在获取数据的时候会先加锁，确保数据不会被别的线程修改。<br>
+synchronixed关键字和Lock类的实现都是悲观锁<br>
+适合`写操作`多的场景，先加锁可以保证写操作时数据正确。显示的锁定之后再操作同步资源
+
+**乐观锁**：认为自己在使用数据的时候一定没有别的线程来修改数据，因此不会加锁。<br>
+在Java中通过使用`无锁编程`来实现，只是在更新数据的时候去判断，之前有没有别的线程更新了这个数据。<br>
+如果这个数据没有被更新，当前线程将自己修改的数据成功写入。<br>
+如果这个数据已经被其他线程更新，则根据不同的实现方式执行不同的操作，比如放弃修改、重试抢锁等。<br>
+适合`读操作`多的场景，不加锁的特点能够使其读操作的性能大幅提升。乐观锁则直接去操作同步资源，是一种无锁算法，得之我幸不得我命，再努力就是
+
+判断规则：<br>
+1、版本号机制Version。<br>
+2、最长采用的是CAS算法，Java原子类中的递增操作就通过CAS自选实现的。
+
+##### 17.2.2 公平锁和非公平锁
+
+**公平锁**：指多个线程按照申请锁的顺序来获取锁，这里类似排队买票，先来的人先买后来的人在队尾排队，这是公平的
+> Lock lock=new ReentrantLock(true); //true表示公平锁，先来先得
+
+**非公平锁**：指多个线程获取锁的顺序并不是按照申请锁的顺序，有可能后申请的线程比先申请的线程先获取锁，在高并发环境下有可能造成`优先级翻转`或者`饥饿现象`（某个线程一直得不到锁）。
+> Lock lock=new ReentrantLock(false); //false表示非公平锁，后来的也可能先获得锁
+> Lock lock=new ReentrantLock(); //默认非公平锁
+
+* 为什么会有公平锁盒非公平锁的设计？为什么默认非公平？
+①恢复挂起的线程到真正锁的获取还是有时间差的，从开发人员来看这个时间微乎其微，但是从CPU的角度来看，这个时间差存在的还是很明显的，所以非公平锁能更充分的利用CPU的时间片，尽量减少CPU空闲状态时间。
+
+②使用多线程很重要的考量点事线程切换的开销，当采用非公平锁时，当一个线程请求锁获取同步状态，然后释放同步状态，所以刚释放锁的线程会在此刻再次获取同步状态的概率变得非常大，所以减少了线程的开销。
+
+```java
+package com.lock;
+
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * @author QRH
+ * @date 2024/5/20 15:24
+ * @description TODO
+ */
+public class SaleTicketDemo {
+    public static void main(String[] args) {
+
+        Ticket ticket = new Ticket();
+
+        new Thread(()->{for(int i=0;i<55;i++)ticket.sale();},"a").start();
+
+        new Thread(()->{for(int i=0;i<55;i++)ticket.sale();},"b").start();
+
+        new Thread(()->{for(int i=0;i<55;i++)ticket.sale();},"c").start();
+    }
+}
+
+class Ticket {
+    private int number = 50;
+    //无参就是非公平锁，有参是公平锁
+    private ReentrantLock lock = new ReentrantLock(true);
+
+    public void sale() {
+        lock.lock();
+        try {
+            if (number > 0) {
+                System.out.println(Thread.currentThread().getName() + "卖出第:  " + (number--) + "票，剩余" + number);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+
+```
+
+##### 17.2.3 可重入锁（递归锁）
+
+可重入锁是值统一线程在外层方法获取锁的时候，再进入该线程的内层方法会自动获取锁（前提，锁对象得是同一对象），不会因为之前已经获取过还没是防而阻塞。
+
+隐式锁：synchronized<br>
+显示锁：Lock
+
+##### 17.2.4 死锁
+
+死锁是指两个或两个以上的进程在执行过程中，因争夺资源而造成的一种互相等待的现象，若无外力干涉那它们将无法推进下去，如果系统资源充足，进程的资源请求都能够得到满足，则系统会 deadlock（死锁）发生，即所有进程均被阻塞，这种状态称为死锁。
+
+产生死锁的主要原因：<br>
+* 系统资源不足
+* 进程运行推进的顺序不合适
+* 资源分配不当
+
+排查死锁：
+* 纯命令：jps -l 找到进程号，然后jstack 进程号
+* 图形化工具：jconsole
+
+#### 17.3 LockSupport和线程中断
+
+LockSupport是jdk1.5之后出现的一个工具类，它提供了线程的阻塞和唤醒操作。<br>
+
+##### 17.3.1  线程中断
+
+* 什么是中断机制？
+首先一个线程不应该由其他线程来强制中断或停止，而是`应该由线程自己自行停止`，自己来决定自己的命运。所以，Thread.stop,Thread.suspend.Thread.resume都已经废弃了<br>
+其次，在Java中没有办法立即停止一条线程，然而停止线程却显得尤为重要，如取消一个耗时操作。因此Java提供了一种用于停止线程的`协商机制`--中断，即中断标识协商机制。
+  <br>
+  
+
+中断只是一种协商机制，Java没有给中断增加任何语法，中断过程完全需要程序员自己实现。
+
+如要中断一个线程，需要手动调用线程的interrupt方法，该方法也仅仅是将线程对象的中断标识设置为true；<br>
+接着需要自己写代码不断检测当前线程的标识位，如果为true，表示当前线程请求这条线程中断。<br>
+此时，究竟要做什么需要自己写代码实现。
+
+**中断三个api**
+
+> public void interrupt() 只是给线程打上中断标记，发起一个协商而不会立即停止线程。
+> 
+> public static void interrupted() 检测当前线程是否被中断,并清除当前中断状态。<br>
+> 这个方法做了两件事：<br>
+> 1、返回当前现成的中断状态，测试当前线程是否已被中断。<br>
+> 2、将当前的中断状态清零并重新设为true，清除当前线程的中断状态
+> 
+> public boolean isInterrupted() 检测线程是否被中断，但不清除当前中断状态。
+
+
+##### 17.3.2 LockSupport
+
+LockSupport用来创建锁和其他同步类的基本线程阻塞原语。
+
+* LockSupport.park()：让当前线程阻塞，直到被unpark()唤醒。<br>
+* LockSupport.unpark(Thread thread)：唤醒一个线程。
+
+**使用Object类中的wait和notify方法实现线程等待和唤醒**
+
+异常情况：<br>
+1、wait和notify方法，两个都去掉同步代码块，就会抛出IllegalMonitorStateException异常。<br>
+2、将notify放在wait方法前面，程序会一直运行，线程无法被唤醒<br>
+
+总结：<br>
+wait和notify方法，两个都放在同步代码块中，且成对出现使用。<br>
+先wait后notify才可以。
+
+```java
+private static void syncAwaitNotify() throws InterruptedException {
+        Object o = new Object();
+        new Thread(() -> {
+//            try {
+//                TimeUnit.MILLISECONDS.sleep(1);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+            synchronized (o) {
+                System.out.println(Thread.currentThread().getName() + "\t ---come in");
+                try {
+                    o.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(Thread.currentThread().getName() + "\t ---被唤醒");
+            }
+        }, "t1").start();
+
+        TimeUnit.MILLISECONDS.sleep(1);
+
+        new Thread(() -> {
+            synchronized (o) {
+                o.notify();
+                System.out.println(Thread.currentThread().getName() + "\t ---发出通知");
+            }
+        }, "t2").start();
+    }
+```
+
+**Condition类中的await和signal方法实现线程等待和唤醒**
+
+异常情况：<br>
+1、去掉lock/unlock，就会抛出IllegalMonitorStateException异常。<br>
+2、先signal再await，程序会一直运行，线程无法被唤醒<br>
+
+总结：<br>
+Condition中的线程等待和唤醒方法，需先获得锁<br>
+一定要先await后signal
+
+```java
+ private static void conditionLock() {
+        Lock lock = new ReentrantLock();
+        Condition condition = lock.newCondition();
+        new Thread(() -> {
+//            try {
+//                TimeUnit.MILLISECONDS.sleep(1);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+            lock.lock();
+            try {
+                System.out.println(Thread.currentThread().getName() + "\t ---come in");
+                condition.await();
+                System.out.println(Thread.currentThread().getName() + "\t ---被唤醒");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                lock.unlock();
+            }
+
+        }, "t1").start();
+
+//        TimeUnit.MILLISECONDS.sleep(1);
+
+        new Thread(() -> {
+            lock.lock();
+            try {
+                condition.signal();
+                System.out.println(Thread.currentThread().getName() + "\t ---发出通知");
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                lock.unlock();
+            }
+
+        }, "t2").start();
+    }
+
+```
+
+**LockSupport类中的park和unpark方法实现线程等待和唤醒**
+
+之前错误的先唤醒后等待，LockSupport照样支持
+
+* 为什么可以突破wait/notify的原有调用原则？
+因为unpack获得了一个凭证，之后再调用park方法，就可以名正言顺的凭证消费，故不会阻塞。先发放了凭证后续可以畅通无阻。
+  
+* 为什么唤醒两次后阻塞两次，但最终结果还会阻塞线程？
+因为凭证的数量`最多为1`，连续调用两次unpark和调用一次unpark效果一样，只会增加一个凭证，调用两次park却需要消费两个凭证，证不够，不能放行。
+
+```java
+public static void main(String[] args) throws Exception {
+
+        Thread t1=new Thread(()->{
+//            try {
+//                TimeUnit.MILLISECONDS.sleep(1);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+
+            System.out.println(Thread.currentThread().getName() + "\t --come in");
+            LockSupport.park();
+            System.out.println(Thread.currentThread().getName() + "\t ---被唤醒");
+        },"t1");
+        t1.start();
+
+        TimeUnit.MILLISECONDS.sleep(1);
+
+        new Thread(()->{
+            LockSupport.unpark(t1);
+            System.out.println(Thread.currentThread().getName() + "\t ---发出通知");
+        },"t2").start();
+
+    }
+```
+
+#### 17.4 Java内存模型JMM
+
+JMM（Java内存模型）是JDK1.5之后出现的概念，是JVM与Java程序之间进行交互的桥梁。<br>
+
+JMM(Java Memory Model，简称JMM)本身是一种抽象的概念并不真实存在它仅仅描述的是一组约定或规范，通过这组规范定义了程序中各个`变量的读写访问方式`并决定一个线程对`共享变量的写入何时`以及如何变成`对另一个线程可见`，关键技术点都是围绕<span style="color:red;">多线程的原子性、可见性和有序性</span>展开的。
+
+原则：<br>
+JMM的关键技术点都是围绕多线程的原子性、可见性和有序性展开的
+
+能干嘛？<br>
+1、通过JMM来实现线程和主内存之间的抽象关系。<br>
+2、屏蔽各个硬件平台和操作系统的内存访问差异已实现Java程序在各个平台下都能达到一致的内存访问效果。
+
+
+
+##### 17.4.1 happens-before原则
+
+**1、次序规则**
+
+一个线程内，按照代码顺序，写在前面的操作先行发生于写在后面的操作。
+
+加深说明：前一个操作的结果可以被后续的操作获取。讲直白点，就是前面一个操作把变量x赋值为1，那后面一个操作坑定能知道x已经变成了1.
+
+**2、锁定规则**
+
+一个unLock操作`先行发生`于后面（后面指的是时间上的先后）对同一个锁的lock操作。
+
+如：
+```java
+public class Demo{
+    
+    static Object o=new Object();
+    
+    public static void main(String[] args){
+        //对于同一把锁o，threadA一定先unlock同一把锁后threadB才能获得该锁，A现先行发生于B
+        synchronized(o){
+            //....
+        }
+    }
+}
+```
+
+
+**3、volatile变量规则**
+
+对一个volatile变量的写操作先行发生于后面对这个变量的读操作，<span style="color:red;">前面写的对后面的读是可见的</span>（后面指定是时间上的先后）。
+
+
+**4、传递规则**
+
+如果操作A先行发生于操作B，操作B先行发生于操作C，那么可以得出操作A先行发生于操作C。
+
+
+**5、线程启动规则**
+
+Thread对象的start方法先行发生于此线程的每一个动作。
+
+
+**6、线程中断规则**
+
+对线程interrupt方法的调用先行发生于被中断线程的代码检测到中断事件的发生;<br>
+可以通过Thread.interrupt()检查是否发生中断。<br>
+也就是说你要先调用interrupt()方法设置中断标志位，我才能检测到中断发送。
+
+
+**7、线程终止规则**
+
+线程中的所有操作都先行发生于对此线程的终止检测，我们可以通过isAlive（）等手段检测线程是否已经终止执行。
+
+
+**8、对象终结规则**
+
+一个对象的初始化完成（构造函数执行结束）先行发生于它的finalize()方法的开始。<br>
+说人话就是，对象还没有完成初始化之前，是不能调用finalize()方法的
+
+##### 17.4.2 volatile和JMM
+
+被volatile修饰的变量有2大特点：`可见性`和`有序性`。
+
+volatile内存定义：<br>
+当写一个volatile变量时，JMM会把该线程对应的本地内存中的共享变量值`立即刷新回主内存`中。<br>
+当读一个volatile变量时，JMM会把该线程对应的本地内存设置为无效，重新回到主内存中读取罪行共享变量的值。<br>
+所以volatile的写内存语义就是直接刷新到主内存中，读的内存语义是直接从主内存中读取。
+
+volatile凭什么可以保证可见性和有序性？？  内存屏障（Memoery Barrier）
+
+<br><br>什么是内存屏障？
+
+![img_19.png](studyImgs/img_19.jpg)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

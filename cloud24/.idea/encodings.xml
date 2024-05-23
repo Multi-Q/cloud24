@@ -37,6 +37,14 @@
     <file url="file://$PROJECT_DIR$/seata-storage-service2002/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring-cloud-kafka/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring-cloud-kafka/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring-cloud-rabbitmq/atguigu-confirm-consumer/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring-cloud-rabbitmq/atguigu-confirm-consumer/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring-cloud-rabbitmq/atguigu-confirm-producer/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring-cloud-rabbitmq/atguigu-confirm-producer/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring-cloud-rabbitmq/atguigu-consumer/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring-cloud-rabbitmq/atguigu-consumer/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring-cloud-rabbitmq/atguigu-producer/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/spring-cloud-rabbitmq/atguigu-producer/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring-cloud-rabbitmq/consumer/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring-cloud-rabbitmq/consumer/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/spring-cloud-rabbitmq/publisher/src/main/java" charset="UTF-8" />
@@ -45,6 +53,8 @@
     <file url="file://$PROJECT_DIR$/spring-security7/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/z-design-pattern/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/z-design-pattern/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/z-juc/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/z-juc/src/main/resources" charset="UTF-8" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>
