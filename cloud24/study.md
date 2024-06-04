@@ -10,9 +10,9 @@
 
 ![img_13](studyImgs/img_13.png)
 
-## 第二天
+## 二、基本知识
 
-### 一、时间格式转化
+### 2.1 时间格式转化
 
 时间格式转化有三种方式：
 
@@ -38,7 +38,7 @@ spring:
     time-zone: GMT+8
 ```
 
-### 二、统一返回接口
+### 2.2 统一返回接口
 
 接口统一返回值：<br>
 ①思路
@@ -163,7 +163,7 @@ public class ResultData<T> {
 }
 ```
 
-### 三、统一异常处理类
+### 2.3 统一异常处理类
 
 异常类捕捉可以自己使用`try...catch`捕捉，也可以使用`全局异常处理器`进行处理，但是处理的异常类型是具体的，捕捉多个异常还得写多个方法
 
@@ -199,9 +199,9 @@ public class GlobalExceptionHandler {
 
 ```
 
-## 第三天
+## 三、微服务内容
 
-### 一、Consul服务注册与发现
+### 一、 Consul服务注册与发现
 
 * 为什么要引入服务注册中心？<br>
   实现微服务之间的动态注册与发现
@@ -219,7 +219,7 @@ Protocol 2 spoken by default, understands 2 to 3 (agent will automatically use p
 
 以开发者模式启动Consul，输入命令`consul agent -dev`。然后就可以访问consul了，访问地址为：`http://localhost:8500`。
 
-### 二、将服务者模块和消费者模块加入Consul
+#### 1.1 将服务者模块和消费者模块加入Consul
 
 **服务提供者** 步骤：
 
@@ -369,7 +369,7 @@ public class RestTemplateConfig {
 }
 ```
 
-### 三、服务配置与刷新
+#### 1.2 服务配置与刷新
 
 通用全局配置信息，直接注册进Consul服务器，从Consul获取
 
@@ -416,7 +416,7 @@ spring:
     active: dev #多环境配置加载内容dev/prod，不写就是默认default配置
 ```
 
-### 四、Consul服务器Key/Value配置填写
+#### 1.3 Consul服务器Key/Value配置填写
 
 配置填写一定要遵循官方规则
 
@@ -431,7 +431,7 @@ spring:
 3、再给上面三个文件夹创建`data`内容，（data不再是文件夹）
 ![img.png](studyImgs/img3.png)
 
-### 五、动态刷新
+#### 1.4 动态刷新
 
 Consul刷新是有默认刷新间隔的，默认是`55秒`。
 
@@ -448,13 +448,12 @@ spring:
           wait-time: 1
 ```
 
-### 六、Consul的配置持久化
+#### 1.5 Consul的配置持久化
 
 当Consul服务关闭时，再次进入页面之前的配好的配置就会全没有，所以需要将Consul持久化。（持久化配置将在之后进行）
 
-## 第三天
 
-### 一、LoadBalancer负载均衡
+### 二、LoadBalancer负载均衡
 
 spring cloud LoadBalancer没有专门的jar包，它挂载在`Spring-Cloud-Commons`jar包下。
 
@@ -467,9 +466,9 @@ spring cloud LoadBalancer没有专门的jar包，它挂载在`Spring-Cloud-Commo
 这是Spring Cloud官方提供的一个开源的、简易的客户端负载均衡器，它包含在Spring Cloud Commons中用来替代以前的Ribbon组件。相较于Ribbon，Spring Cloud
 LoadBalancer不经能支持`RestTemplate`，还支持`WebClient`（WebClient是Spring Web Flux中提供的功能，可以实现响应式异步请求）。
 
-### 二、完成Consul的数据持久化
+#### 2.1 完成Consul的数据持久化
 
-#### 1、Consul数据持久化配置并注册为Window服务
+**Consul数据持久化配置并注册为Window服务**
 
 步骤：
 
@@ -491,7 +490,7 @@ LoadBalancer不经能支持`RestTemplate`，还支持`WebClient`（WebClient是S
 
 ④验证是否成功，浏览器输入网址(http://localhost:8500)，成功打开，然后在windows的后台看consul的服务是否注册成功。
 
-### 三、开始使用LoadBalancer
+#### 2.2 开始使用LoadBalancer
 
 步骤：
 
@@ -519,7 +518,7 @@ public String getInfoByConsul(){
 
 3、重启消费者服务，浏览器访问（http://localhost:80/consumer/pay/get/info）。
 
-### 四、OpenFeign服务接口调用
+### 三、OpenFeign服务接口调用
 
 * OpenFeign是什么？
 
@@ -533,7 +532,7 @@ public String getInfoByConsul(){
 
   日常用OpenFeign
 
-#### 1、OpenFeign通用步骤
+#### 3.1 OpenFeign通用步骤
 
 ①创建一个公共api模块(cloud-consumer-feign-order80)，该模块与服务提供者一一对应。
 
@@ -657,9 +656,9 @@ public class OrderController {
 ⑤测试，启动服务，观察Consul是否能够注册成功。然后输入网址检查是否能返回正确数据。
 ![img.png](studyImgs/img6.png)
 
-### 五、OpenFeign高级特性
+#### 3.2 OpenFeign高级特性
 
-#### 1、OpenFeign超时配置
+##### 3.2.1 OpenFeign超时配置
 
 OpenFign默认等待时间：60s，超时报错
 
@@ -717,7 +716,7 @@ spring:
 
 ③<span style="color:red;">如果全局超时配置和单个服务超时配置同时共存，会`优先使用单个服务配置的超时时间`。</span>
 
-#### 2、OpenFign重试机制
+##### 3.2.2 OpenFign重试机制
 
 重试机制默认是`关闭的`，开启重试机制需写个配置类
 
@@ -749,7 +748,7 @@ public class FeignConfig {
 
 OpenFign的重试次数在控制台看不到，只是给出了最终结果。如果想要看到每次重试的结果，将在日志打印那学到
 
-#### 3、OpenFign默认HttpClient修改
+##### 3.2.3 OpenFign默认HttpClient修改
 
 OpenFign中的Http Client如果不做特殊配置，则会默认使用JDK自带的HttpURLConnection发送HTTP请求。<br>
 但，由于默认的HttpURLConnection没有连接池，性能和效率比较低，如果采用默认，性能不是最牛的，所以要加到最大。
@@ -787,7 +786,7 @@ spring:
 
 ```
 
-#### 4、OpenFign请求/压缩功能
+##### 3.2.4 OpenFign请求/压缩功能
 
 对请求和响应进行GZIP压缩，以减少同行过程中的性能损耗
 
@@ -804,7 +803,7 @@ spring:
           enabled: true
 ```
 
-#### 5、OpenFign日志打印功能
+##### 3.2.5 OpenFign日志打印功能
 
 日志级别：
 
@@ -866,7 +865,7 @@ logging:
             PayFeignApi: debug
 ```
 
-### 六、CirCuitBreaker断路器
+### 四、CirCuitBreaker断路器
 
 断路器：当某个服务不可用时，会自动切换到备用服务。
 
@@ -876,9 +875,9 @@ Resiliences4j是什么？
 
 * Resiliences4j是容错库
 
-#### 6.1 熔断（CirCuitBreaker）
+#### 4.1 熔断（CirCuitBreaker）
 
-##### 6.1.1 按照COUNT_BASE
+##### 4.1.1 按照COUNT_BASE
 
 步骤：
 
@@ -1022,7 +1021,7 @@ public class OrderCircuitController {
 
 ⑥测试
 
-##### 6.1.2 按照TIME_BASED
+##### 4.1.2 按照TIME_BASED
 
 步骤： ①修改yml
 
@@ -1052,11 +1051,11 @@ resilience4j:
         baseConfig: default #使用默认配置
 ```
 
-##### 6.1.3 COUNT_BASED和TIME_BASED用哪个？
+##### 4.1.3 COUNT_BASED和TIME_BASED用哪个？
 
 建议使用COUNT_BASED
 
-#### 6.2 隔离（BuldHead）
+#### 4.2 隔离（BuldHead）
 
 隔离是什么？
 
@@ -1068,7 +1067,7 @@ resilience4j:
 
 Resilience4j提供了两种隔离的实现：
 
-##### 6.2.1 Semahore信号量
+##### 4.2.1 Semahore信号量
 
 使用Semahore需要导入舱壁的包
 
@@ -1152,7 +1151,7 @@ public String myBulkheadFallback(Integer id,Throwable t){
 
 最后启动项目，测试结果。
 
-##### 6.2.2 固定线程池FixedThreadPoolBulkhead舱壁
+##### 4.2.2 固定线程池FixedThreadPoolBulkhead舱壁
 
 使用Semahore需要导入舱壁的包
 
@@ -1239,7 +1238,7 @@ public String myBulkheadFallback(Integer id,Throwable t){
 
 最后启动项目，测试结果。
 
-#### 6.3 限流器（RateLimiter）
+#### 4.3 限流器（RateLimiter）
 
 限流器是什么？
 
@@ -1267,13 +1266,13 @@ public String myBulkheadFallback(Integer id,Throwable t){
          base-config: default
 ```
 
-### 七、分布式链路追踪
+### 五、分布式链路追踪
 
 为什么要用分布式链路追踪？
 
 * 在位服务框架中，一个由客户端发起的请求在后端系统中会经过多个不同的服务结点调用来协同产生最后的请求结果，每一个前段请求都会形成一条复杂的分布式服务调用链路，链路中的任何一环出现高延时或错误都会引起整个请求最后的失败
 
-#### 7.1 Zipkin链路追踪负责数据展现
+#### 5.1 Zipkin链路追踪负责数据展现
 
 * Zipkin是一个开源的分布式追踪系统，用于收集和聚合跨服务调用的链路和操作数据，可用于构建和操作分布式系统间的延迟数据。
 
@@ -1283,7 +1282,7 @@ cmd窗口下执行：java -jar zipkin-server-3.1.1-exec.jar
 
 访问地址：http://localhost:9411/，若能出现ui界面说明成功了
 
-#### 7.2 Micrometer+Zipkin搭配使用
+#### 5.2 Micrometer+Zipkin搭配使用
 
 1、引入相关jar
 
@@ -1431,9 +1430,9 @@ public String myMicrometer(@PathVariable("id") Integer id);
 3、`服务消费者80(cloud-consumer-feign-feign-order80)`
 操作步骤如前所示
 
-### 八、网关
+### 六、网关
 
-#### 8.1 配置
+#### 6.1 配置
 
 1、新建cloud-gateway-gateway9527
 
@@ -1633,9 +1632,9 @@ public interface PayFeignApi {
 }
 ```
 
-#### 8.2 Predicate常用api
+#### 6.2 Predicate常用api
 
-##### 8.2.1 After Route Predicate
+##### 6.2.1 After Route Predicate
 
 在`什么时间之后`能访问这个链接
 
@@ -1651,7 +1650,7 @@ spring:
             - After=2024-04-01T00:00:00.000+08:00[Asia/Shanghai]
 ```
 
-##### 8.2.2 Before Route Predicate
+##### 6.2.2 Before Route Predicate
 
 在`什么时间之前`能访问这个链接
 
@@ -1667,7 +1666,7 @@ spring:
             - Before=2024-04-03T00:00:00.000+08:00[Asia/Shanghai]
 ```
 
-##### 8.2.3 Between Route Predicate
+##### 6.2.3 Between Route Predicate
 
 在`什么时间之前`能访问这个链接
 
@@ -1683,7 +1682,7 @@ spring:
             - Between=2024-04-02T00:00:00.000+08:00[Asia/Shanghai],2024-04-03T00:00:00.000+08:00[Asia/Shanghai]
 ```
 
-##### 8.2.4 Cookie Route Predicate
+##### 6.2.4 Cookie Route Predicate
 
 Cookie断言，需要两个参数`Cookie`和`正则表达式`
 
@@ -1708,7 +1707,7 @@ C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1 --cookie "username=q
 {"code":"200","message":"success","data":{"id":1,"payNo":"pay17203699","orderNo":"6544bafb424a","userId":1,"amount":19.99,"deleted":0,"createTime":"2024-03-14 12:56:24","updateTime":"2024-03-14 15:18:14"},"timestamp":1712069458399}
 ```
 
-##### 8.2.5 Header Route Predicate
+##### 6.2.5 Header Route Predicate
 
 需要两个参数`header请求头`和`正则表达式`
 
@@ -1734,7 +1733,7 @@ C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1 -H "X-Request-Id:123
 
 ```
 
-##### 8.2.6 Host Route Predicate
+##### 6.2.6 Host Route Predicate
 
 需要两个参数`header请求头`和`正则表达式`
 
@@ -1759,7 +1758,7 @@ C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1 -H "Host:www.atguigu
 
 ```
 
-##### 8.2.7 Method Route Predicate
+##### 6.2.7 Method Route Predicate
 
 ```yml
 spring:
@@ -1781,7 +1780,7 @@ C:\Users\qrh19>curl -X GET  http://localhost:9527/pay/gateway/get/1
 {"code":"200","message":"success","data":{"id":1,"payNo":"pay17203699","orderNo":"6544bafb424a","userId":1,"amount":19.99,"deleted":0,"createTime":"2024-03-14 12:56:24","updateTime":"2024-03-14 15:18:14"},"timestamp":1712070926046}
 ```
 
-##### 8.2.8 Path Route Predicate
+##### 6.2.8 Path Route Predicate
 
 访问路径。
 
@@ -1797,7 +1796,7 @@ spring:
 
 ```
 
-##### 8.2.9 Query Route Predicate
+##### 6.2.9 Query Route Predicate
 
 查询请求参数
 
@@ -1823,7 +1822,7 @@ C:\Users\qrh19>
 
 ```
 
-##### 8.2.10 RemoteAddr  Route Predicate
+##### 6.2.10 RemoteAddr  Route Predicate
 
 远程地址请求访问，只有这个地址才能访问
 
@@ -1849,7 +1848,7 @@ C:\Users\qrh19>
 
 ```
 
-##### 8.2.11 自定义断言
+##### 6.2.11 自定义断言
 
 ①新建自定义断言类，（注意：`必须以RoutePredicateFactory`结尾）
 
@@ -1950,19 +1949,19 @@ C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1?userType=diamod
 C:\Users\qrh19>
 ```
 
-#### 8.3 Filter
+#### 6.3 Filter
 
 相当于Spring MVC的拦截器，Serlvet的过滤器
 
-##### 8.3.1 全局过滤器Global Filter
+##### 6.3.1 全局过滤器Global Filter
 
 gateway默认自带的，直接用就可以
 
-##### 8.3.2 单一过滤器
+##### 6.3.2 单一过滤器
 
 单一内置过滤器一共有38个
 
-###### 8.3.2.1 请求头过滤器
+###### 6.3.2.1 请求头过滤器
 
 1、AddRequestHeader GatewayFilter Factory
 
@@ -2047,7 +2046,7 @@ spring:
             - SetRequestHeader=X-request-atguigu3,guiguValue3
 ```
 
-###### 8.3.2.2 请求参数过滤器
+###### 6.3.2.2 请求参数过滤器
 
 1、AddRequestParameter和RemoveRequestParameter
 
@@ -2101,7 +2100,7 @@ spring:
 
 ![img8.png](studyImgs/img8.png)
 
-##### 8.3.3 自定义全局过滤器
+##### 6.3.3 自定义全局过滤器
 
 步骤：
 
@@ -2163,17 +2162,31 @@ public class MyGlobalFilter implements GlobalFilter, Ordered {
 
 ```
 
-##### 8.3.4 自定义条件过滤器
+##### 6.3.4 自定义条件过滤器
 
 步骤：
 
 ①新建一个MyGatewayFilterFactory.java（必须以GatewayFilterFactory结尾），并继承AbstractGatewayFilterFactory
 
-### 九、Spring Cloud Alibaba
+### 七、Spring Cloud Alibaba
 
 * Spring Cloud Alibaba的版本不是最新的
 
-#### 9.1 Spring Cloud Alibaba Nacos
+
+
+**SpringBoot和Spring Alibaba Cloud版本对应关系：**
+
+![img_24.png](studyImgs/img_24.png)
+
+
+
+**Spring Cloud Alibaba 集成的组件版本:**
+
+![img_25.png](studyImgs/img_25.png)
+
+
+
+#### 7.1 Spring Cloud Alibaba Nacos
 
 Nacos是一个动态服务发现、配置管理、服务管理平台，Nacos 致力于解决微服务治理中的问题。Nacos 提供了服务注册、服务发现、配置管理、服务管理、服务网关等微服务治理功能，并支持基于 Spring Cloud 构建微服务应用。
 
@@ -2194,7 +2207,7 @@ https://nacos.io/zh-cn/docs/quick-start.html
 
 ![img_1.png](studyImgs/img_1.png)
 
-##### 9.1.1 服务注册中心
+##### 7.1.1 服务注册中心
 
 步骤：
 
@@ -2435,7 +2448,7 @@ public class OrderNacosController {
 
 ```
 
-##### 9.1.2 服务配置中心
+##### 7.1.2 服务配置中心
 
 ①新建模块(cloudalibaba-config-nacos-client3377)
 
@@ -2587,13 +2600,15 @@ public class NacosConfigController {
 }
 ```
 
-### 十、Spring Cloud Sentinel
+### 八、Spring Cloud Sentinel
+
+ [Sentinel](https://github.com/alibaba/Sentinel) 以流量为切入点，从流量控制、熔断降级、系统负载保护等多个维度保护服务的稳定性。
 
 Sentinel下载：https://github.com/alibaba/Sentinel/releases
 
 启动DashBoard命令：java -jar sentinel-dashboard-1.8.7.jar
 
-访问sentinel启动界面：http://localhost:8080/ (登录账号、密码都是：sentinel);
+访问sentinel启动界面：http://localhost:8080/ (登录账号、密码都是：**sentinel**);
 
 步骤：
 
@@ -2753,13 +2768,13 @@ public class FlowLimitController {
 
 ⑥启动
 
-##### 10.1 流控规则
+##### 8.1 流控规则
 
-##### 10.2 @SentinelSource注解
+##### 8.2 @SentinelSource注解
 
-该注解是写在`Service层的方法上`的
+@SentinelResource 注解用来标识资源是否被`限流`、`降级`。该注解是写在`Service层的方法上`的
 
-##### 10.3 热点规则
+##### 8.3 热点规则
 
 是什么？
 
@@ -2780,7 +2795,7 @@ public String dealHandlerTestHotKey(String p1,String p2,BlockException e){
 
 ![img_2.pgn](studyImgs/img_2.png)
 
-##### 10.4 黑白名单控制
+##### 8.4 黑白名单控制
 
 * 黑白名单控制，就是对请求的ip进行限制，比如只允许白名单的ip访问，或者只允许黑名单的ip访问。
 
@@ -2831,7 +2846,7 @@ public class EmpowerController {
 
 localhost:8401/empower?serverName=test1或localhost:8401/empower?serverName=test2 的都不予通过，其他的可以访问。
 
-##### 10.5 规则持久化
+##### 8.5 规则持久化
 
 * 规则持久化，就是将规则持久化到数据库中，这样，当服务器重启的时候，这些规则就会自动加载到内存中。
 
@@ -2865,7 +2880,7 @@ spring:
             rule-type: flow #flow:流控规则  degrade:降级规则  param-flow:参数流控规则
 ```
 
-##### 10.5 Openfeign和Sentinel整合
+##### 8.5 Openfeign和Sentinel整合
 
 ①提供者模块（cloudalibaba-provider-payment9001）引入依赖
 
@@ -3045,7 +3060,7 @@ public ResultData getPayByOrder(@PathVariable("orderNo") String orderNo){
 解决方案： 降低父工程版本
 ![img_5.png](studyImgs/img_5.png)
 
-##### 10.6 Sentinel整合Gateway
+##### 8.6 Sentinel整合Gateway
 
 ①新建模块(cloudalibaba-sentinel-gateway9528)
 
@@ -3249,7 +3264,7 @@ public class GatewayConfiguration {
 最后测试
 http://localhost:9528/pay/nacos/765
 
-### 十一、Seata分布式事务
+### 九、Seata分布式事务
 
 1.Seata是什么？
 
@@ -3381,7 +3396,7 @@ seata:
 
 ![img_9.png](studyImgs/img_9.png)
 
-#### 11.1 测试用例
+#### 9.1 测试用例
 
 步骤：
 
@@ -3497,18 +3512,18 @@ http://localhost:2004/order/create?userId=1&productId=1&count=10&money=100
 
 解决方案，降低spring+cloud版本
 
-#### 11.2 @GlobalTransation注解
+#### 9.2 @GlobalTransation注解
 
 @GlobalTransation注解，在微服务中，我们使用@GlobalTransation注解来开启全局事务，
 
-### 十二、ElasticSearch
+### 十、ElasticSearch
 
 ElasticSearch是一个基于Lucene构建的开源的分布式搜索服务器。
 
 Elasticsearch是一个基于Lucene的搜索服务器。它提供了一个分布式多用户能力的全文搜索引擎，基于RESTful
 web接口。Elasticsearch是用Java开发的，并作为Apache许可条款下的开放源码发布，是当前流行的企业级搜索引擎。设计用于云计算中，能够达到高可用。
 
-#### 12.1 倒排索引
+#### 10.1 倒排索引
 
 倒排索引，也叫倒排索引，是一种索引结构，用于快速查找包含特定单词的文档。
 
@@ -3525,15 +3540,15 @@ elasticsearch采用倒序排序：
 
 * 对文档内容分词，对词条创建索引，并记录词条所在文档的id，查询时`先根据`词条查询到文档id，而`后根据`文档id查询文档
 
-#### 12.2 IK分词器
+#### 10.2 IK分词器
 
-#### 12.3 索引库操作
+#### 10.3 索引库操作
 
-#### 12.4 DSL查询
+#### 10.4 DSL查询
 
-### 十三、Redis
+### 十一、Redis
 
-#### 13.1 主从集群
+#### 11.1 主从集群
 
 全量同步和增量同步的区别？
 
@@ -3549,7 +3564,7 @@ elasticsearch采用倒序排序：
 
 * slave结点断开又恢复，并且在repl_baklog中能找到offset时
 
-#### 13.2 哨兵原理
+#### 11.2 哨兵原理
 
 哨兵的作用：
 
@@ -3557,16 +3572,16 @@ elasticsearch采用倒序排序：
 * 自动故障切换：如果master故障，sentinel会将一个slave提升为master。当故障实例恢复后也以新的master为主
 * 通知：当集群发生故障转移时，sentinel会将最新节点角色信息推送给redis客户端
 
-#### 13.3 分片集群
+#### 11.3 分片集群
 
 住从何哨兵可以解决高可用、高并发问题，但有两个问题依然没有解决：
 
 * 海量数据存储问题
 * 高并发读写问题
 
-### 十四、Spring Security
+### 十二、Spring Security
 
-#### 14.1 初始使用Spring Security6
+#### 12.1 初始使用Spring Security6
 
 1、引入jar
 
@@ -3640,7 +3655,7 @@ spring:
 
 5、启动测试
 
-#### 14.2 Java自动配置
+#### 12.2 Java自动配置
 
 ```java
 package com.atguigu.security.config;
@@ -3681,7 +3696,7 @@ public class WebSecurityConfig {
 
 ```
 
-#### 14.3 基于数据库的用户验证功能
+#### 12.3 基于数据库的用户验证功能
 
 1、创建DBUserDetailManager.java
 
@@ -3780,13 +3795,13 @@ public class WebSecurityConfig {
 
 ```
 
-#### 14.4 密码加密方式
+#### 12.4 密码加密方式
 
-#### 14.5 前后端分离
+#### 12.5 前后端分离
 
-### 十五、Java设计模式
+### 十三、Java设计模式
 
-#### 15.1 单例模式
+#### 13.1 单例模式
 
 单例模式有个特点：
 
@@ -3801,8 +3816,7 @@ eg:
 ```java
 public class Singleton {
 
-    private Singleton() {
-    }
+    private Singleton() {}
 
     private static Singleton instant;
 
@@ -3812,7 +3826,7 @@ public class Singleton {
 }
 ```
 
-##### 15.1.1 饿汉式（静态常量法）
+##### 13.1.1 饿汉式（静态常量法）
 
 ```java
 package com.design.pattern.singleton;
@@ -3842,8 +3856,7 @@ public class _1HungryStaticInstant {
 class Singleton {
 
     //1、私有化无参构造器
-    private Singleton() {
-    }
+    private Singleton() {}
 
     //2、将该变量用final修饰，并初始化
     private final static Singleton instant = new Singleton();
@@ -3862,12 +3875,11 @@ class Singleton {
 
 * 缺点：在类装载时就完成初始化，没有达到`懒加载（Lazy Loading)`的效果，如果自始至终都没有使用过这个实例，则会`造成内存浪费`。
 
-* 这种基于类加载机制避免了多线程的同步问题，不过，instant在类加载时就实例化，在单例模式中大多数都是调用getInstant方法，
-  但是导致类加载的原因又跟多种，因此不能确定有其他方式（或其他的静态方法）到桌子类加载，这时候初始化instant就没有达到懒加载的效果。
-
+* 这种基于类加载机制避免了多线程的同步问题，不过，instant在类加载时就实例化，在单例模式中大多数都是调用getInstant方法，但是导致类加载的原因又跟多种，因此不能确定有其他方式（或其他的静态方法）到桌子类加载，这时候初始化instant就没有达到懒加载的效果。
+  
 * 结论：这种单例模式`可用`，但可能造成内存浪费
 
-##### 15.1.2 饿汉式（静态代码块法）
+##### 13.1.2 饿汉式（静态代码块法）
 
 ```java
 package com.design.pattern.singleton;
@@ -3896,8 +3908,7 @@ public class _2HungryStaticBlock {
 class Singleton2 {
 
     //1、私有化无参构造器
-    private Singleton2() {
-    }
+    private Singleton2() {}
 
     //2、声明静态成员变量
     private static Singleton2 instant;
@@ -3925,7 +3936,7 @@ class Singleton2 {
 
 * 结论：这种单例模式`可用`，但可能造成内存浪费
 
-##### 15.1.3 懒汉式（线程不安全—）
+##### 13.1.3 懒汉式（线程不安全）
 
 ```java
 package com.design.pattern.singleton;
@@ -3955,10 +3966,7 @@ public class _3LazyThreadUnsafe {
 
 class Singleton3 {
     //1、私有化无参构造器
-    private Singleton3() {
-    }
-
-    ;
+    private Singleton3() {}
 
     //2、声明一个静态成员变量
     private static Singleton3 instant;
@@ -3978,11 +3986,11 @@ class Singleton3 {
 
 * 优点：起到懒加载的效果，但是只能在`单线程`中使用。
 
-* 缺点：如果在多线程下，一个线程进入if(instant==null)判断语句块，还未来得及往下执行，另一个线程也通过了这个判断语句，这时便会`产生多个实例`。 所以多线程环境下不可以使用这种方式
+* 缺点：如果在多线程下，一个线程进入if(instant==null)判断语句块，还未来得及往下执行，另一个线程也通过了这个判断语句，这时便会`产生多个实例`。 所以多线程环境下不可以使用这种方式。
 
 * 结论：实际开发中，不要使用这种方式
 
-##### 15.1.4 懒汉式（线程安全，同步方法）
+##### 13.1.4 懒汉式（线程安全，同步方法）
 
 ```java
 package com.design.pattern.singleton;
@@ -4010,8 +4018,7 @@ public class _4LazyThreadSafeAndSynchronizedMethod {
 class Singleton4 {
 
     //1、私有化无参构造器
-    private Singleton4() {
-    }
+    private Singleton4() {}
 
     //2、声明静态成员变量
     private static Singleton4 instant;
@@ -4035,7 +4042,7 @@ class Singleton4 {
 
 * 结论：实际开发中，`不推荐使用`这种方式
 
-##### 15.1.5 懒汉式（线程安全，同步代码块）
+##### 13.1.5 懒汉式（线程安全，同步代码块）
 
 ```java
 package com.design.pattern.singleton;
@@ -4064,8 +4071,7 @@ public class _5LazyThreadSafeAndSynchronizedBlock {
 
 class Singleton5 {
     //1、私有化无参构造器
-    private Singleton5() {
-    }
+    private Singleton5() {}
 
     //2、声明静态成员变量
     private static Singleton5 instant;
@@ -4090,7 +4096,7 @@ class Singleton5 {
 
 * 结论：实际开发中，`不推荐使用`这种方式
 
-##### 15.1.6 双重检查
+##### 13.1.6 双重检查
 
 ```java
 package com.design.pattern.singleton;
@@ -4099,8 +4105,7 @@ package com.design.pattern.singleton;
  * @author QRH
  * @date 2024/5/6 15:46
  * @description 单例模式双重检查
- * 优点：双重检查概念是多线程开发中常使用到的，如代码所示，使用了两次if(instant==null)检查，这样可以保证线程安全。
-这样代码只用执行一次，后面再访问时，判断if(instant==null)，直接return实例化对象，也避免了反复进行方法同步<br/>
+ * 优点：双重检查概念是多线程开发中常使用到的，如代码所示，使用了两次if(instant==null)检查，这样可以保证线程安全。这样代码只用执行一次，后面再访问时，判断if(instant==null)，直接return实例化对象，也避免了反复进行方法同步<br/>
  * 线程安全：延迟加载，效率较高。<br/>
  * 结论：实际开发中，推荐这种方式
  */
@@ -4118,8 +4123,7 @@ public class _6DoubleCheck {
 
 class Singleton6 {
     //1、私有化无参构造器
-    private Singleton6() {
-    }
+    private Singleton6() {}
 
     //2、声明静态成员变量
     private static Singleton6 instant;
@@ -4140,12 +4144,11 @@ class Singleton6 {
 
 **优缺点：**
 
-* 优点：双重检查概念是多线程开发中常使用到的，如代码所示，使用了两次if(instant==null)检查，这样可以保证线程安全。 这样代码`只用执行一次`，后面再访问时，判断if(instant==null)
-  ，直接return实例化对象，也避免了`反复`进行方法同步
+* 优点：双重检查概念是多线程开发中常使用到的，如代码所示，使用了两次if(instant\==null)检查，这样可以保证线程安全。 这样代码`只用执行一次`，后面再访问时，判断if(instant\==null)，直接return实例化对象，也避免了`反复`进行方法同步
 * `线程安全`,`延迟加载`，`效率较高`。
-* 结论：实际开发中，<span style="font-size:18px;font-weight:bolder;color:red;>推荐</span>这种方式
+* 结论：实际开发中，<span style="font-size:18px;font-weight:bolder;color:red;">推荐</span>这种方式
 
-##### 15.1.7 静态内部类
+##### 13.1.7 静态内部类
 
 ```java
 package com.design.pattern.singleton;
@@ -4158,7 +4161,7 @@ package com.design.pattern.singleton;
  * * 静态内部类方式在Singleton7类被加载时并不会立即实例化，而是需要实例化时，调用getInstant方法，才会状态SingletonInstance类，从完成Singleton的实例化。
  * * 类的静态属性只会在第一次加载类的时候，所以，jvm帮我们保证了线程的安全性，在类进行初始化时，别的线程是无法进入的。
  * * `线程安全`,`利用静态内部类实现延迟加载`，`效率高`。
- * * 结论：实际开发中，<span style="font-size:18px;font-weight:bolder;color:red;>推荐</span>这种方式
+ * * 结论：实际开发中，推荐这种方式
  */
 public class _7StaticInnerClass {
     public static void main(String[] args) {
@@ -4179,7 +4182,7 @@ class Singleton7 {
     private Singleton7() {
     }
 
-    //2、声明静态成员变量，不过改变量要用volatile修饰
+    //2、声明静态成员变量，不过该变量要用volatile修饰
     private static volatile Singleton7 instant;
 
     //3、创建静态内部类
@@ -4200,9 +4203,9 @@ class Singleton7 {
 * 静态内部类方式在Singleton7类被加载时并不会立即实例化，而是需要实例化时，调用getInstant方法，才会状态SingletonInstance类，从完成Singleton的实例化。
 * 类的静态属性只会在第一次加载类的时候，所以，jvm帮我们保证了线程的安全性，在类进行初始化时，别的线程是无法进入的。
 * `线程安全`,`利用静态内部类实现延迟加载`，`效率高`。
-* 结论：实际开发中，<span style="font-size:18px;font-weight:bolder;color:red;>推荐</span>这种方式
+* 结论：实际开发中，<span style="font-size:18px;font-weight:bolder;color:red;">推荐</span>这种方式。
 
-##### 15.1.8 枚举
+##### 13.1.8 枚举
 
 ```java
 package com.design.pattern.singleton;
@@ -4246,13 +4249,13 @@ enum Singleton8 {
 
 * 推荐使用
 
-##### 15.1.9 注意事项和细节
+##### 13.1.9 注意事项和细节
 
-* 单例模式保证了系统内存中该类只存在一个对象，节省了系统资源，对于一些需要频繁创建销毁的对象，使用单例模式可以提供啊系统性能
-* 党项实例化一个单例类时，必须记住使用相应的获取对象的方法，而不是使用new
-* 单例模式的使用场景：①需要频繁进行创建和销毁的对象；②创建对象时耗时过多或耗时资源过多，单用经常用到的对象； ③工具类对象；④频繁访问数据库或文件的对象（如数据源、session工厂）
+* 单例模式保证了系统内存中该类只存在一个对象，节省了系统资源，对于一些需要频繁创建销毁的对象，使用单例模式可以提供啊系统性能。
+* 当实例化一个单例类时，必须记住使用相应的获取对象的方法，而不是使用new。
+* 单例模式的使用场景：①需要频繁进行创建和销毁的对象；②创建对象时耗时过多或耗时资源过多，但经常用到的对象； ③工具类对象；④频繁访问数据库或文件的对象（如数据源、session工厂）
 
-#### 15.2 建造者模式
+#### 13.2 建造者模式
 
 建造者模式有四个角色：
 
@@ -4264,7 +4267,7 @@ enum Singleton8 {
 
 ④Direct（指挥者）：`构建`一个使用Builder接口的对象，他主要是用于创建一个复杂的对象，主要有两个作用：一、`隔离`客户与对象的生产关系；二、负责`控制`产品对象的生产过程
 
-##### 15.2.1 实现步骤
+##### 13.2.1 实现步骤
 
 ①创建一个产品角色
 
@@ -4442,7 +4445,7 @@ public class Main {
 
 ```
 
-##### 15.2.2 细节与说明
+##### 13.2.2 细节与说明
 
 * 客户端`不必知道产品内部组成的细节`，将产品本身与产品的`创建过程解耦`，使得相同的创建过程可以创建不同的产品对象
 * 每一个具体创建者都`相对独立`，而与其他的具体建造者无关，因此可以很方便地替换具体建造者或增加新的具体建造者，用户使用不同的具体建造者即可得到不同的产品对象
@@ -4455,7 +4458,7 @@ public class Main {
 * 抽象工厂模式实现对`产品家族`的创建，一个产品家族是这样的一系列产品：具有不同分类维度的产品组合，采用抽象工厂模式`不需要关系构建过程`，只关心什么产品由什么工厂生产即可。<br>
 而建造者模式则是要求按照`指定的蓝图`建造产品，它的主要目的是通过`组装零配件`而生产的一个新产品
 
-#### 15.3 代理模式
+#### 13.3 代理模式
 
 代理模式：为一个对象`提供一个替身`，以控制对这个对象的访问。即通过代理对象访问目标对象，这样做的好处是：可以在目标对象实现的基础上，`增强额外的功能操作`，即扩展目标对象的功能
 
@@ -4463,7 +4466,7 @@ public class Main {
 
 带模式有不同的形式，主要有三种：**静态代理**、**动态代理**（JDK代理、接口代理）和**Cglib代理**（可以在内存动态创建对象，而不需要实现接口，它属于动态代理的范畴）
 
-##### 15.3.1 静态代理
+##### 13.3.1 静态代理
 
 静态代理在使用时，需要定义`接口或父类`，被代理对象（即目标对象）与代理对象一起`实现相同的接口`或者`继承相同父类`
 
@@ -4565,7 +4568,7 @@ public class Main {
 * 缺点：因为代理对象需要与目标对象实现一样的接口，所以会有很多代理类
 * 一旦接口增加方法，目标对象与代理对象都要维护
 
-##### 15.3.2 动态代理
+##### 13.3.2 动态代理
 
 动态代理也叫jdk代理或接口代理。动态代理`不需要实现接口`，但`目标对象需要实现接口`，否者不能动态代理
 
@@ -4690,12 +4693,12 @@ public class Main2 {
 
 ```
 
-### 十六、RabbitMQ
+### 十四、RabbitMQ
 
-#### 16.1 RabbitMQ结构
+#### 14.1 RabbitMQ结构
 ![img_14.png](studyImgs/img_14.png)
 
-#### 16.2 RabbitMQ安装
+#### 14.2 RabbitMQ安装
 * Windows安装：
 
 需要下载erlong，再安装rabbitmq，启动时需要点击`RabbitMQ Service-start.bat`开启cmd窗口，窗口不能关闭。
@@ -4732,11 +4735,11 @@ rabbitmq:3.13-management
 
 ```
 
-#### 16.3 RabbitMQ通信模式种类
+#### 14.3 RabbitMQ通信模式种类
 
 ![img_18.jpg](studyImgs/img_18.jpg)
 
-#### 16.4 SpringBoot整合RabbitMQ
+#### 14.4 SpringBoot整合RabbitMQ
 
 基本思路：
 
@@ -4871,7 +4874,7 @@ public class RabbitMQTest {
 
 ```
 
-#### 16.5 消费确认机制
+#### 14.5 消费确认机制
 
 **新建一个生产者模块（atguigu-confirm-producer）**
 
@@ -5014,7 +5017,7 @@ public class MyMessageListener {
 
 ```
 
-##### 16.6 死信和死信队列
+##### 14.6 死信和死信队列
 
 * 死信：当一个消费无法被消费，他就成了死信。
 
@@ -5028,7 +5031,7 @@ public class MyMessageListener {
 2、入库：把死信写入数据库，日后再处理。<br>
 3、监听：消息变成死信后进入死信队列，我们专门设置消费端监听死信队列，做后续处理（通常采用）。
 
-##### 16.7 延迟队列
+##### 14.7 延迟队列
 
 实现方案：<br>
 1、<br>
@@ -5036,17 +5039,17 @@ public class MyMessageListener {
 
 
 
-### 十七、JUC并发编程
+### 十五、JUC并发编程
 
 > java.util.concurrent.*
 
-#### 17.1 并发与并行
+#### 15.1 并发与并行
 
 并发：`同一个实体上的多个事件`，是在`同一台处理器`上“同时”处理多个任务，同一时刻，其实只有一个事件在发生。
 
-并行：`在不同实体上的多个事件`，是在`多台处理器`上同时处理多个任务，同一时刻，大家真的都在做事情，你做你的
+并行：`在不同实体上的多个事件`，是在`多台处理器`上同时处理多个任务，同一时刻，大家真的都在做事情，你做你的。
 
-##### 17.1.1 CompletableFuture
+##### 15.1.1 CompletableFuture
 
 Future接口（FutureTask实现类）定义了操作`异步线程`执行一些方法，如获取一步任务的执行结果、取消任务的执行、判断任务是否被取消、判断任务执行是否完毕等。
 
@@ -5058,17 +5061,19 @@ FutureTask的优缺点：
 
 1、get()阻塞。一旦调用get()方法求结果，如果计算没有完成容易导致程序阻塞。
 
-2、isDone()轮询，轮询方式会耗费无谓的CPU资源，而且也不见得能及时得到计算结果。如果想要一步获取结果，通常会议轮询的方式去获取结果，尽量不阻塞。
+2、isDone()轮询，轮询方式会耗费无谓的CPU资源，而且也不见得能及时得到计算结果。如果想要一步获取结果，通常会以轮询的方式去获取结果，尽量不阻塞。
 
 优点：
 。。。。
+
+
 
 
 * CompletableFuture为什么出现？
 
 CompletableFuture提供了一种观察者模式类似的机制，通过回调函数来处理异步任务的结果。
 
-** CompletableFuture是Future的增强版，减少阻塞和轮询，可以传入回调对象，当异步任务完成或发生异常时，自动调用回调对象的回调方法 **
+**CompletableFuture是Future的增强版，减少阻塞和轮询，可以传入回调对象，当异步任务完成或发生异常时，自动调用回调对象的回调方法 **
 
 使用CompletableFuture不建议使用`new`创建对象，而是使用`静态方法`来创建。
 
@@ -5080,10 +5085,11 @@ CompletableFuture提供了一种观察者模式类似的机制，通过回调函
 > public static <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier, Executor executor); 
 
 `不需要`返回值的，使用`runAsync()`方法:
+
 > public static CompletableFuture<Void> runAsync(Runnable runnable);
 > public static CompletableFuture<Void> runAsync(Runnable runnable, Executor executor);
 
-上述Executor executor参数说明：如果没有指定Executor的方法，直接使用默认的ForkJoinPool.commonPool()作为他的线程池执行异步代码；
+上述Executor executor参数说明：如果没有指定Executor的方法，直接使用默认的ForkJoinPool.commonPool()作为它的线程池执行异步代码；
 如果指定线程池，则使用我们自定义的或者特别指定的线程池执行异步代码。
 
 ```java
@@ -5162,7 +5168,7 @@ public class CompletableFutureBuilderDemo {
 
 CompleteableFuture的优点：
 
-1、一步任务结束时，会自动回调某个对象的方法。
+1、异步任务结束时，会自动回调某个对象的方法。
 
 2、主线程设置好回调后，不再关心一步任务的执行，异步任务之间可以顺序执行。
 
@@ -5215,11 +5221,11 @@ public class CompletableFutureUseDemo {
 
 ```
 
-##### 17.1.2 CompletableFuture的的api
+##### 15.1.2 CompletableFuture的的api
 
 CompletableFuture的的api可以划分为五种：
 
-** 1、获得结果和触发计算**
+**1、获得结果和触发计算**
 
 >* get()：同步获取结果，如果任务完成，则获取其结果；如果任务异常完成，则抛出异常。
 >* get(long timeout, TimeUnit unit)：同步获取结果，如果任务完成，则获取其结果；如果任务异常完成，则抛出异常；如果超过指定的时间仍然未完成，则抛出超时异常。
@@ -5259,7 +5265,7 @@ public static void main(String[] args) {
 
 ```
 
-** 2、对计算结果进行处理**
+**2、对计算结果进行处理**
 
 >* thenApply(Function fn)：当任务完成时，执行fn，并把结果作为参数传递给fn。
 >* handle(BiFunction fn)：当任务完成时，执行fn，并把结果作为参数传递给fn。
@@ -5352,12 +5358,12 @@ public class CompletableFutureApi2Demo {
 
 ```
 
-** 3、对计算结果进行消费**
+**3、对计算结果进行消费**
 
 >* thenAccept(Consumer action)：接受任务的处理结果，并进行消费，无返回结果。
 
 执行顺序：
-** thenRun() > thenAccept() > thenApply() **
+**thenRun() > thenAccept() > thenApply() **
 
 * thenRun(Runnnable runnable):任务A执行完执行任务B，并且`B不需要A的结果`
 * thenAccept(Consumer action):任务A执行完执行任务B，B需要A的结果，但是任务`B无返回值`
@@ -5586,7 +5592,7 @@ public class CompletableFutureApi4Demo {
 
 ```
 
-** 5、对两个结果进行合并**
+**5、对两个结果进行合并**
 
 * thenCombine():两个任务都完成之后，最终吧两个任务的结果一起交给thenCombine（）处理。先完成的的先等着，等待其他分支任务完成。
 
@@ -5641,25 +5647,25 @@ public class CompletableFutureApi5Demo {
 
 ```
 
-#### 17.2 锁
+#### 15.2 锁
 
-##### 17.2.1 乐观锁和悲观锁
+##### 15.2.1 乐观锁和悲观锁
 
 **悲观锁**：认为自己在使用数据的时候一定有别的线程来修改数据，因此在获取数据的时候会先加锁，确保数据不会被别的线程修改。<br>
-synchronixed关键字和Lock类的实现都是悲观锁<br>
+`synchronized关键字`和`Lock类`的实现都是悲观锁<br>
 适合`写操作`多的场景，先加锁可以保证写操作时数据正确。显示的锁定之后再操作同步资源
 
 **乐观锁**：认为自己在使用数据的时候一定没有别的线程来修改数据，因此不会加锁。<br>
 在Java中通过使用`无锁编程`来实现，只是在更新数据的时候去判断，之前有没有别的线程更新了这个数据。<br>
 如果这个数据没有被更新，当前线程将自己修改的数据成功写入。<br>
 如果这个数据已经被其他线程更新，则根据不同的实现方式执行不同的操作，比如放弃修改、重试抢锁等。<br>
-适合`读操作`多的场景，不加锁的特点能够使其读操作的性能大幅提升。乐观锁则直接去操作同步资源，是一种无锁算法，得之我幸不得我命，再努力就是
+适合`读操作`多的场景，不加锁的特点能够使其读操作的性能大幅提升。乐观锁则直接去操作同步资源，是一种无锁算法，得之我幸不得我命，再努力就是。
 
 判断规则：<br>
 1、版本号机制Version。<br>
-2、最长采用的是CAS算法，Java原子类中的递增操作就通过CAS自选实现的。
+2、最常采用的是CAS算法，Java原子类中的递增操作就通过CAS自旋实现的。
 
-##### 17.2.2 公平锁和非公平锁
+##### 15.2.2 公平锁和非公平锁
 
 **公平锁**：指多个线程按照申请锁的顺序来获取锁，这里类似排队买票，先来的人先买后来的人在队尾排队，这是公平的
 > Lock lock=new ReentrantLock(true); //true表示公平锁，先来先得
@@ -5717,14 +5723,14 @@ class Ticket {
 
 ```
 
-##### 17.2.3 可重入锁（递归锁）
+##### 15.2.3 可重入锁（递归锁）
 
 可重入锁是值统一线程在外层方法获取锁的时候，再进入该线程的内层方法会自动获取锁（前提，锁对象得是同一对象），不会因为之前已经获取过还没是防而阻塞。
 
 隐式锁：synchronized<br>
 显示锁：Lock
 
-##### 17.2.4 死锁
+##### 15.2.4 死锁
 
 死锁是指两个或两个以上的进程在执行过程中，因争夺资源而造成的一种互相等待的现象，若无外力干涉那它们将无法推进下去，如果系统资源充足，进程的资源请求都能够得到满足，则系统会 deadlock（死锁）发生，即所有进程均被阻塞，这种状态称为死锁。
 
@@ -5737,11 +5743,11 @@ class Ticket {
 * 纯命令：jps -l 找到进程号，然后jstack 进程号
 * 图形化工具：jconsole
 
-#### 17.3 LockSupport和线程中断
+#### 15.3 LockSupport和线程中断
 
 LockSupport是jdk1.5之后出现的一个工具类，它提供了线程的阻塞和唤醒操作。<br>
 
-##### 17.3.1  线程中断
+##### 15.3.1  线程中断
 
 * 什么是中断机制？
 首先一个线程不应该由其他线程来强制中断或停止，而是`应该由线程自己自行停止`，自己来决定自己的命运。所以，Thread.stop,Thread.suspend.Thread.resume都已经废弃了<br>
@@ -5767,7 +5773,7 @@ LockSupport是jdk1.5之后出现的一个工具类，它提供了线程的阻塞
 > public boolean isInterrupted() 检测线程是否被中断，但不清除当前中断状态。
 
 
-##### 17.3.2 LockSupport
+##### 15.3.2 LockSupport
 
 LockSupport用来创建锁和其他同步类的基本线程阻塞原语。
 
@@ -5902,8 +5908,8 @@ public static void main(String[] args) throws Exception {
     }
 ```
 
-#### 17.4 Java内存模型JMM
-
+#### 15.4 Java内存模型JMM
+75
 JMM（Java内存模型）是JDK1.5之后出现的概念，是JVM与Java程序之间进行交互的桥梁。<br>
 
 JMM(Java Memory Model，简称JMM)本身是一种抽象的概念并不真实存在它仅仅描述的是一组约定或规范，通过这组规范定义了程序中各个`变量的读写访问方式`并决定一个线程对`共享变量的写入何时`以及如何变成`对另一个线程可见`，关键技术点都是围绕<span style="color:red;">多线程的原子性、可见性和有序性</span>展开的。
@@ -5917,7 +5923,7 @@ JMM的关键技术点都是围绕多线程的原子性、可见性和有序性�
 
 
 
-##### 17.4.1 happens-before原则
+##### 15.4.1 happens-before原则
 
 **1、次序规则**
 
@@ -5977,7 +5983,7 @@ Thread对象的start方法先行发生于此线程的每一个动作。
 一个对象的初始化完成（构造函数执行结束）先行发生于它的finalize()方法的开始。<br>
 说人话就是，对象还没有完成初始化之前，是不能调用finalize()方法的
 
-##### 17.4.2 volatile和JMM
+##### 15.4.2 volatile和JMM
 
 被volatile修饰的变量有2大特点：`可见性`和`有序性`。
 
@@ -5991,6 +5997,599 @@ volatile凭什么可以保证可见性和有序性？？  内存屏障（Memoery
 <br><br>什么是内存屏障？
 
 ![img_19.png](studyImgs/img_19.jpg)
+
+
+#### 15.5 CAS 
+
+原子类：java.util.concurrent.atomic
+
+没有原子类之前：多线程环境下不使用原子类保证线程安全i++
+
+使用CAS后：多线程环境下使用原子类保证线程安全i++，类似于乐观锁
+
+* CAS是什么？
+compare and swap的缩写，它包含三个操作数--内存位置、预期原值及更新值。
+  
+
+执行CAS操作的时候，将内存位置的值与预期原值比较：<br>
+如果相匹配，那么处理器会自动将该位置更新为新值，<br>
+如果不相匹配，处理器不做任何操作，多个线程同时执行CAS操作只有一个会成功。
+
+cas缺点：<br>
+1、循环时间长，会消耗CPU，消耗时间长，效率低。<br>
+2、只能保证一个共享变量的原子操作，不能保证多个变量的原子操作。
+
+#### 15.6 原子类与18罗汉增强
+
+atomic包下一共有16个类，把这些类分一下：
+
+##### 15.6.1 基本类型原子类
+
+> AtomicInteger
+> 
+> AtomicBoolean
+> 
+> AtomicLong
+
+常用api介绍：<br>
+> public final int get() //获取当前的值
+> 
+> public final int getAndSet(int newValue) //获取当前的值,并设置为newValue
+> 
+> public final int getAndIncrement() //获取当前的值,并自增
+> 
+> public final int getAndDecrement() //获取当前的值,并自减
+> 
+> public final int getAndAdd(int delta) //获取当前的值,并加上预期的值
+> 
+> public final boolean compareAndSet(int expect, int update) //如果输入数值等于预期值,则院子方式将该值设置为输入值
+
+```java
+package com.atomic;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * @author QRH
+ * @date 2024/5/24 21:50
+ * @description TODO
+ */
+public class AtomicIntegerDemo {
+    final static  int size=50;
+    public static void main(String[] args) throws InterruptedException {
+        MyNumber myNumber = new MyNumber();
+        CountDownLatch countDownLatch = new CountDownLatch(size);
+        for (int i = 1; i <= size; i++) {
+            new Thread(() -> {
+                try {
+                    for (int j = 1; j <= 1000; j++) {
+                        myNumber.addPlus();
+                    }
+                } finally {
+                    countDownLatch.countDown();
+                }
+            }, String.valueOf(i)).start();
+        }
+        countDownLatch.await();
+
+        System.out.println(Thread.currentThread().getName() + "\t res=" + myNumber.atomicInteger.get());
+    }
+}
+
+class MyNumber {
+    AtomicInteger atomicInteger = new AtomicInteger();
+
+    public void addPlus() {
+        atomicInteger.getAndIncrement();
+    }
+}
+
+```
+
+##### 15.6.2 数组类型原子类
+
+> AtomicIntegerArray
+>
+> AtomicReferenceArray
+>
+> AtomicLongArray
+
+```java
+
+package com.atomic;
+
+import java.util.concurrent.atomic.AtomicIntegerArray;
+
+/**
+ * @author QRH
+ * @date 2024/5/24 22:02
+ * @description TODO
+ */
+public class AtomicIntegerArrayDemo {
+    public static void main(String[] args) {
+        //a1();
+
+        AtomicIntegerArray atomicIntegerArray = new AtomicIntegerArray(new int[]{1, 2, 3, 4, 5});
+
+        for (int i=0;i<atomicIntegerArray.length();i++){
+            System.out.println(atomicIntegerArray.get(i));
+        }
+
+        System.out.println("-----------------");
+
+        int tmpId = atomicIntegerArray.getAndSet(0, 1112);
+        System.out.println(tmpId+"\t "+atomicIntegerArray.get(0));
+
+        int increment = atomicIntegerArray.getAndIncrement(0);
+        System.out.println(increment+"\t "+atomicIntegerArray.get(0));
+
+    }
+
+    private static void a1() {
+        //        AtomicIntegerArray atomicIntegerArray = new AtomicIntegerArray(new int[5]);
+
+        AtomicIntegerArray atomicIntegerArray = new AtomicIntegerArray(new int[]{1, 2, 3, 4, 5});
+
+        for (int i=0;i<atomicIntegerArray.length();i++){
+            System.out.println(atomicIntegerArray.get(i));
+        }
+
+        System.out.println();
+    }
+}
+
+```
+
+##### 15.6.3 引用类型原子类
+
+> AtomicReference
+>
+> AtomicStampedReference
+>
+> AtomicMarkableReference
+
+##### 15.6.4 引用类型原子类
+
+> AtomicIntegerFieldUpdate
+>
+> AtomicLongFieldUpdate
+>
+> AtomicReferenceFieldUpdate
+
+使用目的：以一种线程安全的方式操作非线程安全对象内的某些字段。
+
+使用要求：更新的对象属性必须使用public volatile修饰符。因为对象的属性修改类型原子类都是抽象类，所以每次使用都必须使用静态方法newUpdateer()创建一个更新器，并且需要设置想要更新的类和属性。
+
+```java
+package com.atomic;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+
+/**
+ * @author QRH
+ * @date 2024/5/25 13:44
+ * @description TODO
+ */
+public class AtomicIntegerFieldUpdateDemo {
+    public static void main(String[] args) throws Exception {
+        int size = 10;
+        BankAccount bankAccount = new BankAccount();
+        CountDownLatch countDownLatch = new CountDownLatch(size);
+
+        for (int i = 1; i <= size; i++) {
+            new Thread(() -> {
+                try {
+                    for (int j = 1; j <= 1000; j++) {
+                        bankAccount.transMoney(bankAccount);
+                    }
+                } finally {
+                    countDownLatch.countDown();
+                }
+            }, String.valueOf(i)).start();
+        }
+        countDownLatch.await();
+        System.out.println(Thread.currentThread().getName() + "\t res= " + bankAccount.money);
+    }
+}
+
+class BankAccount {
+    String bankName = "CCB";
+    public volatile int money = 0;
+
+    AtomicIntegerFieldUpdater<BankAccount> moneyUpdater = AtomicIntegerFieldUpdater.newUpdater(BankAccount.class, "money");
+
+    public void transMoney(BankAccount bankAccount) {
+        moneyUpdater.getAndIncrement(bankAccount);
+    }
+}
+
+```
+
+```java
+package com.atomic;
+
+import java.sql.Time;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+
+/**
+ * @author QRH
+ * @date 2024/5/25 13:56
+ * @description TODO
+ */
+public class AtomicReferenceFieldDemo {
+    public static void main(String[] args) {
+        MyVar myVar = new MyVar();
+
+        for (int i = 1; i <= 5; i++) {
+            new Thread(() -> {
+                myVar.init(myVar);
+            }, String.valueOf(i)).start();
+        }
+
+    }
+}
+
+class MyVar {
+    public volatile Boolean isInit = false;
+
+    AtomicReferenceFieldUpdater<MyVar, Boolean> updater = AtomicReferenceFieldUpdater.newUpdater(MyVar.class, Boolean.class, "isInit");
+
+    public void init(MyVar myVar) {
+        if (updater.compareAndSet(myVar, Boolean.FALSE, Boolean.TRUE)) {
+            System.out.println(Thread.currentThread().getName() + "\t ---start init need 2 seconds");
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(Thread.currentThread().getName() + "\t ---over init");
+        } else {
+            System.out.println(Thread.currentThread().getName() + "\t ---已有线程正在初始化工作");
+        }
+    }
+}
+
+```
+
+##### 15.6.5 原子操作增强类
+
+> DoubleAccumulator
+>
+> DoubleAdder
+>
+> LongAccumulator 提供自定义的函数操作
+> 
+> LongAdder 只能用来计算加法，切从0开始计算
+
+```java
+package com.atomic;
+
+import lombok.val;
+
+import java.util.concurrent.atomic.LongAccumulator;
+import java.util.concurrent.atomic.LongAdder;
+
+/**
+ * @author QRH
+ * @date 2024/5/25 14:09
+ * @description TODO
+ */
+public class LongAdderDemo {
+    public static void main(String[] args) {
+        LongAdder longAdder = new LongAdder();
+
+        longAdder.increment();
+        longAdder.increment();
+        longAdder.increment();
+
+        System.out.println(longAdder.sum());
+
+        System.out.println("--------------");
+
+        LongAccumulator longAccumulator = new LongAccumulator((x, y) -> x + y, 0);
+
+        longAccumulator.accumulate(1);
+        longAccumulator.accumulate(12);
+
+        System.out.println(longAccumulator.get());
+
+    }
+}
+
+```
+
+```java
+package com.atomic;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAccumulator;
+import java.util.concurrent.atomic.LongAdder;
+
+/**
+ * @author QRH
+ * @date 2024/5/25 14:18
+ * @description TODO
+ */
+public class AccumulatorCompareDemo {
+    public static void main(String[] args) throws Exception{
+        ClickNumber clickNumber = new ClickNumber();
+
+        long startTime,endTime;
+
+        CountDownLatch countDownLatch1 = new CountDownLatch(50);
+        CountDownLatch countDownLatch2 = new CountDownLatch(50);
+        CountDownLatch countDownLatch3 = new CountDownLatch(50);
+        CountDownLatch countDownLatch4 = new CountDownLatch(50);
+
+
+        startTime=System.currentTimeMillis();
+        for(int i=1;i<=50;i++){
+            new Thread(()->{
+              try   {
+                  for(int j=1;j<=1_000_000;j++){
+                    clickNumber.clickBySynchronized();
+                  }
+              }finally {
+                  countDownLatch1.countDown();
+              }
+            },String.valueOf(i)).start();
+        }
+        countDownLatch1.await();
+        endTime=System.currentTimeMillis();
+        System.out.println("synchronized:"+(endTime-startTime)+"毫秒,number= "+clickNumber.number);
+
+        System.out.println("-------------------");
+
+        startTime=System.currentTimeMillis();
+        for(int i=1;i<=50;i++){
+            new Thread(()->{
+                try   {
+                    for(int j=1;j<=1_000_000;j++){
+                        clickNumber.clickByAtomicLong();
+                    }
+                }finally {
+                    countDownLatch2.countDown();
+                }
+            },String.valueOf(i)).start();
+        }
+        countDownLatch2.await();
+        endTime=System.currentTimeMillis();
+        System.out.println("AtomicLong:"+(endTime-startTime)+"毫秒,number= "+clickNumber.atomicLong.get());
+
+        System.out.println("-------------------");
+
+        startTime=System.currentTimeMillis();
+        for(int i=1;i<=50;i++){
+            new Thread(()->{
+                try   {
+                    for(int j=1;j<=1_000_000;j++){
+                        clickNumber.clickByLongAdder();
+                    }
+                }finally {
+                    countDownLatch3.countDown();
+                }
+            },String.valueOf(i)).start();
+        }
+        countDownLatch3.await();
+        endTime=System.currentTimeMillis();
+        System.out.println("LongAdder:"+(endTime-startTime)+"毫秒,number= "+clickNumber.longAdder.sum());
+
+        System.out.println("-------------------");
+
+        startTime=System.currentTimeMillis();
+        for(int i=1;i<=50;i++){
+            new Thread(()->{
+                try   {
+                    for(int j=1;j<=1_000_000;j++){
+                        clickNumber.clickByLongAccumulator();
+                    }
+                }finally {
+                    countDownLatch4.countDown();
+                }
+            },String.valueOf(i)).start();
+        }
+        countDownLatch4.await();
+        endTime=System.currentTimeMillis();
+        System.out.println("LongAccumulator:"+(endTime-startTime)+"毫秒,number= "+clickNumber.longAccumulator.get());
+
+    }
+}
+
+class ClickNumber{
+   int number = 0;
+
+   public synchronized void clickBySynchronized(){
+       number++;
+   }
+
+  AtomicLong atomicLong =  new AtomicLong(0);
+
+  public void clickByAtomicLong(){
+      atomicLong.getAndIncrement();
+  }
+
+  LongAdder longAdder = new LongAdder();
+
+  public void clickByLongAdder(){
+      longAdder.increment();
+  }
+
+  LongAccumulator longAccumulator = new LongAccumulator((x,y)->x+y,0);
+
+  public void clickByLongAccumulator(){
+      longAccumulator.accumulate(1);
+  }
+
+
+}
+
+```
+
+#### 15.7 Threadlocal
+
+* 是什么？
+
+ThreadLocal提供线程局部变量。这些变量与正常的变量不同，因为每一个线程在访问ThreadLocal实例的时候（通过get或set方法）都有自己的、独立的初始化的变量副本。ThreadLocal实例通常是类中的`私有静态字段`，使用它的目的是希望将状态（例如用户ID或事务ID）与线程关联起来。
+
+* 能干嘛？
+
+实现每一个线程都有自己专属的本地变量副本（自己用自己的变量不麻烦别人，不和其他人共享，人人有份，人各一份），主要解决了让每个线程绑定自己的值，通过使用get或set方法，获取默认值或将其值更改为当前线程所存的副本的值从而避免了线程安全问题，比如我们之前讲解的8锁案例，资源类是使用同一部手机，多个线程抢夺同一部手机使用，假如人手一份是不是天下太平？？？
+
+
+```java
+package com.threadLocal;
+
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+
+/**
+ * @author QRH
+ * @date 2024/5/26 15:23
+ * @description TODO
+ */
+public class ThreadLocalDemo {
+    public static void main(String[] args) throws  Exception {
+        House house = new House();
+        CountDownLatch countDownLatch = new CountDownLatch(5);
+        for (int i = 1; i <= 5; i++) {
+            new Thread(() -> {
+                int size = new Random().nextInt(5) + 1;
+                try {
+                    for (int j = 1; j <= size; j++) {
+                        house.saleHouse();
+                        house.saleVolumeByThreadLocal();
+                    }
+                    System.out.println(Thread.currentThread().getName() + "\t号销售卖出了" + house.saleVolume.get() + "间房子");
+                } finally {
+                  house.saleVolume.remove();
+                    countDownLatch.countDown();
+                }
+            }, String.valueOf(i)).start();
+        }
+        countDownLatch.await();
+        System.out.println(Thread.currentThread().getName() + "\t 共卖出 " + house.saleCount);
+
+    }
+}
+
+class House {
+    int saleCount = 0;
+
+    public synchronized void saleHouse() {
+        ++saleCount;
+    }
+
+    ThreadLocal<Integer> saleVolume = ThreadLocal.withInitial(() -> 0);
+
+    public void saleVolumeByThreadLocal() {
+        saleVolume.set(1 + saleVolume.get());
+    }
+
+}
+```
+
+```java
+package com.threadLocal;
+
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/**
+ * @author QRH
+ * @date 2024/5/26 15:23
+ * @description TODO
+ */
+public class ThreadLocalDemo2 {
+    public static void main(String[] args) throws Exception {
+        MyData myData = new MyData();
+        ExecutorService threadPool = Executors.newFixedThreadPool(3);
+        try {
+            for (int i = 0; i < 10; i++) {
+                threadPool.submit(() -> {
+                    try {
+                        Integer beforeCount = myData.threadLocalField.get();
+                        myData.add();
+                        Integer afterCount = myData.threadLocalField.get();
+                        System.out.println(Thread.currentThread().getName() + ": " + beforeCount + "->" + afterCount);
+                    } finally {
+                        myData.threadLocalField.remove();
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            threadPool.shutdown();
+        }
+    }
+}
+
+class MyData {
+
+    Integer count = 0;
+
+    ThreadLocal<Integer> threadLocalField = ThreadLocal.withInitial(() -> 0);
+
+    public  void add() {
+        threadLocalField.set(1+threadLocalField.get());
+    }
+}
+```
+
+##### 15.7.1 Thread、ThreadLocal、ThreadLocalMap的关系
+
+* ThreadLocalMap是ThreadLocal的私有静态内部类，每个Thread对象都包含一个ThreadLocalMap对象，ThreadLocalMap是ThreadLocal的线程局部变量的Map集合，ThreadLocalMap的key是ThreadLocal对象，value是ThreadLocal对象的value。
+
+##### 15.7.2 ThreadLocal内存泄漏问题
+
+* 什么是内存泄漏？
+
+不再会被使用的对象或变量占用的内存不能被回收，就叫内存泄漏。
+
+
+##### 15.7.3 总结
+
+1、ThreadLocal并不解决线程之间共享数据的问题。<br>
+2、ThreadLocal适用于变量在线程件隔离且在方法间共享的场景。<br>
+3、ThreadLocal通过隐式的在不同线程内创建独立实例副本避免了实例线程安全的问题。<br>
+4、每个线程持有一个只属于自己的专属Map并维护了ThreadLocal对象与具体实例的映射，该Map由于只被持有它的线程访问，故不存在线程安全以及锁的问题。<br>
+4、ThreadLocalMap的Entry对ThreadLocal的引用为弱引用，避免了ThreadLocal对象无法被回收的问题。<br>
+5、都会通过expungeStableEntry，cleanSomSlots，replaceStableEntry这三个方法回收键为null的Entry对象的值（及具体的实例）以及Entry对象本身从而防止内存泄漏，属于安全加固的方法。<br>
+6、群雄逐鹿起纷争，人各一份天下安。
+
+#### 15.8 synchronized与锁升级
+
+![img_20.png](studyImgs/img_20.png)
+
+![img_21.png](studyImgs/img_21.png)
+
+![img_22.png](studyImgs/img_22.png)
+
+
+#### 15.9 AQS
+
+* AQS是AbstractQueuedSynchronizer的简称，它是一个抽象类，它提供了一种线程间协作的方式，通过使用AQS的模板方法，实现同步。
+
+![img_23.png](studyImgs/img_23.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

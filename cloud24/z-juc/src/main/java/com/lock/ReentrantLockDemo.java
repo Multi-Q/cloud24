@@ -8,25 +8,24 @@ package com.lock;
 public class ReentrantLockDemo {
     public static void main(String[] args) {
 
-new ReentrantLockDemo().m1();
+        new ReentrantLockDemo().m1();
     }
 
 
-    public synchronized void m1(){
+    public synchronized void m1() {
         System.out.println(Thread.currentThread().getName() + " ----come in");
         m2();
         System.out.println(Thread.currentThread().getName() + " ----end m1");
     }
 
-    public synchronized void m2(){
+    public synchronized void m2() {
         System.out.println(Thread.currentThread().getName() + " ----come in");
         m3();
     }
 
-    public synchronized void m3(){
+    public synchronized void m3() {
         System.out.println(Thread.currentThread().getName() + " ----come in");
     }
-
 
 
     private static void reentrantLock1() {
@@ -42,6 +41,6 @@ new ReentrantLockDemo().m1();
                     }
                 }
             }
-        },"t1").start();
+        }, "t1").start();
     }
 }
