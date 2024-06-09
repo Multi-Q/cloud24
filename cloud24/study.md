@@ -2,11 +2,11 @@
 
 ## 一、前言
 
-本项目必须得配置
+本项目配置要求：
 
 ![img_12](studyImgs/img_12.png)
 
-本项目将学到以下技术
+本项目将学习以下技术：
 
 ![img_13](studyImgs/img_13.png)
 
@@ -43,7 +43,6 @@ spring:
 接口统一返回值：<br>
 ①思路
 > 返回接口的类的标准定义格式：
-> > * 1、code状态值：由后端统一定义各种返回结果的状态码
 > > * 2、message描述：本次接口调用的结果描述
 > > * 3、data数据：本次返回的数据
 >
@@ -52,17 +51,19 @@ spring:
 > > * 1、接口调用时间之类---timestamp：接口调用时间
 
 ②步骤
-> * 1、新建枚举类ReturnCodeEnum
->> http请求返回状态码：
->>
->> |分类 |区间 |分类描述|
->> |:-----:|:----:|:-------:|
->> |1***|100~199|信息，服务器收到请求，需要请求者继续执行操作|
->> |2***|200~299|成功，操作被成功接收并处理|
->> |3***|300~399|重定向，需要进一步的操作已完成请求|
->> |4***|400~499|客户端错误，请求包含语法错误或无法完成请求|
->> |5***|500~599|服务器错误，服务器在处理请求的过程中发生了错误|
->>
+  1、新建枚举类ReturnCodeEnum
+>  http请求返回状态码：
+> 
+>  |分类 |区间 |分类描述|
+>  |:-----:|:----:|:-------:|
+>  |1***|100~199|信息，服务器收到请求，需要请求者继续执行操作|
+>  |2***|200~299|成功，操作被成功接收并处理|
+>  |3***|300~399|重定向，需要进一步的操作已完成请求|
+>  |4***|400~499|客户端错误，请求包含语法错误或无法完成请求|
+>  |5***|500~599|服务器错误，服务器在处理请求的过程中发生了错误|
+> 
+>  
+
 **ReturnCodeEnum.class**
 
 ```java
@@ -119,7 +120,8 @@ public enum ReturnCodeEnum {
 ```
 
 > * 2、定义统一返回对象ResultData
->> **ResultData.class**
+
+**ResultData.class**
 
 ```java
  package com.atguigu.cloud.resp;
@@ -165,7 +167,7 @@ public class ResultData<T> {
 
 ### 2.3 统一异常处理类
 
-异常类捕捉可以自己使用`try...catch`捕捉，也可以使用`全局异常处理器`进行处理，但是处理的异常类型是具体的，捕捉多个异常还得写多个方法
+异常类捕捉可以自己使用`try...catch`捕捉，也可以使用`全局异常处理器`进行处理，但是处理的异常类型是具体的，捕捉多个异常还得写多个方法。
 
 ```java
 
@@ -206,8 +208,7 @@ public class GlobalExceptionHandler {
 * 为什么要引入服务注册中心？<br>
   实现微服务之间的动态注册与发现
 
-Consul需要从官网下载（https://developer.hashicorp.com/consul/install） ，安装到本地,验证是否安装成功： 到安装包所在的目录，打开cmd，输入`consul --version`
-，如果出现一下信息表示成功。
+Consul需要从官网下载（https://developer.hashicorp.com/consul/install） ，安装到本地,验证是否安装成功： 到安装包所在的目录，打开cmd，输入`consul --version`，如果出现一下信息表示成功。
 
 ```cmd
 F:\Consul>consul --version
@@ -383,9 +384,10 @@ public class RestTemplateConfig {
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-starter-consul-config</artifactId>
 </dependency>
+
 <dependency>
-<groupId>org.springframework.cloud</groupId>
-<artifactId>spring-cloud-starter-bootstrap</artifactId>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-bootstrap</artifactId>
 </dependency>
 ```
 
@@ -418,24 +420,24 @@ spring:
 
 #### 1.3 Consul服务器Key/Value配置填写
 
-配置填写一定要遵循官方规则
+配置填写一定要遵循官方规则。
 
 步骤：
 
 1、Consul页面的`Key/Value`创建文件夹，（必须以`config`开头）
 ![img.png](studyImgs/img1.png)
 
-2、再在`config`文件夹内创建`服务`,（必须一`/`结尾）
+2、再在`config`文件夹内创建`服务`,（必须一`/`结尾）。
 ![img.png](studyImgs/img2.png)
 
-3、再给上面三个文件夹创建`data`内容，（data不再是文件夹）
+3、再给上面三个文件夹创建`data`内容，（data不再是文件夹）。
 ![img.png](studyImgs/img3.png)
 
 #### 1.4 动态刷新
 
 Consul刷新是有默认刷新间隔的，默认是`55秒`。
 
-1、`主启动类`添加`@RefreshScope`
+1、`主启动类`添加`@RefreshScope`。
 
 2、`bootstrap.yml`添加配置：（实际开发建议不改）
 
@@ -463,8 +465,7 @@ spring cloud LoadBalancer没有专门的jar包，它挂载在`Spring-Cloud-Commo
 
 * spring-cloud-starter-loadbalancer是什么？
 
-这是Spring Cloud官方提供的一个开源的、简易的客户端负载均衡器，它包含在Spring Cloud Commons中用来替代以前的Ribbon组件。相较于Ribbon，Spring Cloud
-LoadBalancer不经能支持`RestTemplate`，还支持`WebClient`（WebClient是Spring Web Flux中提供的功能，可以实现响应式异步请求）。
+这是Spring Cloud官方提供的一个开源的、简易的客户端负载均衡器，它包含在Spring Cloud Commons中用来替代以前的Ribbon组件。相较于Ribbon，Spring Cloud LoadBalancer不经能支持`RestTemplate`，还支持`WebClient`（WebClient是Spring Web Flux中提供的功能，可以实现响应式异步请求）。
 
 #### 2.1 完成Consul的数据持久化
 
@@ -511,8 +512,8 @@ LoadBalancer不经能支持`RestTemplate`，还支持`WebClient`（WebClient是S
 
 @GetMapping(value = "/consumer/pay/get/info")
 public String getInfoByConsul(){
-        return restTemplate.getForObject(PaymentSrv_URL+"/pay/get/info",String.class);
-        }
+    return restTemplate.getForObject(PaymentSrv_URL+"/pay/get/info",String.class);
+}
 
 ```
 
@@ -522,9 +523,7 @@ public String getInfoByConsul(){
 
 * OpenFeign是什么？
 
-  Feign是一个<span style="color:red;font-weight:bolder;font-size:20px;">`声明式web服务客户端`</span>
-  。他编写web服务客户端变得更容易。`使用Feign创建一个接口并对其进行注释`。它具有可插入的注释支持，包括Feign注释和JAX-RS注释。Feign还支持可插拔编码器和解码器。Spring Cloud添加了对Spring
-  MVC注释的支持，以及对使用Spring Web中默认使用的HttpMessageConveter的支持。Spring Cloud还集成了Eureka、Spring Cloud CircuitBreaker以及Spring Cloud
+  Feign是一个<span style="color:red;font-weight:bolder;font-size:20px;">`声明式web服务客户端`</span>。他编写web服务客户端变得更容易。`使用Feign创建一个接口并对其进行注释`。它具有可插入的注释支持，包括Feign注释和JAX-RS注释。Feign还支持可插拔编码器和解码器。Spring Cloud添加了对Spring MVC注释的支持，以及对使用Spring Web中默认使用的HttpMessageConveter的支持。Spring Cloud还集成了Eureka、Spring Cloud CircuitBreaker以及Spring Cloud
   LoadBalancer，以便使用Feign时提供负载均衡的http客户端。
 
 
@@ -660,7 +659,7 @@ public class OrderController {
 
 ##### 3.2.1 OpenFeign超时配置
 
-OpenFign默认等待时间：60s，超时报错
+OpenFign默认等待时间：60s，超时报错。
 
 在`消费者模块的application.yml`添加以下内容：
 
@@ -683,7 +682,7 @@ spring:
 
 步骤：
 
-①在`cloud-consumer-feign-order80`项目中的controller头上添加指定的`微服务服务实例`
+①在`cloud-consumer-feign-order80`项目中的controller头上添加指定的`微服务服务实例`。
 
 ```java
 
@@ -718,7 +717,7 @@ spring:
 
 ##### 3.2.2 OpenFign重试机制
 
-重试机制默认是`关闭的`，开启重试机制需写个配置类
+重试机制默认是`关闭的`，开启重试机制需写个配置类。
 
 **FeignConfig.java**
 
@@ -739,14 +738,14 @@ public class FeignConfig {
 
     @Bean
     public Retryer myRetryer() {
-        //最大请求次数为3，出时间间隔时间为100ms，重试最大间隔时间为1s
+        //最大请求次数为3，重试时间间隔为100ms，重试最大间隔时间为1s
         return new Retryer.Default(100, 1, 3);
     }
 }
 
 ```
 
-OpenFign的重试次数在控制台看不到，只是给出了最终结果。如果想要看到每次重试的结果，将在日志打印那学到
+OpenFign的重试次数在控制台看不到，只是给出了最终结果。如果想要看到每次重试的结果，将在日志打印那学到。
 
 ##### 3.2.3 OpenFign默认HttpClient修改
 
@@ -757,7 +756,7 @@ OpenFign中的Http Client如果不做特殊配置，则会默认使用JDK自带�
 
 步骤：
 
-①修改`消费者模块(cloud-consumer-feign-order80)的pom.xml`，引入`httpclient5`依赖
+①修改`消费者模块(cloud-consumer-feign-order80)的pom.xml`，引入`httpclient5`依赖。
 
 ```xml
 <!-- httpclient5-->
@@ -766,15 +765,16 @@ OpenFign中的Http Client如果不做特殊配置，则会默认使用JDK自带�
     <artifactId>httpclient5</artifactId>
     <version>5.3</version>
 </dependency>
-        <!-- feign-hc5-->
+
+<!-- feign-hc5-->
 <dependency>
-<groupId>io.github.openfeign</groupId>
-<artifactId>feign-hc5</artifactId>
-<version>13.1</version>
+    <groupId>io.github.openfeign</groupId>
+    <artifactId>feign-hc5</artifactId>
+    <version>13.1</version>
 </dependency>
 ```
 
-②修改`消费者模块(cloud-consumer-feign-order80)的application.yml`，配置Apache HttpClient5
+②修改`消费者模块(cloud-consumer-feign-order80)的application.yml`，配置Apache HttpClient5。
 
 ```yml
 spring:
@@ -788,7 +788,7 @@ spring:
 
 ##### 3.2.4 OpenFign请求/压缩功能
 
-对请求和响应进行GZIP压缩，以减少同行过程中的性能损耗
+对请求和响应进行GZIP压缩，以减少同行过程中的性能损耗。
 
 ```yml
 spring:
@@ -869,7 +869,7 @@ logging:
 
 断路器：当某个服务不可用时，会自动切换到备用服务。
 
-CirCuitBreaker只是一套规范或接口，落实实现是`Resiliences4j`
+CirCuitBreaker只是一套规范或接口，落实实现是`Resiliences4j`。
 
 Resiliences4j是什么？
 
@@ -881,7 +881,7 @@ Resiliences4j是什么？
 
 步骤：
 
-①在提供者模块`cloud-provider-payment8001`新增PayCircuitController.java
+①在提供者模块`cloud-provider-payment8001`新增PayCircuitController.java。
 
 ```java
 package com.atguigu.cloud.controller;
@@ -938,7 +938,7 @@ public interface PayFeignApi {
 }
 ```
 
-③消费者模块`cloud-consumer-feign-order80`添加Resilience4j的依赖
+③消费者模块`cloud-consumer-feign-order80`添加Resilience4j的依赖。
 
 ```xml
 
@@ -946,15 +946,16 @@ public interface PayFeignApi {
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
 </dependency>
-        <!--        由于断路保护需要aop实现，所以必须导入aop包-->
+
+<!--        由于断路保护需要aop实现，所以必须导入aop包-->
 <dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-starter-aop</artifactId>
+    <groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-aop</artifactId>
 </dependency>
 
 ```
 
-④编写yml
+④编写yml。
 
 ```yml
 spring:
@@ -974,7 +975,7 @@ resilience4j:
         slidingWindowType: COUNT_BASED #滑动窗口的类型
         slidingWindowSize: 6 #滑动窗口的大小配置COUNT_BASED表示6个请求，配置TIME_BASED表示6秒
         minimumNumberOfCalls: 6 #断路器计算失败率或慢调用率之前所需的最小样本（每个滑动周期）。默认为10，
-        automaticTransitionFromOpenToHalfOpenEnabled: true #是否启用自动从开启状态过渡到半开状态，默认值为true，如果启用，circuitbreaker
+        automaticTransitionFromOpenToHalfOpenEnabled: true #是否启用自动从开启状态过渡到半开状态，默认值为true
         permittedNumberOfCallsInHalfOpenState: 2 #半开状态允许的最大请求数，默认为10
         recordExceptions:
           - java.lang.Exception
@@ -983,7 +984,7 @@ resilience4j:
         baseConfig: default #使用默认配置
 ```
 
-⑤新建OrderCircuitController.java
+⑤新建OrderCircuitController.java。
 
 ```java
 package com.atguigu.cloud.controller;
@@ -1023,7 +1024,7 @@ public class OrderCircuitController {
 
 ##### 4.1.2 按照TIME_BASED
 
-步骤： ①修改yml
+步骤： ①修改yml。
 
 ```yml
 resilience4j:
@@ -1053,17 +1054,17 @@ resilience4j:
 
 ##### 4.1.3 COUNT_BASED和TIME_BASED用哪个？
 
-建议使用COUNT_BASED
+建议使用COUNT_BASED。
 
 #### 4.2 隔离（BuldHead）
 
 隔离是什么？
 
-* 限制并发
+* 限制并发。
 
 隔离能干什么？
 
-* 用来限制对于下游服务的并发请求数
+* 用来限制对于下游服务的并发请求数。
 
 Resilience4j提供了两种隔离的实现：
 
@@ -1097,7 +1098,7 @@ resilience4j:
         timeout-duration: 10s #默认限制远程1s，超过1s就超时异常，配置了降级，就走降级逻辑
 ```
 
-再在提供者模块`cloud-provider-hystrix-payment8001`中添加方法
+再在提供者模块`cloud-provider-payment8001`中添加方法。
 **PayCircuitController.java**
 
 ```java
@@ -1109,14 +1110,20 @@ resilience4j:
  */
 @GetMapping(value = "/pay/bulkhead/{id}")
 public String myBulkHead(@PathVariable("id") Integer id){
-        if(id==-4)throw new RuntimeException("----bulkHead id 不能为空");
-        if(id==999)try{TimeUnit.SECONDS.sleep(5);}catch(InterruptedException e){e.printStackTrace();}
-        return"Hello bulkHead inputId : "+id+"\t"+IdUtil.simpleUUID();
+    if(id==-4)throw new RuntimeException("----bulkHead id 不能为空");
+    if(id==999){
+        try{
+            TimeUnit.SECONDS.sleep(5);
+        }catch(InterruptedException e){
+            e.printStackTrace();
         }
+    }
+    return"Hello bulkHead inputId : "+id+"\t"+IdUtil.simpleUUID();
+}
 
 ```
 
-PayFeignApi.java添加myBulkHead方法，供外部调用
+PayFeignApi.java添加myBulkHead方法，供外部调用。
 
 ```java
 /**
@@ -1128,7 +1135,7 @@ PayFeignApi.java添加myBulkHead方法，供外部调用
 public String myBulkHead(@PathVariable("id") Integer id);
 ```
 
-消费者模块`cloud-consumer-feign-order80`中添加方法访问
+消费者模块`cloud-consumer-feign-order80`中添加方法访问。
 **OrderCircuitController.java**
 
 ```java
@@ -1140,12 +1147,12 @@ public String myBulkHead(@PathVariable("id") Integer id);
 @GetMapping(value = "/feign/pay/bulkhead/{id}")
 @Bulkhead(name = "cloud-payment-service", fallbackMethod = "myBulkheadFallback", type = Bulkhead.Type.SEMAPHORE)
 public String myBulkHead(@PathVariable("id") Integer id){
-        return payFeignApi.myBulkHead(id);
-        }
+    return payFeignApi.myBulkHead(id);
+}
 
 public String myBulkheadFallback(Integer id,Throwable t){
-        return"myBulkheadFallback ，舱壁超出最大数量限制， 系统繁忙，请稍后重试----~~~~";
-        }
+    return"myBulkheadFallback ，舱壁超出最大数量限制， 系统繁忙，请稍后重试----~~~~";
+}
 
 ```
 
@@ -1153,7 +1160,7 @@ public String myBulkheadFallback(Integer id,Throwable t){
 
 ##### 4.2.2 固定线程池FixedThreadPoolBulkhead舱壁
 
-使用Semahore需要导入舱壁的包
+使用Semahore需要导入舱壁的包。
 
 ```xml
 
@@ -1184,7 +1191,7 @@ resilience4j:
 #使用固定线程需要将spring.cloud.openfeign.circuitbreaker.group.enabled设置为false
 ```
 
-再在提供者模块`cloud-provider-hystrix-payment8001`中添加方法
+再在提供者模块`cloud-provider-hystrix-payment8001`中添加方法。
 **PayCircuitController.java**
 
 ```java
@@ -1196,14 +1203,14 @@ resilience4j:
  */
 @GetMapping(value = "/pay/bulkhead/{id}")
 public String myBulkHead(@PathVariable("id") Integer id){
-        if(id==-4)throw new RuntimeException("----bulkHead id 不能为空");
-        if(id==999)try{TimeUnit.SECONDS.sleep(5);}catch(InterruptedException e){e.printStackTrace();}
-        return"Hello bulkHead inputId : "+id+"\t"+IdUtil.simpleUUID();
-        }
+    if(id==-4)throw new RuntimeException("----bulkHead id 不能为空");
+    if(id==999)try{TimeUnit.SECONDS.sleep(5);}catch(InterruptedException e){e.printStackTrace();}
+    return"Hello bulkHead inputId : "+id+"\t"+IdUtil.simpleUUID();
+}
 
 ```
 
-PayFeignApi.java添加myBulkHead方法，供外部调用
+PayFeignApi.java添加myBulkHead方法，供外部调用。
 
 ```java
 /**
@@ -1215,7 +1222,7 @@ PayFeignApi.java添加myBulkHead方法，供外部调用
 public String myBulkHead(@PathVariable("id") Integer id);
 ```
 
-消费者模块`cloud-consumer-feign-order80`中添加方法访问
+消费者模块`cloud-consumer-feign-order80`中添加方法访问。
 **OrderCircuitController.java**
 
 ```java
@@ -1227,12 +1234,12 @@ public String myBulkHead(@PathVariable("id") Integer id);
 @GetMapping(value = "/feign/pay/bulkhead/{id}")
 @Bulkhead(name = "cloud-payment-service", fallbackMethod = "myBulkheadFallback", type = Bulkhead.Type.SEMAPHORE)
 public String myBulkHead(@PathVariable("id") Integer id){
-        return payFeignApi.myBulkHead(id);
-        }
+    return payFeignApi.myBulkHead(id);
+}
 
 public String myBulkheadFallback(Integer id,Throwable t){
-        return"myBulkheadFallback ，舱壁超出最大数量限制， 系统繁忙，请稍后重试----~~~~";
-        }
+    return"myBulkheadFallback ，舱壁超出最大数量限制， 系统繁忙，请稍后重试----~~~~";
+}
 
 ```
 
@@ -1242,7 +1249,7 @@ public String myBulkheadFallback(Integer id,Throwable t){
 
 限流器是什么？
 
-* 用来限制对某个资源（如：接口）的访问次数
+* 用来限制对某个资源（如：接口）的访问次数。
 
 ```xml
 
@@ -1270,7 +1277,7 @@ public String myBulkheadFallback(Integer id,Throwable t){
 
 为什么要用分布式链路追踪？
 
-* 在位服务框架中，一个由客户端发起的请求在后端系统中会经过多个不同的服务结点调用来协同产生最后的请求结果，每一个前段请求都会形成一条复杂的分布式服务调用链路，链路中的任何一环出现高延时或错误都会引起整个请求最后的失败
+* 在微服务框架中，一个由客户端发起的请求在后端系统中会经过多个不同的服务结点调用来协同产生最后的请求结果，每一个前段请求都会形成一条复杂的分布式服务调用链路，链路中的任何一环出现高延时或错误都会引起整个请求最后的失败。
 
 #### 5.1 Zipkin链路追踪负责数据展现
 
@@ -1278,13 +1285,13 @@ public String myBulkheadFallback(Integer id,Throwable t){
 
 zipkin下载地址：https://zipkin.io/pages/quickstart.html
 
-cmd窗口下执行：java -jar zipkin-server-3.1.1-exec.jar
+cmd窗口下执行：`java -jar zipkin-server-3.1.1-exec.jar`
 
-访问地址：http://localhost:9411/，若能出现ui界面说明成功了
+访问地址：http://localhost:9411/，若能出现ui界面说明成功了。
 
 #### 5.2 Micrometer+Zipkin搭配使用
 
-1、引入相关jar
+1、引入相关jar。
 
 **父工程pom**
 
@@ -1342,7 +1349,7 @@ cmd窗口下执行：java -jar zipkin-server-3.1.1-exec.jar
 
 ```
 
-2、`服务提供者8001(cloud-payment-service)`
+2、`服务提供者8001(cloud-payment-service)`。
 **pom**
 
 ```xml
@@ -1352,29 +1359,33 @@ cmd窗口下执行：java -jar zipkin-server-3.1.1-exec.jar
     <artifactId>micrometer-tracing</artifactId>
     <version>${micrometer-tracing.version}</version>
 </dependency>
+
         <!--micrometer-tracing-bridge-brave适配zipkin的桥接包 3-->
 <dependency>
-<groupId>io.micrometer</groupId>
-<artifactId>micrometer-tracing-bridge-brave</artifactId>
-<version>${micrometer-tracing.version}</version>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-tracing-bridge-brave</artifactId>
+    <version>${micrometer-tracing.version}</version>
 </dependency>
+
         <!--micrometer-observation 4-->
 <dependency>
-<groupId>io.micrometer</groupId>
-<artifactId>micrometer-observation</artifactId>
-<version>${micrometer-observation.version}</version>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-observation</artifactId>
+    <version>${micrometer-observation.version}</version>
 </dependency>
+
         <!--feign-micrometer 5-->
 <dependency>
-<groupId>io.github.openfeign</groupId>
-<artifactId>feign-micrometer</artifactId>
-<version>${feign-micrometer.version}</version>
+    <groupId>io.github.openfeign</groupId>
+    <artifactId>feign-micrometer</artifactId>
+    <version>${feign-micrometer.version}</version>
 </dependency>
+
         <!--zipkin-reporter-brave 6-->
 <dependency>
-<groupId>io.zipkin.reporter2</groupId>
-<artifactId>zipkin-reporter-brave</artifactId>
-<version>${zipkin-reporter-brave.version}</version>
+    <groupId>io.zipkin.reporter2</groupId>
+    <artifactId>zipkin-reporter-brave</artifactId>
+    <version>${zipkin-reporter-brave.version}</version>
 </dependency>
 ```
 
@@ -1390,7 +1401,7 @@ management:
       probability: 1.0 #值越大手机越及时
 ```
 
-3、新建业务类
+3、新建业务类。
 **PayMicrometerController.java**
 
 ```java
@@ -1428,15 +1439,15 @@ public String myMicrometer(@PathVariable("id") Integer id);
 ```
 
 3、`服务消费者80(cloud-consumer-feign-feign-order80)`
-操作步骤如前所示
+操作步骤如前所示。
 
 ### 六、网关
 
 #### 6.1 配置
 
-1、新建cloud-gateway-gateway9527
+1、新建cloud-gateway-gateway9527。
 
-2、pom.xml
+2、pom.xml。
 
 ```xml
 
@@ -1469,7 +1480,7 @@ public String myMicrometer(@PathVariable("id") Integer id);
 
 ```
 
-3、application.yml
+3、application.yml。
 
 ```yml
 
@@ -1489,7 +1500,7 @@ spring:
 
 ```
 
-4、主启动
+4、主启动。
 
 ```java
 package com.atguigu.cloud;
@@ -1514,7 +1525,7 @@ public class Main9527 {
 
 ```
 
-5、关联路由
+5、关联路由。
 
 ```yml
 spring:
@@ -1533,9 +1544,9 @@ spring:
             - Path=/pay/gateway/info/**              # 断言，路径相匹配的进行路由
 ```
 
-6、启动使用9527端口访问链接
+6、启动使用9527端口访问链接。
 
-7、FeignApi.java添加两个接口
+7、FeignApi.java添加两个接口。
 
 ```java
 
@@ -1586,7 +1597,7 @@ public class PayGateWayController {
 
 ```
 
-9、OrderGateWayController.java添加两个接口
+9、OrderGateWayController.java添加两个接口。
 
 ```java
 package com.atguigu.cloud.controller;
@@ -1625,7 +1636,9 @@ public class OrderGateWayController {
 ```
 
 ```java
-
+/**
+	这里不再是通过微服务实例名来远程调用提供者的相关方法了，而是使用网关来进行代理请求，只需要在配置文件中配置好断言就可实现远程调用
+*/
 //@FeignClient(value = "cloud-payment-service")
 @FeignClient(value = "cloud-gateway")
 public interface PayFeignApi {
@@ -1636,7 +1649,7 @@ public interface PayFeignApi {
 
 ##### 6.2.1 After Route Predicate
 
-在`什么时间之后`能访问这个链接
+在`什么时间之后`能访问这个链接。
 
 ```yml
 spring:
@@ -1652,7 +1665,7 @@ spring:
 
 ##### 6.2.2 Before Route Predicate
 
-在`什么时间之前`能访问这个链接
+在`什么时间之前`能访问这个链接。
 
 ```yml
 spring:
@@ -1668,7 +1681,7 @@ spring:
 
 ##### 6.2.3 Between Route Predicate
 
-在`什么时间之前`能访问这个链接
+在`什么时间之前`能访问这个链接。
 
 ```yml
 spring:
@@ -1684,7 +1697,7 @@ spring:
 
 ##### 6.2.4 Cookie Route Predicate
 
-Cookie断言，需要两个参数`Cookie`和`正则表达式`
+Cookie断言，需要两个参数`Cookie`和`正则表达式`。
 
 ```yml
 spring:
@@ -1699,7 +1712,7 @@ spring:
             - Cookie=username,qrh
 ```
 
-结果，使用cmd测试
+结果，使用cmd测试。
 
 ```cmd
 C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1 --cookie "username=qrh"
@@ -1709,7 +1722,7 @@ C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1 --cookie "username=q
 
 ##### 6.2.5 Header Route Predicate
 
-需要两个参数`header请求头`和`正则表达式`
+需要两个参数`header请求头`和`正则表达式`。
 
 ```yml
 spring:
@@ -1724,7 +1737,7 @@ spring:
             - Header=X-Request-Id,123456 
 ```
 
-结果，使用cmd测试
+结果，使用cmd测试。
 
 ```cmd
 C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1 -H "X-Request-Id:123456"
@@ -1735,7 +1748,7 @@ C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1 -H "X-Request-Id:123
 
 ##### 6.2.6 Host Route Predicate
 
-需要两个参数`header请求头`和`正则表达式`
+需要两个参数`header请求头`和`正则表达式`。
 
 ```yml
 spring:
@@ -1772,7 +1785,7 @@ spring:
             - Method=GET,POST #注意需要大写，小写不行
 ```
 
-结果，使用cmd测试
+结果，使用cmd测试。
 
 ```cmd
 C:\Users\qrh19>curl -X GET  http://localhost:9527/pay/gateway/get/1
@@ -1798,7 +1811,7 @@ spring:
 
 ##### 6.2.9 Query Route Predicate
 
-查询请求参数
+查询请求参数。
 
 ```yml
 spring:
@@ -1824,7 +1837,7 @@ C:\Users\qrh19>
 
 ##### 6.2.10 RemoteAddr  Route Predicate
 
-远程地址请求访问，只有这个地址才能访问
+远程地址请求访问，只有这个地址才能访问。
 
 ```yml
 spring:
@@ -1844,13 +1857,12 @@ spring:
 C:\Users\qrh19>curl http://192.168.10.12:9527/pay/gateway/get/1
 
 {"code":"200","message":"success","data":{"id":1,"payNo":"pay17203699","orderNo":"6544bafb424a","userId":1,"amount":19.99,"deleted":0,"createTime":"2024-03-14 12:56:24","updateTime":"2024-03-14 15:18:14"},"timestamp":1712071431679}
-C:\Users\qrh19>
 
 ```
 
 ##### 6.2.11 自定义断言
 
-①新建自定义断言类，（注意：`必须以RoutePredicateFactory`结尾）
+①新建自定义断言类，（注意：`必须以RoutePredicateFactory`结尾）。
 
 **MyRoutePredicateFactory.java**
 
@@ -1925,7 +1937,7 @@ public class MyRoutePredicateFactory extends AbstractRoutePredicateFactory<MyRou
 
 ```
 
-②写yml
+②写yml。
 
 ```yml
 spring:
@@ -1946,26 +1958,26 @@ spring:
 C:\Users\qrh19>curl http://localhost:9527/pay/gateway/get/1?userType=diamod
 
 {"code":"200","message":"success","data":{"id":1,"payNo":"pay17203699","orderNo":"6544bafb424a","userId":1,"amount":19.99,"deleted":0,"createTime":"2024-03-14 12:56:24","updateTime":"2024-03-14 15:18:14"},"timestamp":1712073665745}
-C:\Users\qrh19>
+
 ```
 
 #### 6.3 Filter
 
-相当于Spring MVC的拦截器，Serlvet的过滤器
+相当于Spring MVC的拦截器，Serlvet的过滤器。
 
 ##### 6.3.1 全局过滤器Global Filter
 
-gateway默认自带的，直接用就可以
+gateway默认自带的，直接用就可以。
 
 ##### 6.3.2 单一过滤器
 
-单一内置过滤器一共有38个
+单一内置过滤器一共有38个。
 
 ###### 6.3.2.1 请求头过滤器
 
 1、AddRequestHeader GatewayFilter Factory
 
-该过滤器包含一个`name`和`value`
+该过滤器包含一个`name`和`value`。
 
 步骤：
 
@@ -1974,23 +1986,23 @@ gateway默认自带的，直接用就可以
 ```java
  @GetMapping(value = "/pay/gateway/filter")
 public ResultData<String> getGateWayFilter(HttpServletRequest request){
-        String result="";
-        Enumeration<String> headers=request.getHeaderNames();
-        while(headers.hasMoreElements()){
+    String result="";
+    Enumeration<String> headers=request.getHeaderNames();
+    while(headers.hasMoreElements()){
         String headerName=headers.nextElement();
         String headerValue=request.getHeader(headerName);
         System.out.println("请求头名： "+headerName+"\t\t\t请求头值： "+headerValue);
         if(headerName.equalsIgnoreCase("X-Request-atguigu1")||headerName.equalsIgnoreCase("X-Request-atguigu2")){
-        result=result+headerName+"\t"+headerValue+" ";
+            result=result+headerName+"\t"+headerValue+" ";
         }
 
-        }
-        return ResultData.success("getGateWayFilter 过滤器 test： "+result+" \t"+DateUtil.now());
-        }
+    }
+    return ResultData.success("getGateWayFilter 过滤器 test： "+result+" \t"+DateUtil.now());
+}
 
 ```
 
-②cloud-gateway9527 yml编写配置
+②cloud-gateway9527 yml编写配置。
 
 ```yml
 spring:
@@ -2048,31 +2060,32 @@ spring:
 
 ###### 6.3.2.2 请求参数过滤器
 
-1、AddRequestParameter和RemoveRequestParameter
+1、AddRequestParameter和RemoveRequestParameter。
 
 ```java
 @GetMapping(value = "/pay/gateway/filter")
 public ResultData<String> getGateWayFilter(HttpServletRequest request){
-        String result="";
-        Enumeration<String> headers=request.getHeaderNames();
-        while(headers.hasMoreElements()){
+    String result="";
+    Enumeration<String> headers=request.getHeaderNames();
+    while(headers.hasMoreElements()){
         String headerName=headers.nextElement();
         String headerValue=request.getHeader(headerName);
         System.out.println("请求头名： "+headerName+"\t\t\t请求头值： "+headerValue);
-        if(headerName.equalsIgnoreCase("X-Request-atguigu1")||headerName.equalsIgnoreCase("X-Request-atguigu2")){
-        result=result+headerName+"\t"+headerValue+" ";
+        if(headerName.equalsIgnoreCase("X-Request-atguigu1")
+           ||headerName.equalsIgnoreCase("X-Request-atguigu2")){
+            result=result+headerName+"\t"+headerValue+" ";
         }
 
-        }
-        System.out.println("=============================");
-        String customerId=request.getParameter("customerId");
-        System.out.println("request parameter customId: "+customerId);
+    }
+    System.out.println("=============================");
+    String customerId=request.getParameter("customerId");
+    System.out.println("request parameter customId: "+customerId);
 
-        String customerName=request.getParameter("customerName");
-        System.out.println("request parameter customerName: "+customerName);
-        System.out.println("=============================");
-        return ResultData.success("getGateWayFilter 过滤器 test： "+result+" \t"+DateUtil.now());
-        }
+    String customerName=request.getParameter("customerName");
+    System.out.println("request parameter customerName: "+customerName);
+    System.out.println("=============================");
+    return ResultData.success("getGateWayFilter 过滤器 test： "+result+" \t"+DateUtil.now());
+}
 
 ```
 
@@ -2094,7 +2107,7 @@ spring:
             - RemoveRequestParameter=customerName
 ```
 
-访问http://localhost:9527/pay/gateway/filter?customerId=9999&customerName=h123，如果传了customerId，那就是用传过来的值，如果链接没有请求参数，那就使用配置内定义好的值
+访问http://localhost:9527/pay/gateway/filter?customerId=9999&customerName=h123，如果传了customerId，那就是用传过来的值，如果链接没有请求参数，那就使用配置内定义好的值。
 
 ![img7.png](studyImgs/img7.png)
 
@@ -2104,7 +2117,7 @@ spring:
 
 步骤：
 
-①新建一个MyGlobalFilter.java
+①新建一个MyGlobalFilter.java。
 
 ```java
 package com.atguigu.cloud.mygateway;
@@ -2166,11 +2179,11 @@ public class MyGlobalFilter implements GlobalFilter, Ordered {
 
 步骤：
 
-①新建一个MyGatewayFilterFactory.java（必须以GatewayFilterFactory结尾），并继承AbstractGatewayFilterFactory
+①新建一个MyGatewayFilterFactory.java（必须以GatewayFilterFactory结尾），并继承AbstractGatewayFilterFactory。
 
 ### 七、Spring Cloud Alibaba
 
-* Spring Cloud Alibaba的版本不是最新的
+* Spring Cloud Alibaba的版本不是最新的。
 
 
 
@@ -2211,9 +2224,9 @@ https://nacos.io/zh-cn/docs/quick-start.html
 
 步骤：
 
-①新建一个cloudalibaba-provider-payment9001模块(提供者模块)
+①新建一个cloudalibaba-provider-payment9001模块(提供者模块)。
 
-②加pom
+②加pom。
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -2281,7 +2294,7 @@ https://nacos.io/zh-cn/docs/quick-start.html
 
 ```
 
-③写yml
+③写yml。
 
 ```yaml
 server:
@@ -2297,7 +2310,7 @@ spring:
         server-addr: localhost:8848 #配置nacos地址
 ```
 
-④主启动
+④主启动。
 
 ```java
 package com.atguigu.cloud;
@@ -2321,7 +2334,7 @@ public class Main9001 {
 
 ```
 
-⑤controller
+⑤controller。
 
 ```java
 package com.atguigu.cloud.controller;
@@ -2351,21 +2364,26 @@ public class PayAlibabaController {
 
 ```
 
-消费者模块的pom与提供者模块差不太多
+消费者模块的pom与提供者模块差不太多。
 
 消费者模块：
 
 ```xml
+<dependecies>
+    
+    <dependency>
+        <groupId>com.alibaba.cloud</groupId>
+        <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+    </dependency>
 
-<dependency>
-    <groupId>com.alibaba.cloud</groupId>
-    <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-</dependency>
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+    </dependency>
+    
+    
+</dependecies>
 
-<dependency>
-<groupId>org.springframework.cloud</groupId>
-<artifactId>spring-cloud-starter-loadbalancer</artifactId>
-</dependency>
 ```
 
 ```yml
@@ -2385,7 +2403,7 @@ service-url:
 
 ```
 
-配置RestTemplate
+配置RestTemplate。
 
 ```java
 package com.atguigu.cloud.config;
@@ -2412,7 +2430,7 @@ public class RestTemplateConfig {
 
 ```
 
-controller
+controller。
 
 ```java
 package com.atguigu.cloud.controller;
@@ -2450,9 +2468,9 @@ public class OrderNacosController {
 
 ##### 7.1.2 服务配置中心
 
-①新建模块(cloudalibaba-config-nacos-client3377)
+①新建模块(cloudalibaba-config-nacos-client3377)。
 
-②改pom
+②改pom。
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -2521,7 +2539,7 @@ public class OrderNacosController {
 </project>
 ```
 
-③写yml
+③写yml。
 
 **bootstrap.yml**
 
@@ -2553,7 +2571,7 @@ spring:
 
 ```
 
-④主启动
+④主启动。
 
 ```java
 package com.atguigu.cloud;
@@ -2573,7 +2591,7 @@ public class Main3377 {
 
 ```
 
-⑤业务类
+⑤业务类。
 
 **注意：@RefreshScope要加在controller类中才能实现动态更新，加载主启动类上不会实现动态更新，这与Consul的配置不同**
 
@@ -2606,15 +2624,15 @@ public class NacosConfigController {
 
 Sentinel下载：https://github.com/alibaba/Sentinel/releases
 
-启动DashBoard命令：java -jar sentinel-dashboard-1.8.7.jar
+启动DashBoard命令：`java -jar sentinel-dashboard-1.8.7.jar`
 
-访问sentinel启动界面：http://localhost:8080/ (登录账号、密码都是：**sentinel**);
+访问sentinel启动界面：http://localhost:8080/ (登录账号、密码都是：**sentinel**)。
 
 步骤：
 
-① 创建模块(cloudalibaba-provider-payment8401)
+① 创建模块(cloudalibaba-provider-payment8401)。
 
-②改pom
+②改pom。
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -2695,7 +2713,7 @@ Sentinel下载：https://github.com/alibaba/Sentinel/releases
 
 ```
 
-③写yml
+③写yml。
 
 ```yaml
 server:
@@ -2714,7 +2732,7 @@ spring:
           port: 8719 #默认8179端口，假如被占会自动从8179开始一次+1扫描，直至找到未被占用的端口
 ```
 
-④主启动
+④主启动。
 
 ```java
 package com.atguigu.cloud;
@@ -2738,7 +2756,7 @@ public class Main8401 {
 
 ```
 
-⑤业务类
+⑤业务类。
 
 ```java
 package com.atguigu.cloud.controller;
@@ -2766,13 +2784,13 @@ public class FlowLimitController {
 
 ```
 
-⑥启动
+⑥启动。
 
 ##### 8.1 流控规则
 
 ##### 8.2 @SentinelSource注解
 
-@SentinelResource 注解用来标识资源是否被`限流`、`降级`。该注解是写在`Service层的方法上`的
+@SentinelResource 注解用来标识资源是否被`限流`、`降级`。该注解是写在`Service层的方法上`的。
 
 ##### 8.3 热点规则
 
@@ -2799,7 +2817,7 @@ public String dealHandlerTestHotKey(String p1,String p2,BlockException e){
 
 * 黑白名单控制，就是对请求的ip进行限制，比如只允许白名单的ip访问，或者只允许黑名单的ip访问。
 
-需要重写RequestOriginParser.java，并设值参数名为serverName
+需要重写RequestOriginParser.java，并设值参数名为serverName。
 
 ```java
 package com.atguigu.cloud.hander;
@@ -2852,7 +2870,7 @@ localhost:8401/empower?serverName=test1或localhost:8401/empower?serverName=test
 
 步骤：
 
-1. 引入依赖
+1. 引入依赖。
 
 ```xml
 
@@ -2882,7 +2900,7 @@ spring:
 
 ##### 8.5 Openfeign和Sentinel整合
 
-①提供者模块（cloudalibaba-provider-payment9001）引入依赖
+①提供者模块（cloudalibaba-provider-payment9001）引入依赖。
 
 ```xml
 
@@ -2892,12 +2910,12 @@ spring:
 </dependency>
 
 <dependency>
-<groupId>org.springframework.cloud</groupId>
-<artifactId>spring-cloud-starter-openfeign</artifactId>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
 </dependency>
 ```
 
-②提供者模块（cloudalibaba-provider-payment9001）写yml
+②提供者模块（cloudalibaba-provider-payment9001）写yml。
 
 ```yml
 server:
@@ -2918,7 +2936,7 @@ spring:
 
 ```
 
-③业务类
+③业务类。
 
 **PayAlibabaController.java**
 
@@ -2926,20 +2944,21 @@ spring:
 @GetMapping(value = "/pay/nacos/get/{orderNo}")
 @SentinelResource(value = "getPayByOrder", blockHandler = "handlerBlockHandler")
 public ResultData getPayByOrder(@PathVariable("orderNo")String orderNo){
-        PayDTO payDTO=new PayDTO();
-        payDTO.setId(1024);
-        payDTO.setOrderNo(orderNo);
-        payDTO.setAmount(BigDecimal.valueOf(9.91));
-        payDTO.setPayNo("pay: "+IdUtil.fastUUID());
-        payDTO.setUserId(1);
-        return ResultData.success("查询返回值： "+payDTO);
-        }
+    PayDTO payDTO=new PayDTO();
+    payDTO.setId(1024);
+    payDTO.setOrderNo(orderNo);
+    payDTO.setAmount(BigDecimal.valueOf("9.91"));
+    payDTO.setPayNo("pay: "+IdUtil.fastUUID());
+    payDTO.setUserId(1);
+    return ResultData.success("查询返回值： "+payDTO);
+}
+
 public ResultData handlerBlockHandler(@PathVariable("orderNo")String orderNo,Throwable e){
-        return ResultData.fail(ReturnCodeEnum.RC500.getCode(),"getPayByOrder服务不可用，触发sentinel流控配置规则");
-        }
+    return ResultData.fail(ReturnCodeEnum.RC500.getCode(),"getPayByOrder服务不可用，触发sentinel流控配置规则");
+}
 ```
 
-④公共模块（cloud-api-commons）引入依赖、
+④公共模块（cloud-api-commons）引入依赖。
 
 ```xml
 
@@ -2949,12 +2968,12 @@ public ResultData handlerBlockHandler(@PathVariable("orderNo")String orderNo,Thr
 </dependency>
 
 <dependency>
-<groupId>org.springframework.cloud</groupId>
-<artifactId>spring-cloud-starter-openfeign</artifactId>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
 </dependency>
 ```
 
-⑤公共模块（cloud-api-commons）新建PayFeignSentinelApi.java
+⑤公共模块（cloud-api-commons）新建PayFeignSentinelApi.java。
 
 ```java
 package com.atguigu.cloud.apis;
@@ -2979,7 +2998,7 @@ public interface PayFeignSentinelApi {
 
 ```
 
-Sentinel回调类
+Sentinel回调类。
 
 ```java
 package com.atguigu.cloud.apis;
@@ -3004,7 +3023,7 @@ public class PayFeignSentinelApiFallback implements PayFeignSentinelApi {
 
 ```
 
-⑥消费者模块（cloudalibaba-consumer-nacos-order83）引入以下依赖
+⑥消费者模块（cloudalibaba-consumer-nacos-order83）引入以下依赖。
 
 ```xml
 
@@ -3015,17 +3034,17 @@ public class PayFeignSentinelApiFallback implements PayFeignSentinelApi {
 </dependency>
 
 <dependency>
-<groupId>org.springframework.cloud</groupId>
-<artifactId>spring-cloud-starter-openfeign</artifactId>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
 </dependency>
 
 <dependency>
-<groupId>com.alibaba.cloud</groupId>
-<artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
 </dependency>
 ```
 
-改yml
+改yml。
 
 ```yml
 #激活feign对sentinel的支持
@@ -3034,20 +3053,20 @@ feign:
     enabled: true
 ```
 
-主启动类添加@EnableFeignClients注解
+主启动类添加@EnableFeignClients注解。
 
 业务类：
 
 **OrderNacosController.java**
 
 ```java
-    @Resource
+@Resource
 private PayFeignSentinelApi payFeignSentinelApi;
 
 @GetMapping(value = "/consumer/pay/nacos/get/{orderNo}")
 public ResultData getPayByOrder(@PathVariable("orderNo") String orderNo){
-        return payFeignSentinelApi.getPayByOrder(orderNo);
-        }
+    return payFeignSentinelApi.getPayByOrder(orderNo);
+}
 ```
 
 测试：
@@ -3055,16 +3074,16 @@ public ResultData getPayByOrder(@PathVariable("orderNo") String orderNo){
 启动83会报错：
 ![img_4.png](studyImgs/img_4.png)
 
-导致原因：boot+cloud版本太高，alibab的sentinel版本与cloud版本不匹配，导致报错
+导致原因：boot+cloud版本太高，alibaba的sentinel版本与cloud版本不匹配，导致报错。
 
-解决方案： 降低父工程版本
+解决方案： 降低父工程版本。
 ![img_5.png](studyImgs/img_5.png)
 
 ##### 8.6 Sentinel整合Gateway
 
-①新建模块(cloudalibaba-sentinel-gateway9528)
+①新建模块(cloudalibaba-sentinel-gateway9528)。
 
-②改pom
+②改pom。
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -3121,7 +3140,7 @@ public ResultData getPayByOrder(@PathVariable("orderNo") String orderNo){
 </project>
 ```
 
-③写yml
+③写yml。
 
 ```yml
 server:
@@ -3143,7 +3162,7 @@ spring:
             - Path=/pay/**
 ```
 
-④主启动
+④主启动。
 
 ```java
 package com.atguigu.cloud;
@@ -3412,9 +3431,6 @@ create database seata_account;
 2、按照上述三个库分别创建undo_log回滚日志表
 
 ```sql
-
--- use seata_account;
--- use  seata_order;
 use seata_storage;
 CREATE TABLE IF NOT EXISTS `undo_log`
 (
@@ -3454,7 +3470,7 @@ SELECT *
 FROM t_order;
 ```
 
-** seata_account库t_account表**
+**seata_account库t_account表**
 
 ```sql
 CREATE TABLE t_account
@@ -3475,7 +3491,7 @@ SELECT *
 FROM t_account;
 ```
 
-** seata_storage库t_storage表**
+**seata_storage库t_storage表**
 
 ```sql
 CREATE TABLE t_storage
@@ -3875,7 +3891,7 @@ class Singleton {
 
 * 缺点：在类装载时就完成初始化，没有达到`懒加载（Lazy Loading)`的效果，如果自始至终都没有使用过这个实例，则会`造成内存浪费`。
 
-* 这种基于类加载机制避免了多线程的同步问题，不过，instant在类加载时就实例化，在单例模式中大多数都是调用getInstant方法，但是导致类加载的原因又跟多种，因此不能确定有其他方式（或其他的静态方法）到桌子类加载，这时候初始化instant就没有达到懒加载的效果。
+* 这种基于类加载机制避免了多线程的同步问题，不过，instant在类加载时就实例化，在单例模式中大多数都是调用getInstant方法，但是导致类加载的原因又跟多种，因此不能确定有其他方式（或其他的静态方法）子类加载，这时候初始化instant就没有达到懒加载的效果。
   
 * 结论：这种单例模式`可用`，但可能造成内存浪费
 
@@ -4447,16 +4463,16 @@ public class Main {
 
 ##### 13.2.2 细节与说明
 
-* 客户端`不必知道产品内部组成的细节`，将产品本身与产品的`创建过程解耦`，使得相同的创建过程可以创建不同的产品对象
-* 每一个具体创建者都`相对独立`，而与其他的具体建造者无关，因此可以很方便地替换具体建造者或增加新的具体建造者，用户使用不同的具体建造者即可得到不同的产品对象
-* 可以更加精细地控制产品的创建过程，将复杂产品的创建`步骤分解`在不同的方法中，使得创建过程更加清晰，也方便使用程序来控制创建过程
-* 增加新的具体建造者无需修改原有类库的代码，指挥者类针对抽象建造者类编程，系统扩展方便，符合“开闭原则”
-* 建造者模式所创建的产品一般具有`较多的共同点`，其`组成部分相似`，如果产品之间的差异性很大，则不适合使用建造者模式，因此其适用范围受到一定的`限制`
-* 如果产品的内部变化复杂，可能会导致需要定义很多具体建造者类来实现这种变化，导致系统变得庞大，因此在这种情况下，要考虑是否选择建造者模式
+* 客户端`不必知道产品内部组成的细节`，将产品本身与产品的`创建过程解耦`，使得相同的创建过程可以创建不同的产品对象。
+* 每一个具体创建者都`相对独立`，而与其他的具体建造者无关，因此可以很方便地替换具体建造者或增加新的具体建造者，用户使用不同的具体建造者即可得到不同的产品对象。
+* 可以更加精细地控制产品的创建过程，将复杂产品的创建`步骤分解`在不同的方法中，使得创建过程更加清晰，也方便使用程序来控制创建过程。
+* 增加新的具体建造者无需修改原有类库的代码，指挥者类针对抽象建造者类编程，系统扩展方便，符合“开闭原则”。
+* 建造者模式所创建的产品一般具有`较多的共同点`，其`组成部分相似`，如果产品之间的差异性很大，则不适合使用建造者模式，因此其适用范围受到一定的`限制。`
+* 如果产品的内部变化复杂，可能会导致需要定义很多具体建造者类来实现这种变化，导致系统变得庞大，因此在这种情况下，要考虑是否选择建造者模式。
 
 抽象工厂模式和建造者模式的区别：
 * 抽象工厂模式实现对`产品家族`的创建，一个产品家族是这样的一系列产品：具有不同分类维度的产品组合，采用抽象工厂模式`不需要关系构建过程`，只关心什么产品由什么工厂生产即可。<br>
-而建造者模式则是要求按照`指定的蓝图`建造产品，它的主要目的是通过`组装零配件`而生产的一个新产品
+而建造者模式则是要求按照`指定的蓝图`建造产品，它的主要目的是通过`组装零配件`而生产的一个新产品。
 
 #### 13.3 代理模式
 
@@ -4564,15 +4580,15 @@ public class Main {
 
 **优缺点：**
 
-* 优点：在不修改目标对象的功能前提下，能通过代理对象对目标功能扩展
-* 缺点：因为代理对象需要与目标对象实现一样的接口，所以会有很多代理类
-* 一旦接口增加方法，目标对象与代理对象都要维护
+* 优点：在不修改目标对象的功能前提下，能通过代理对象对目标功能扩展。
+* 缺点：因为代理对象需要与目标对象实现一样的接口，所以会有很多代理类。
+* 一旦接口增加方法，目标对象与代理对象都要维护。
 
 ##### 13.3.2 动态代理
 
-动态代理也叫jdk代理或接口代理。动态代理`不需要实现接口`，但`目标对象需要实现接口`，否者不能动态代理
+动态代理也叫jdk代理或接口代理。动态代理`不需要实现接口`，但`目标对象需要实现接口`，否者不能动态代理。
 
-代理对象的生成，是利用JDK的API，动态的在内存中构建代理对象
+代理对象的生成，是利用JDK的API，动态的在内存中构建代理对象。
 
 ①创建接口
 
@@ -4703,7 +4719,7 @@ public class Main2 {
 
 需要下载erlong，再安装rabbitmq，启动时需要点击`RabbitMQ Service-start.bat`开启cmd窗口，窗口不能关闭。
 
-然后输入网址:localhost:15672进入后台
+然后输入网址:localhost:15672进入后台。
 
 ![img_15.png](studyImgs/img_15.png)
 
