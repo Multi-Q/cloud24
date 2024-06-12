@@ -26,7 +26,7 @@ public class CompletableFutureApiDemo {
          System.out.println(completableFuture.getNow("xxx"));
          **/
 
-        /**
+
          //complete("打断值"):如果打断计算，则把默认值给打断方法，否则不打断，返回计算结果
 
          //        try { TimeUnit.MILLISECONDS.sleep(1); } catch (InterruptedException e) {  e.printStackTrace();  }
@@ -35,7 +35,7 @@ public class CompletableFutureApiDemo {
          try { TimeUnit.MILLISECONDS.sleep(2); } catch (InterruptedException e) {  e.printStackTrace();  }
          System.out.println(completableFuture.complete("打断值")+"\t"+completableFuture.join());
 
-         **/
+
 
 
 

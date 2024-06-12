@@ -22,6 +22,11 @@ public class LockSurpportDemo {
 //        conditionLock();
 
 
+        lockSupport();
+
+    }
+
+    private static void lockSupport() throws InterruptedException {
         Thread t1=new Thread(()->{
 //            try {
 //                TimeUnit.MILLISECONDS.sleep(1);
@@ -41,7 +46,6 @@ public class LockSurpportDemo {
             LockSupport.unpark(t1);
             System.out.println(Thread.currentThread().getName() + "\t ---发出通知");
         },"t2").start();
-
     }
 
     private static void conditionLock() {

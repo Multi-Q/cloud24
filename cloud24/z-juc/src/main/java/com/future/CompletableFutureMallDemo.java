@@ -1,9 +1,6 @@
 package com.future;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 import java.util.Arrays;
@@ -75,6 +72,9 @@ public class CompletableFutureMallDemo {
         list2.forEach(System.out::println);
         System.out.println("cost time: " + (System.currentTimeMillis() - start2) + "ms");
 
+
+
+
     }
 }
 
@@ -106,4 +106,5 @@ class Student {
     private Integer id;
     private String stuName;
     private String major;
+
 }
