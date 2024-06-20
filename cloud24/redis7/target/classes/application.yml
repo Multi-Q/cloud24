@@ -13,13 +13,13 @@ spring:
   data:
     redis:
       database: 0
-      host: 192.168.177.178
+      host: 192.168.101.65
       port: 6379
       password: redis
       lettuce:
         pool:
           max-active: 8
-          max-wait: -1ms
+          max-wait: 100ms
           max-idle: 8
           min-idle: 0
 

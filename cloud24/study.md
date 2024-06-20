@@ -3564,6 +3564,989 @@ elasticsearch采用倒序排序：
 
 ### 十一、Redis
 
+#### 11.1 安装redis
+
+docker内安装redis，本次安装版本6.2.6。
+去redis的GitHub仓库，下载redis.conf配置文件，并修改配置文件：
+
+```shell
+#监听的地址，默认是127.0.0.1，会导致只能在本地访问，修改为0.0.0.0则可以在任意ip访问，生产环境不要设置为0.0.0.0
+bind 0.0.0.0
+
+#守护进程
+daemonize yes
+
+# 密码
+requirepass 你要设置的密码
+
+#日志文件路劲
+logfile "/dockers/redis/log/redis.log"
+```
+
+```shell
+docker pull redis:6.2.6
+
+docker run --name redis -p 6379:6379  -v $PWD/dockers/redis/data:/data -v $PWD/dockers/redis/redis.conf:/etc/redis/redis.conf -d redis:6.2.6 redis-server --appendonly yes --requirepass "redis"
+
+docker exec -it redis redis-cli -a "redis"  --raw
+```
+
+#### 11.2 基本命令
+redis是一个key-value的数据库，key一般是String，不过value的类型多种多样：
+
+|数据类型|value|
+|:------:|:------:|
+|String|hello world|
+|Hash|{name:"jack",age:21|
+|List|[1,2,3,4]|
+|Set|{A,B,C}|
+|ZSet(SortedSet)|{A:1,B:2,C:3}|
+|GEO|{A:(120.3,20.5)}|
+|BitMap|0110111011011011|
+|HyperLogLog|0110111011011011|
+
+##### 11.2.1 通用命令
+
+* keys pattern：查看复合模板的所有key。
+```shell
+keys *
+```
+
+* del [key ...]： 批量删除key。
+```shell
+del name age
+```
+
+* exists keyname：查看keyname是否存在。
+```shell
+exists name
+```
+
+* expire keyname [seconds]：设置keyname的过期时间（时间单位：秒）。
+```shell
+expire age 10
+````
+
+* ttl keyname：查看keyname的过期时间（-1表示永不过期）。
+```shell
+ttl age
+```
+
+##### 11.2.2 String命令
+String类型，也就是字符串，其value是字符串，根据字符串的格式不同，又可以分为3类：
+
+* string：普通字符串。
+* int：整数类型，可以做自增、自减。
+* float：浮点类型，可以做自增、自减。
+
+字符串类型的最大空间不能超过512M。
+
+**常见命令：**
+
+* set keyname value：添加或修改已经存在的一个string类型的键值对。
+```shell
+set name "jack"
+
+set name "Lose"
+```
+
+* get keyname：获取keyname的值。
+```shell
+get name
+```
+
+* mset [key value ...]：批量添加或修改string类型的键值对。
+```shell
+mset username "cheng" age 18 sex "men"
+
+mset username "cheng" age 18 sex "women"
+```
+
+* mget [key ...]：批量获取多个string类型的键值对。
+```shell
+mget usernmae age sex
+```
+
+* incr keyname：让这个keyname自增1。
+```shell
+incr age
+
+incr age
+```
+
+* incrby keyname [increment]：让这个keyname自增increment。
+```shell
+incrby age 2
+```
+
+* decr keyname：让这个keyname自减1。
+```shell
+decr age
+```
+
+* decrby keyname [decrement]：让这个keyname自减decrement。
+```shell
+decrby age 2
+```
+
+* incrbyfloat keyname [increment]：让这个keyname自增increment（浮点数自增必须指定步长）。
+```shell
+incr score 2.5
+```
+
+* setnx keyname value：添加一个string类型的键值对，如果这个keyname不存在，则添加，如果这个keyname存在，则不添加。
+```shell
+setnx name2 "LiSi"
+
+setnx name "zs"
+```
+
+* setex keyname seconds value：添加key并设值key的过期时间。
+```shell
+setex news 10 "news event"
+```
+
+##### 11.2.3 Hash命令
+
+Hash类型，也叫散列，其value是一个无序字典，类似于Java中的HashMap类型。
+
+String结构是将对象序列化为JSON字符串后存储，当需要修改对象某个字段时很不方便。
+
+Hash结构可以将对象中每个字段独立存储，可以针对当个字段做crud。
+
+**常见命令：**
+* hset keyname field value：添加一个hash类型的键值对。
+```shell
+hset user:1 name "jack" age 18 sex "men"
+```
+
+* hget keyname field value：获取一个hash类型的键值对。
+```shell
+hget user:1 name
+```
+
+* hmget keyname [field ...]：批量获取多个hash类型的键值对。
+```shell
+hmget user:1 name age sex
+```
+
+* hgetall keyname：获取一个hash类型的所有键值对。
+```shell
+hgetall user:1
+```
+
+* hkeys keyname：获取一个hash类型的所有键。
+```shell
+hkeys user:1
+```
+
+* hvals keyname：获取一个hash类型的所有值。
+```shell
+hvals user:1
+```
+
+* hincrby keyname field [increment]：让这个field自增increment。
+```shell
+hincrby user:1 age 3
+```
+
+* hdel keyname field [field ...]：删除一个hash类型的键值对。
+```shell
+hdel user:1 sex
+```
+
+* hexists keyname field：查看field是否存在。
+```shell
+hexists user:1 sex
+```
+
+* hlen keyname：获取hash类型的键值对个数。
+```shell
+hlen user:1  
+```
+
+* hsetnx keyname field value：添加一个hash类型的键值对，如果这个field不存在，则添加，如果这个field存在，则不添加。
+```shell
+hsetnx user:1 name "Jack"  
+
+hsetnx user:2 name "Bob" 
+```
+
+##### 11.2.4 List命令 
+
+List类型可以看做一个双向链表，支持正向检索和反向检索。
+
+List与LinkedList类似：①有序。②元素可重复。③插入和删除快。④查询速度一般。
+
+**常见命令：**
+
+* lpush keyname [value ...]：添加一个list类型的键值对，value是数组，添加到list的左边。
+```shell
+lpush num 1 2 3
+```
+
+* lpop keyname count：删除一个list类型的键值对，value是数组，删除list的左边。
+```shell
+lpop num 1
+```
+
+* rpush keyname [value ...]：添加一个list类型的键值对，value是数组，添加到list的右边。
+```shell
+rpush num1 6 7 8 9
+```
+
+* rpop keyname count：删除一个list类型的键值对，value是数组，删除list的右边。
+```shell
+rpop num1 1
+```
+
+* lrange keyname start stop：获取一个list类型的键值对，value是数组，获取list的左边到右边的元素（stop=-1表示获取所有）。
+```shell
+lrange num 0 -1
+````
+
+##### 11.2.5 Set命令
+
+Set类型与Java中的HashSet类似，可以看做是一个value为null的HashMap，因为也是一个hash表。
+
+与HashSet类似的特点：①无序。②元素不可重复。③查找快。④支持交集、并集、差集等功能。
+
+**常见命令：**
+
+* sadd keyname [member ...]：向set中添加一个或多个元素。
+```shell
+sadd s1 a b  c d
+```
+
+* smembers keyname：获取set中所有元素。
+```shell
+smembers s1
+```
+
+* sismember keyname member：查看member是否在set中。
+```shell
+sismember s1 a
+```
+
+* srem keyname [member ...]：删除set中指定元素
+```shell
+srem s1 a
+```
+
+* scard keyname：获取set中元素个数。
+```shell
+scard s1
+```
+
+* sinter key1 key2 ...：求交集
+```shell
+sinter s1 s2
+```
+
+* sdiff key1 key2 ...：求差集
+```shell
+sdiff s1 s2
+```
+
+* sunion key1 key2 ...：求并集
+```shell
+sunion s1 s2
+```
+
+##### 11.2.6 Sorted Set命令
+Sorted Set是一个可排序的set集合，与Java中的TreeSet类似，但底层数据结构差别很大，SortedSet中每一个元素都带有一个score属性，可以给予score属性对元素排序，底层的实现是一个调表（SkipList）加hash表。
+
+SortedSet特点：①可排序。②元素不重复。③查询速度快。
+
+**应用场景：**用来实现`排行榜`、`排行榜排名变化`、`排行榜排名变化通知`等。
+
+**常见命令：**
+
+* zadd keyname score member：添加一个有序集合的键值对。
+```shell
+zadd stus 85 Jack 89 Lucy 82 Rose 95 Tom 78 Jerry 92 Amy 76 Miles
+```
+
+* zrem keyname member：删除sorted set中的一个指定元素。
+```shell
+zrem stus Tom
+```
+
+* zscore keyname member：获取sorted set中指定元素的score属性的值。
+```shell 
+zscore stus Rose
+```
+
+* zrank key memeber ：获取sorted set中指定元素的排名，从0开始。
+```shell
+zrank stus Rose
+```
+
+* zcard keyname：获取sorted set中元素个数。
+```shell
+zcard stus
+```
+
+* zcount keyname min max：统计score值在指定范围内的所有元素的个数。
+```shell
+zcount stus 0 95
+```
+
+* zincrby keyname increment member ：让sorted set中指定元素的score值自增，步长increment。
+```shell
+zincrby stus 3 Rose
+```
+
+* zrange  keyname min max [byscore|lex] [rev] [limit offset count] [withscores] ：按照score排序后，获取指定排名范围内的元素（排序默认是升序的）。
+```shell
+zrange stus 0 100 withscore
+```
+
+* zrangebyscore keyname min max [withscores] [limit offset count]：按照score排序后，获取指定排名范围内的元素。
+```shell
+zrangebyscore stus 0 100 withscores
+```
+
+#### 11.3 Java Redis客户端
+|Java客户端|说明|
+|:----:|:----:|
+|Jedis|以Redis命令作为方法名称，学习成本低，简单实用。但是Jedis实例是线程不安全的，多线程环境下需要基于连接池来使用。|
+|Lettuce|Lettuce是基于Netty实现的，支持同步、异步和响应编码方式，并且是线程安全的。支持Redis哨兵模式、集群模式和管道模式。|
+|Redission|Redisson是一个基于Redis实现的分布式、可伸缩的Java数据结构集合。包含了诸如Map、Queue、Lock、Semaphore、AtomicLong等强大功能。|
+
+##### 11.3.1 Jedis
+
+Jedis官网：https://github.com/redis/jedis。
+
+1、引入依赖。
+```xml
+<dependency>
+  <groupId>redis.clients</groupId>
+  <artifactId>jedis</artifactId>
+  <version>3.7.0</version>
+</dependency>
+```
+
+2、建立连接。
+```java
+private Jedis jedis ;
+
+    @BeforeEach
+    void setUp(){
+        jedis=new Jedis("192.168.101.65",6379);
+        jedis.auth("redis");
+        jedis.select(0);
+    }
+```
+
+3、获取数据。
+```java
+package com.redis6.test;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import redis.clients.jedis.Jedis;
+
+/**
+ * @author QRH
+ * @date 2024/6/18 22:03
+ * @description TODO
+ */
+public class JedisTest {
+
+    private Jedis jedis ;
+
+    @BeforeEach
+    void setUp(){
+        jedis=new Jedis("192.168.101.65",6379);
+        jedis.auth("redis");
+        jedis.select(0);
+    }
+
+    @Test
+    public void testString(){
+        String res = jedis.set("name", "QRH");
+        System.out.println(res);
+        System.out.println(jedis.get("name"));
+    }
+
+    @AfterEach
+    public void countDown(){
+        if (jedis!=null){
+            jedis.close();
+        }
+    }
+
+}
+
+```
+
+4、连接池用法。
+```java
+package com.redis6.test;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+
+import java.time.Duration;
+
+/**
+ * @author QRH
+ * @date 2024/6/18 22:23
+ * @description TODO
+ */
+public class JedisPoolTest {
+    private static final Jedis jedis;
+
+    static {
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        jedisPoolConfig.setMaxTotal(8);
+        jedisPoolConfig.setMaxIdle(8);
+        jedisPoolConfig.setMinIdle(0);
+        jedisPoolConfig.setMaxWait(Duration.ofMillis(10000));
+        JedisPool jedisPool = new JedisPool(jedisPoolConfig, "192.168.101.65", 6379, 1000, "redis");
+        jedis = jedisPool.getResource();
+    }
+
+    @Test
+    public void testString(){
+        System.out.println(jedis.get("name"));
+    }
+
+    @Test
+    public void testHash(){
+        System.out.println(jedis.hgetAll("user:3"));
+    }
+
+
+    @AfterEach
+    public void close(){
+        if(jedis!=null){
+            jedis.close();
+        }
+    }
+
+}
+```
+
+##### 11.3.2 Spring Data Redis
+SpringData是Spring中数据操作的模块，包含对各种数据库的集成，其中对Redis的集成模块就叫做SpringDataRedis。
+* 提供了对不同Redis客户端的整合（Lettuce和Jedis）。
+* 提供了RedisTemplate统一api来操作Redis。
+* 支持Redis的发布订阅模型。
+* 支持哨兵和Redis集群。
+* 支持基于Lettuce的响应式编程。
+* 支持基于JDK、JSON、字符串、Spring对象的数据序列化和反序列化。
+* 支持基于Redis的JDK Collection实现。
+
+SpringDataRedis中提供了RedisTemplate工具类，其中封装了各种对Redis的操作。并且将不同数据类型的操作api封装到不同的类型中。
+
+|API|返回值类型|说明|
+|:----:|:----:|:----:|
+|<span style="color:purple;font-weight:bolder;"> redisTemplate</span>.opsForValue()|ValueOperations|操作String类型数据|
+|<span style="color:purple;font-weight:bolder;"> redisTemplate</span>.opsForHash()|HashOperations|操作Hash类型数据|
+|<span style="color:purple;font-weight:bolder;"> redisTemplate</span>.opsForList()|ListOperations|操作List类型数据|
+|<span style="color:purple;font-weight:bolder;">  redisTemplate</span>.opsForSet()|SetOperations|操作Set类型数据|
+|<span style="color:purple;font-weight:bolder;"> redisTemplate</span>.opsForZSet()|ZSetOperations|操作SortedSet类型数据|
+|<span style="color:purple;font-weight:bolder;"> redisTemplate</span>|  |通用命令|
+
+1、引入依赖。
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+
+<!--连接池依赖-->
+<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-pool2</artifactId>
+</dependency>
+```
+
+2、配置。
+```yml
+spring:
+  data:
+    redis:
+      database: 0
+      host: 192.168.101.65
+      port: 6379
+      password: redis
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: 100ms
+          max-idle: 8
+          min-idle: 0
+```
+
+3、使用Redis。
+```java
+package com.redis6.springdata;
+
+import com.redis.MainRedis;
+import jakarta.annotation.Resource;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
+
+ 
+@SpringBootTest(classes = MainRedis.class)
+public class SpringDataRedisTest {
+
+    @Resource
+    private RedisTemplate redisTemplate;
+
+
+    @Test
+    public void testString() {
+        redisTemplate.opsForValue().set("userVersion", "SpringDataRedis");
+        System.out.println(redisTemplate.opsForValue().get("userVersion"));
+    }
+
+}
+
+```
+
+**改变RedisTemplate的序列化方式：**
+```java
+package com.redis.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+/**
+ * @author QRH
+ * @date 2024/4/13 10:51
+ * @description TODO
+ */
+@Configuration
+public class RedisConfig {
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        //创建redisTemplate对象
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<String, Object>();
+        //设置连接工厂
+        redisTemplate.setConnectionFactory(connectionFactory);
+        //设置JSON序列化工具
+        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer();
+        //设置key的序列化
+        redisTemplate.setKeySerializer(RedisSerializer.string());
+        redisTemplate.setHashKeySerializer(RedisSerializer.string());
+        //设置value序列化
+        redisTemplate.setValueSerializer(serializer);
+        redisTemplate.setHashValueSerializer(serializer);
+        return redisTemplate;
+    }
+
+}
+
+```
+
+**StringRedisTemplate**
+使用JSON序列化器来处理value是通常带有一个`@class`的属性，如：
+```json
+{
+  "@class":"com.heima.redis.pojo.User",
+  "name": "张三",
+  "age": 21,
+  "sex": "men"
+}
+```
+@class属性存入redis会带来额外的内存开销。所以将JSON序列化器改为String序列化器，要求只能存储String类型的key和value。当需要存储Java对象时，手动完成对象的序列化和反序列化。
+
+```java
+package com.redis6.springdata;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redis.MainRedis;
+import jakarta.annotation.Resource;
+import lombok.Data;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
+ 
+@SpringBootTest(classes = MainRedis.class)
+public class StringRedisTemplateTest {
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    private ObjectMapper mapper=new ObjectMapper();
+
+    @Test
+    public void testUser() throws JsonProcessingException {
+        User user = new User();
+        user.setName("王五");
+        user.setAge(45);
+        user.setSex("男");
+        //手动序列化
+        String s = mapper.writeValueAsString(user);
+        stringRedisTemplate.opsForValue().set("user:4",s);
+
+        String jsonUser = stringRedisTemplate.opsForValue().get("user:4");
+        //手动反序列化
+        User user1 = mapper.readValue(jsonUser, User.class);
+        System.out.println(user1);
+
+    }
+
+  @Test
+  public void testHash(){
+    stringRedisTemplate.opsForHash().put("user:5","name","小怪兽");
+    System.out.println(stringRedisTemplate.opsForHash().get("user:5", "name"));
+
+    HashMap<String,String> map=new HashMap<String,String>();
+    map.put("name","文星");
+    map.put("age","23");
+    map.put("sex","男");
+    map.put("phoneNumber","123456789");
+    stringRedisTemplate.opsForHash().putAll("user:6",map);
+    System.out.println(stringRedisTemplate.opsForHash().entries("user:6"));
+  }
+
+    @Data
+   static class User{
+        private String name;
+        private String sex;
+        private Integer age;
+    }
+}
+
+```
+
+#### 11.4 实战
+
+##### 11.4.1 基于Session实现登录
+
+![img_27.jpg](studyImgs/img_27.jpg)
+
+
+
+##### 11.4.2 集群的Session共享问题
+
+**Session共享问题：**多台Tomcat并不共享session内存空间，当请求切换到不同Tomcat服务时导致数据丢失的问题。
+
+![img_28.jpg](studyImgs/img_28.jpg)
+
+##### 11.4.3 使用Redis实现共享session登录
+
+![img_29.png](studyImgs/img_29.png)
+
+#### 11.5 缓存
+
+缓存是数据交换的缓冲区，是存储数据的临时地方，一般读写性能较高。
+
+![img_30.jpg](studyImgs/img_30.jpg)
+
+
+
+##### 11.5.1 缓存更新策略：
+
+|          |                           内存淘汰                           |                           超时剔除                           |                   主动更新                   |
+| :------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :------------------------------------------: |
+|   说明   | 不用自己维护，利用Redis的内存淘汰机制，当内存不足时自动淘汰部分数据。下次查询时更新缓存。 | 给缓存数据添加TTL时间，到期后自动删除缓存，下次查询时更新缓存 | 编写业务逻辑，在修改数据库的同时，更新缓存。 |
+|  一致性  |                              差                              |                             一般                             |                      好                      |
+| 维护成本 |                              无                              |                              低                              |                      高                      |
+
+**业务场景：**
+
+低一致性需求：使用内存淘汰机制。例如店铺类型的查询缓存。
+
+高一致性需求：主动更新，并以超时剔除作为兜底方案。例如店铺详情查询的缓存。
+
+
+
+![img_31.jpg](studyImgs/img_31.jpg)
+
+
+
+![img_32.jpg](studyImgs/img_32.jpg)
+
+
+
+**缓存更新策略的最佳实践方案：**
+
+1、低一致性需求：使用Redis自带的内存淘汰机制。
+
+2、高一致性需求：主动更新，并以超时剔除作为兜底方案。
+
+* 读操作：
+
+  缓存命中则直接返回。
+
+  缓存未命中则查询数据，并写入缓存，设定超时时间。
+
+* 写操作：
+   写数据库，然后再删除缓存。
+   确保数据库与缓存操作的原子性。
+
+
+
+##### 11.5.2 缓存穿透
+
+缓存穿透是指客户端请求的数据在缓存中盒数据库中都不存在，这样缓存永远不会生效，这些请求都会打到数据库。
+
+![img_33.jpg](studyImgs/img_33.jpg)
+
+
+
+##### 11.5.3 缓存雪崩
+
+缓存雪崩指在同一时段的缓存key同时失效或则redis服务宕机，导致大量请求达到数据库，带来巨大压力。
+
+**解决方案：**
+
+* 给不同的key的ttl添加随机值。
+* 利用Redis集群提高服务的可用性。
+* 给缓存业务添加降级限流策略。
+* 给业务添加多级缓存。
+
+
+
+![img_34.png](studyImgs/img_34.png)
+
+
+
+##### 11.5.4 缓存击穿
+
+缓存击穿问题也叫热点key问题，就是一个被高并发访问并且缓存重建业务比较复杂的key突然失效，无数的请求访问会在瞬间给数据库带来巨大的压力。
+
+**解决方案：**
+
+* 互斥锁。
+* 逻辑过期。
+
+![img_35.png](studyImgs/img_35.png)
+
+
+
+![img_36.jpg](studyImgs/img_36.jpg)
+
+
+
+| 解决方案 |                    优点                     |                     缺点                     |
+| :------: | :-----------------------------------------: | :------------------------------------------: |
+|  互斥锁  | ①没有额外的内存消耗；②保证一致性；③实现简单 | ①线程需要等待，性能受影响；②可能有死锁风险； |
+| 逻辑过期 |           线程无需等待，性能较好            |  ①不保证一致性；②有额外内存消耗；③实现复杂   |
+
+
+
+#### 11.6 Redis实现秒杀问题
+
+##### 11.6.1 全局唯一ID
+
+全局ID生成器，是一种在分布式系统下用来生成全局唯一ID的工具，一般满足以下特性：
+
+* 唯一性
+* 高可用
+* 高性能
+* 递增性
+* 安全性
+
+为了增加ID的安全性，我们可以不直接使用Redis自增的数据，而是拼接一些其他信息：
+
+ID的组成部分：
+
+* 符号位：1bit，永远为0。
+* 时间戳：31bit，以秒为单位，可以使用69年。
+* 序列号：32bit，秒内的计数器，支持美妙产生2<sup>32</sup>个不同的ID
+
+例：符号位-时间戳-序列号
+
+<p><span style="color:black;font-weight:bolder;">0</span>-<span style="color:red;font-weight:bolder;">00000000 00000000 00000000 0000000</span>-<span style="color:purple;font-weight:bolder;">00000000 00000000 00000000 00000000</span></p>
+
+**全局唯一ID生成策略：**
+
+* UUID
+* Redis自增
+* 雪花算法
+* 数据库自增
+
+Redis自增ID策略：
+
+* 每天一个key，方便统计订单量。
+* ID构造是时间戳+计数器
+
+##### 11.6.2 超卖问题
+
+![img_37.png](studyImgs/img_37.png)
+
+使用乐观锁的方案：
+
+* 版本号机制
+* CAS
+
+##### 11.6.3 一人一单
+
+
+
+```java
+@Override
+public Result seckillVoucher(Long voucherId) {
+    //1、查询优惠券
+    SeckillVoucher voucher = seckillVoucherService.getById(voucherId);
+    //2、判断秒杀是否开始
+    if (voucher.getBeginTime().isAfter(LocalDateTime.now())) {
+        //尚未开始
+        return Result.fail("秒杀尚未开始");
+    }
+    //3、判断秒杀是否已结束
+    if (voucher.getEndTime().isBefore(LocalDateTime.now())) {
+        //已经结束
+        return Result.fail("秒杀已经结束");
+    }
+
+    //4、判断库存是否充足
+    if (voucher.getStock() < 1) {
+        return Result.fail("库存不足");
+    }
+    /********************重点开这里*******************/
+    /**
+    通过加锁解决一人一单的问题，
+    加锁细粒化
+    这里用到了代理对象，虽说调用createVoucherOrder(voucherId)，其实是this.createVoucherOrder(voucherId)。而这个this对象指向的是VoucherOrderServiceImpl.java，而VoucherOrderServiceImpl.java是非代理对象，它的代理对象是VoucherOrderService.java。
+    所以在同步锁内部通过AopContext获取当前类的代理类，通过代理类来调用createVoucherOrder(voucherId)。当然代理类需要定义createVoucherOrder(Long voucherId)这个函数。另外还得引入aspectjviwer依赖，然后再在启动类中添加@EnableAspectJAutoProxy(exposeProxy = true)
+    */
+    Long userId = UserHolder.getUser().getId();
+    synchronized (userId.toString().intern()) {
+        //获取代理对象（事务）
+        IVoucherOrderService proxy =(IVoucherOrderService) AopContext.currentProxy();
+        return proxy.createVoucherOrder(voucherId);
+    }
+    /********************重点开这里*******************/
+}
+
+
+
+/********************重点开这里*******************/
+@Transactional
+public Result createVoucherOrder(Long voucherId) {
+    Long userId = UserHolder.getUser().getId();
+
+    //一人一单
+    long count = this.query().eq("user_id", userId).eq("voucher_id", voucherId).count();
+    if (count > 0) {
+        //用户已经购买过了
+        return Result.fail("用户已经购买过了");
+    }
+
+    //5、扣减库存
+    boolean b = seckillVoucherService.update()
+        .setSql("stock=stock-1")
+        .eq("voucher_id", voucherId)
+        .gt("stock", 0)
+        .update();
+    if (!b) {
+        return Result.fail("库存不足");
+    }
+    //6、创建订单
+    VoucherOrder voucherOrder = new VoucherOrder();
+    long orderId = redisIDWorker.nextId("order");
+    voucherOrder.setId(orderId);
+    voucherOrder.setUserId(userId);
+    voucherOrder.setVoucherId(voucherId);
+
+    this.save(voucherOrder);
+    return Result.ok(orderId);
+}
+/********************重点开这里*******************/
+```
+
+虽然这种通过加锁的方式解决了多线程下购买问题，但是只能在`单机环境下`保证了事务的一致性，在集群的环境下就会出问题，解决集群环境下锁失效的的问题，就需要引入分布式锁。
+
+![img_38.png](studyImgs/img_38.png)
+
+
+
+##### 11.6.4 分布式锁
+
+分布式锁：满足分布式系统或集群模式下多进程可见并互斥的锁。
+
+* 高可用
+* 多进程可见
+* 互斥
+* 高性能
+* 安全性
+* .......
+
+|        |           MySQL           |          Redis           |            Zookeeper             |
+| :----: | :-----------------------: | :----------------------: | :------------------------------: |
+|  互斥  | 利用MySQL本身的互斥锁机制 | 利用setnx这样的互斥命令  | 利用节点的唯一性和有序性实现互斥 |
+| 高可用 |            好             |            好            |                好                |
+| 高性能 |           一般            |            好            |               一般               |
+| 安全性 |   断开连接，自动释放锁    | 利用锁超时时间，到期释放 |    临时节点，断开连接自动释放    |
+
+**基于Redis的分布式锁**
+
+实现分布式锁时需要实现的两个基本方法：
+
+* 获取锁：
+
+  * 互斥：确保只能有一个线程获取锁。
+
+  * ```shell
+    #添加锁，利用setnx的互斥特性
+    setnx key value
+    
+    set key value NX EX 10
+    
+    #添加锁过期时间，避免服务当即引起的死锁
+    expire key 10
+    ```
+
+* 释放锁：
+
+  * 手动释放
+
+  * 超时释放：获取锁时添加一个超时时间
+
+  * ```shell
+    #释放锁，删除即可
+    del key
+    ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #### 11.1 主从集群
 
 全量同步和增量同步的区别？
@@ -5100,12 +6083,12 @@ CompletableFuture提供了一种与观察者模式类似的机制，通过回调
 
 `需要`返回值的，使用`supplyAsync()`方法:
 
-> public static <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier);
+> public static <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier); <br>
 > public static <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier, Executor executor); 
 
 `不需要`返回值的，使用`runAsync()`方法:
 
-> public static CompletableFuture<Void> runAsync(Runnable runnable);
+> public static CompletableFuture<Void> runAsync(Runnable runnable);<br>
 > public static CompletableFuture<Void> runAsync(Runnable runnable, Executor executor);
 
 上述Executor executor参数说明：如果没有指定Executor的方法，直接使用默认的ForkJoinPool.commonPool()作为它的线程池执行异步代码；
