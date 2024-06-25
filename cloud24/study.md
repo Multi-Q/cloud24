@@ -3907,7 +3907,28 @@ zrange stus 0 100 withscore
 zrangebyscore stus 0 100 withscores
 ```
 
+##### 11.2.7 BitMap命令
+
+
+
+**应用场景：**签到、统计连续签到
+
+
+
+##### 11.2.8 HyperLongLong命令
+
+
+
+**应用场景：**大数统计，统计UV（Unique Visitors独立访问量）、PV（Page View页面访问量）。
+
+
+
+
+
+
+
 #### 11.3 Java Redis客户端
+
 |Java客户端|说明|
 |:----:|:----:|
 |Jedis|以Redis命令作为方法名称，学习成本低，简单实用。但是Jedis实例是线程不安全的，多线程环境下需要基于连接池来使用。|
@@ -4299,7 +4320,7 @@ public class StringRedisTemplateTest {
 
 ##### 11.5.2 缓存穿透
 
-缓存穿透是指客户端请求的数据在缓存中盒数据库中都不存在，这样缓存永远不会生效，这些请求都会打到数据库。
+缓存穿透是指客户端请求的数据在缓存中和数据库中都不存在，这样缓存永远不会生效，这些请求都会打到数据库。
 
 ![img_33.jpg](studyImgs/img_33.jpg)
 
@@ -4307,7 +4328,7 @@ public class StringRedisTemplateTest {
 
 ##### 11.5.3 缓存雪崩
 
-缓存雪崩指在同一时段的缓存key同时失效或则redis服务宕机，导致大量请求达到数据库，带来巨大压力。
+缓存雪崩指在同一时段的缓存key同时失效或则redis服务宕机，导致大量请求打到数据库中，给数据库带来巨大压力。
 
 **解决方案：**
 
@@ -4369,7 +4390,6 @@ ID的组成部分：
 例：符号位-时间戳-序列号
 
 <p><span style="color:black;font-weight:bolder;">0</span>-<span style="color:red;font-weight:bolder;">00000000 00000000 00000000 0000000</span>-<span style="color:purple;font-weight:bolder;">00000000 00000000 00000000 00000000</span></p>
-
 **全局唯一ID生成策略：**
 
 * UUID
@@ -4439,7 +4459,10 @@ public Result createVoucherOrder(Long voucherId) {
     Long userId = UserHolder.getUser().getId();
 
     //一人一单
-    long count = this.query().eq("user_id", userId).eq("voucher_id", voucherId).count();
+    long count = this.query()
+                    .eq("user_id", userId)
+                    .eq("voucher_id", voucherId)
+                    .count();
     if (count > 0) {
         //用户已经购买过了
         return Result.fail("用户已经购买过了");
@@ -4447,10 +4470,10 @@ public Result createVoucherOrder(Long voucherId) {
 
     //5、扣减库存
     boolean b = seckillVoucherService.update()
-        .setSql("stock=stock-1")
-        .eq("voucher_id", voucherId)
-        .gt("stock", 0)
-        .update();
+                                    .setSql("stock=stock-1")
+                                    .eq("voucher_id", voucherId)
+                                    .gt("stock", 0)
+                                    .update();
     if (!b) {
         return Result.fail("库存不足");
     }
@@ -4511,7 +4534,7 @@ public Result createVoucherOrder(Long voucherId) {
 
 * 释放锁：
 
-  * 手动释放
+  * 手动释放。
 
   * 超时释放：获取锁时添加一个超时时间
 
@@ -4522,61 +4545,559 @@ public Result createVoucherOrder(Long voucherId) {
 
 
 
+**基于Redis的分布式锁实现思路：**
+
+* 利用setnx key value ex获取锁，并设置过期时间，保存线程标识。
+* 释放锁时先判断线程标识是否与自己一致，一致则删除锁。
+
+特性：
+
+* 利用setnx满足互斥性。
+* 利用setnx保证故障时锁依然能释放，避免死锁，提高安全性。
+* 利用Redis集群保证高可用和高并发特性。
+
+**基于setnx实现的分布式锁存在下面的问题：**
+
+* 不可重入：同一个线程无法多次获取一把锁。
+* 不可重试：获取锁只尝试一次就返回false，没有重试机制。
+* 超时释放：锁超时时释放虽然可以避免死锁，但如果是业务执行耗时较长，也会导致锁释放，存在安全隐患。
+* 主从一致性：如果Redis提供了主从集群，主从同步存在延迟，当主宕机时，如果从同步主中的锁数据，则会出现锁失效。
+
+##### 11.6.5 Redisson
+
+1、引入依赖。
+
+```xml
+<dependency>
+    <groupId>org.redisson</groupId>
+    <artifactId>redisson</artifactId>
+</dependency>
+```
+
+2、配置redisson客户端。
+
+```java
+package com.hmdp.config;
+
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class RedissonConfiguration {
+
+    @Bean
+    public RedissonClient redissonClient() {
+        Config config = new Config();
+        config.useSingleServer()
+            .setAddress("redis://192.168.101.65:6379")
+            .setPassword("redis");
+        return Redisson.create(config);
+    }
+
+}
+
+```
+
+
+
+##### 11.6.6 消息队列实现异步秒杀
+
+![img_39.jpg](studyImgs/img_39.jpg)
+
+
+
+**基于List结构模拟消息队列**
+
+![img_40.jpg](studyImgs/img_40.jpg)
+
+基于List结构模拟消息队列的优缺点：
+
+优点：
+
+* 利用Redis存储，不受限于jvm内存上限。
+* 基于Redis的持久化机制，数据安全性有保证。
+* 可以满足消息有序性。
+
+缺点：
+
+* 无法避免消息丢失。
+* 只支持单消费者。
+
+**基于PubSub的消息队列：**
+
+![img_41.png](studyImgs/img_41.png)
+
+基于PubSub的消息队列的优缺点：
+
+优点：
+
+* 采用发布订阅模型，支持多生产、多消费。
+
+缺点：
+
+* 不支持数据持久化。
+* 无法避免消息丢失。
+* 消息堆积上限，超出时数据丢失。
+
+**基于Stream的消息队列：**
+
+特点：
+
+* 消息可回溯。
+* 一个消息可以被多个消费者读取。
+* 可以阻塞读取。
+* 有消息漏读的风险。
+
+**基于Stream的消息队列-消费者组：**
+
+消费者组：将多个消费者划分到一个组中，监听同一个队列。具有以下特点：
+
+* 消息分流：队列中的消息会分流给组内的不同消费者，而不是重复消费，从而加快消息处理的速度。
+* 消息提示：消费者组会维护一个标识，记录最后一个被处理的消息，哪怕消费者宕机重启，还会从标识之后读取消息。确保每一个消息都会被消费。
+* 消息确认：消费者获取消息后，消息处于pending状态，并存入一个pending-list。当处理完成后需要通过xack来确认消息，标记消息为已处理，才会从pending-list中移除。
+
+特点：
+
+* 消息可回溯。
+* 可以多消费者争抢消息，加快消费速度。
+* 可以阻塞读取。
+* 没有消息漏读的风险。
+* 有消息确认机制，保证消息至少被消费一次。
+
+
+
+**总结**：
+
+|              |                   List                   |       PubSub       |                         Stream                         |
+| :----------: | :--------------------------------------: | :----------------: | :----------------------------------------------------: |
+|  消息持久化  |                   支持                   |       不支持       |                          支持                          |
+|   阻塞队列   |                   支持                   |        支持        |                          支持                          |
+| 消息堆积处理 | 受限于内存空间，可以利用多消费者加快处理 | 受限于消费者缓冲区 | 受限于队列长度，可以利用消费者组提高消费速度，减少堆积 |
+| 消息确认机制 |                  不支持                  |       不支持       |                          支持                          |
+|   消息回溯   |                  不支持                  |       不支持       |                          支持                          |
+
+##### 11.6.7 Feed流
+
+![img_42.png](studyImgs/img_42.png)
+
+Feed流模式：
+
+* Timeline ：不做内容筛选，简单按照内容发布时间排序，常用于好友或关注，例如朋友圈。
+  * 优点：信息全面，不会有缺失，并且实现也相对简单。
+  * 缺点：信息噪音较多，用户不一定感兴趣，内容获取效率低。
+
+|              | 拉模式   | 推模式            | 推拉结合              |
+| ------------ | -------- | ----------------- | --------------------- |
+| 写比例       | 低       | 高                | 中                    |
+| 读比例       | 高       | 低                | 中                    |
+| 用户读取延迟 | 高       | 低                | 低                    |
+| 实现难度     | 复杂     | 简单              | 很复杂                |
+| 使用场景     | 很少使用 | 用户量少、没有大V | 过千万的用户量、有大V |
+
+* 智能排序：利用智能算法屏蔽掉违规的、用户不感兴趣的内容，推送用户感兴趣信息来吸引用户。
+  * 优点：头尾用户感兴趣信息，用户粘度很高，容易沉迷。
+  * 缺点如果算法不精准，可能起到反作用。
+
+#### 11.7 分布式缓存
+
+单节点Redis的问题：
+
+* 数据丢失问题：Redis是内存存储，服务重启可能会丢失数据。==【实现Redis数据持久化】==
+* 并发能力问题：单节点Redis并发能力虽然不错，但也无法满足如618这样的高并发场景。==【搭建主从集群，实现读写分离】==
+* 故障恢复能力：如果Redis宕机，则服务不可用，需要一种自动的故障恢复手段。==【利用Redis哨兵，实现健康检测和自动恢复】==
+* 存储能力问题：Redis基于内存，单节点能存储的数据量难以满足海量数据需求。==【搭建分片集群，利用插槽机制实现动态扩容】==
+
+##### 11.7.1 数据持久化
+
+###### 11.7.1.1 RDB
+
+RDB（全称Redis Database Backup file，Redis数据备份文件，也叫Redis数据快照）。简单来说就是把内存中的所有数据都记录到磁盘中，当Redis实例故障重启之后，从磁盘读取快照文件，恢复数据。
+
+快照文件称为rdb文件，默认是保存在当前运行目录。
+
+```shell
+save #阻塞保存
+
+bgsave #开启子进程保存快照
+```
+
+在Redis内部有触发RDB的机制，可以在redis.conf中找到：
+
+```shell
+#900秒内，如果至少有一个key被修改，执行bgsave，如果save "" ，表示禁用rdb
+save 900 1
+save 300 10
+save 60 10000
+```
+
+rdb的其他配置也可以在redis.conf文件中设置：
+
+```shell
+#是否压缩，建议不开启，压缩会消耗cpu，磁盘的话不值钱
+rdbcompression yes
+
+#rdb文件名称
+dbfilename dump.rdb
+
+#rdb文件保存的路径
+dir ./
+
+```
+
+bgsave开始时会fork主进程得到子进程，子进程共享主进程的内存数据，完成fork后读取内存数据并写入rdb文件。
+
+fork采用的是copy-on-write技术：
+
+* 当主进程执行读操作时，访问共享内存。
+
+* 当主进程执行写操作时，会拷贝一份数据，执行写操作。
+
+**rdb的缺点：**
+
+* rdb执行间隔时间长，两次rdb之间写入数据有丢失风险。
+* fork子进程、压缩、写出rdb文件都比较耗时。
+
+
+
+###### 11.7.1.2 AOF
+
+AOF（Append Only File，追加文件），Redis处理的每一个命令都会记录在AOF文件中，可以看做是命令日志文件。
+
+AOF默认是关闭的，需要修改redis.conf配置文件来开启AOF：
+
+```shell
+#是否开启AOF功能，默认no
+appendonly yes
+
+#AOF文件的名称
+appendfilename "appendonly.aof"
+```
+
+AOF的命令记录的频率也可以通过redis.conf文件来配置：
+
+```shell
+#表示每执行一次命令，立即记录到AOF文件中
+appendfsync always
+
+#写命令执行先放入AOF缓冲区，然后表示每隔一秒将缓冲区数据写到AOF文件，默认方案
+appendfsync everysec
+
+#写命令执行完先放入AOF缓冲区，由操作系统决定何时将缓冲区内容写会磁盘
+appendfsync no
+```
+
+| 配置项   | 刷盘时机     | 优点                         | 缺点                       |
+| -------- | ------------ | ---------------------------- | -------------------------- |
+| always   | 同步刷盘     | 可靠性高，几乎不存在数据丢失 | 性能影响大                 |
+| everysec | 每秒刷盘     | 性能适中                     | 最多丢失1秒数据            |
+| no       | 操作系统控制 | 性能最好                     | 可靠性差，可能丢失大量数据 |
+
+因为是记录命令，AOF文件会比RDB文件大的多，而且AOF会记录对同一个key的多次写操作，但是只有最后一次写操作才有意义。通过执行bgrewriteaof命令，可以让AOF文件执行重写功能，用最少命令达到相同效果。
+
+Redis也会在触发阈值时重写AOF文件，阈值也可以在redis.conf中配置：
+
+```shell
+#AOF文件比上次文件增长超过多少百分比则触发重写
+auto-aof-rewrite-percentage 100
+
+#AOF文件体积最小多大以上才出发重写
+auto-aof-rewrite-min-size 64mb
+```
+
+**总结：**在实际开发中往往会结合两者来使用。
+
+|                |                     RDB                      |                          AOF                          |
+| :------------: | :------------------------------------------: | :---------------------------------------------------: |
+|   持久化方式   |             定时对整个内存做快照             |                 记录每一次执行的命令                  |
+|   数据完成性   |          不完整，两次备份之间会丢失          |               相对完整，取决于刷盘策略                |
+|    文件大小    |             会有压缩，文件体积小             |                 记录命令，文件体积大                  |
+|  宕机恢复速度  |                     很快                     |                          慢                           |
+| 数据恢复优先级 |          低，因为数据完整性不如AOF           |                高，因为数据完整性更高                 |
+|  系统资源占用  |            高，大量cpu和内存消耗             | 低，主要是磁盘io资源，但重写时会占用大量cpu和内存资源 |
+|    使用场景    | 可以容忍数分钟的数据丢失，追求更快的启动速度 |                 对数据安全性要求较高                  |
+
+#### 11.8 主从集群
+
+单节点Redis的并发能力是有上限的，要进一步提高Redis的并发能力，就需要搭建主从集群，实现读写分离。
+
+![img_43.png](studyImgs/img_43.png)
+
+
+
+##### 11.8.1 数据同步原理：
+
+主从第一次同步是**全量同步**：
+
+![img_44.png](studyImgs/img_44.png)
+
+master如何判断slave是不是第一次来同步数据：
+
+* replication id：简称replid，是数据集的标记，id一致则说明是同一数据集。每一个master都有唯一的replid，slave则会继承master结点的replid。
+* offset：偏移量，随着记录在repl_baklog中的数据增多而逐渐增大，slave完成同步时也会记录当前同步的offset。如果slave的offset小于master的offset，说明数据落后于master，需要更新。
+
+因此salve做数据同步必须向master声明自己的replication id和offset，master才可以判断到底需要同步哪些数据。
+
+![img_45.png](studyImgs/img_45.png)
+
+**简述全量同步的流程：**
+
+1、slave结点请求增量同步。
+
+2、master结点判断replid，发现不一致，拒绝增量同步。
+
+3、master将完整内存数据生成RDB，发送RDB到slave。
+
+4、slave清空本地数据，加载master的RDB。
+
+5、master将RDB期间的命令记录在repl_baklog，并持续将log中的命令发送到slave。
+
+6、slave执行接收到命令，保持于master之间的同步。
+
+
+
+主从第一次同步是**全量同步**，但如果slave重启后同步，则执行**增量同步**：
+
+![img_46.png](studyImgs/img_46.png)
+
+##### 11.8.2 优化主从集群
+
+* 在master中配置repl-diskless-sync yes启用无磁盘复制，避免全量同步时的磁盘io。
+* Redis节点上的内存占用不要太大，减少RDB导致过多的磁盘io。
+* 适当提高repl_baklog的大小，发现slave宕机时尽快实现故障恢复，尽可能避免全量同步。
+* 限制一个master上的slave结点数量，如果实在是太多slave，则可以采用主-从-从链式结构，减少master压力。
+
+**全量同步和增量同步的区别？**
+
+* 全量同步：master将完整内存数据生成rdb，发送rdb到slave，后续命令则记录在repl_baklog，逐个发送给slave。
+* 增量同步：slave提交自己的offset到master，master获取repl_baklog中slave的offset之后的命令给slave。
+
+**什么时候执行全量同步？**
+
+* slave节点第一次连接master节点时。
+* slave结点断开时间太久，repl_baklog中的offset已经被覆盖时。
+
+**什么时候执行增量同步？**
+
+* slave结点断开又恢复，并且在repl_baklog中能找到offset时。
+
+#### 11.9 哨兵
+
+slave结点宕机恢复后可以找master结点同步数据，那master结点宕机后怎么办？
+
+答：这就需要使用**哨兵机制**了。
+
+##### 11.9.1 哨兵的作用
+
+* 监控：sentinel会不断检查master和slave是否按照预期工作。
+* 自动故障切换：如果master故障，sentinel会将一个slave提升为master。当故障实例恢复后也以新的master为主。
+* 通知：当集群发生故障转移时，sentinel会将最新节点角色信息推送给redis客户端。
+
+![img_47.png](studyImgs/img_47.png)
+
+**服务状态监控**
+
+sentinel基于心跳机制监测服务状态，每隔1秒向集群的每个实例发送ping命令：
+
+* 主观下线：如果sentinel节点发现某实例未在规定时间响应，则认为该实例主观下线。
+* 客观下线：若超过指定数量（quorum）的sentinel都认为该实例主观下线，则该实例客观下线。quorum值最好超过sentinel实例数量的一半。
+
+![img_48.png](studyImgs/img_48.png)
+
+**选举新的master**
+
+一旦发现master故障，sentinel需要在slave中选择一个作为新的master，选择依据：
+
+* 首先会判断slave结点与master结点断开时间长短，如果超过指定值（down-after-milliseconds*10）则会排除该slave节点。
+* 然后判断slave结点的slave-priority值，越小优先级越高，如果是0则永不参与选举。
+* 如果slave-prority一样，则判断slave节点的offset值，越大说明数据越新，优先级越高。
+* 最后是判断slave结点的运行id大小，越小优先级越高。
+
+**如何实现故障转移**
+
+当选中了其中一个slave为新的master后，故障转移步骤：
+
+* sentinel给备选的slave1结点发送slaveof no one命令，让该节点成为master。
+* sentinel给所有其他slave发送slaveof 192.168.150.101 7002命令，让这些slave成为新的master从节点，开始从新的master上同步数据。
+* 最后，sentinel将故障节点标记为slave，当故障节点恢复后会自动成为新的master的slave节点。
+
+![img_49.png](studyImgs/img_49.png)
+
+##### 11.9.2 搭建sentinel集群
 
 
 
 
 
+##### 11.9.3 RedisTemplate的哨兵模式
+
+1、引入依赖。
+
+```xml
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+```
+
+2、在配置文件中指定sentinel的相关信息。
+
+```yml
+spring:
+	redis:
+		sentinel:
+            master: mymaster #指定master名称
+            nodes: #指定redis sentinel集群信息
+                - 192.168.150.101:27001
+                - 192.168.150.101:27002
+                - 192.168.150.101:27003
+```
+
+3、配置自定义读写分离配置。
+
+```java
+@Configuration
+public class RedisConfiguration{
+    /**
+    	ReadFrom是Redis的读取策略，是一个枚举类。
+    	MASTER:从主节点读取。
+    	MASTER_PREFERRED:优先从master节点读取，master不可用才读取replica
+    	REPLICA:从slave结点读取
+    	REPLICA_PREFERRED：优先从slave节点读取，所有的slave都不可用才读取master
+    */
+    @bean
+    public LettuceClientConfigurationBuilderCustomizer configurationBuilderCustomizer(){
+        return configBuilder->configBuilder.readFrom(ReadFrom.REPLICA_PREFERRED);
+    }
+}
+```
 
 
 
+#### 11.10 分片集群
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#### 11.1 主从集群
-
-全量同步和增量同步的区别？
-
-* 全量同步：master将完整内存数据生成rdb，发送rdb到slave
-* 增量同步：slave提交自己的offset到master，master获取repl_baklog中slave的offset之后的命令给slave
-
-什么时候执行全量同步？
-
-* slave节点第一次连接master节点时
-* slave结点断开时间太久，repl_baklog中的offset已经被覆盖时
-
-什么时候执行增量同步？
-
-* slave结点断开又恢复，并且在repl_baklog中能找到offset时
-
-#### 11.2 哨兵原理
-
-哨兵的作用：
-
-* 监控：sentinel会不断检查master和slave是否按照预期工作
-* 自动故障切换：如果master故障，sentinel会将一个slave提升为master。当故障实例恢复后也以新的master为主
-* 通知：当集群发生故障转移时，sentinel会将最新节点角色信息推送给redis客户端
-
-#### 11.3 分片集群
-
-主从何哨兵可以解决高可用、高并发问题，但有两个问题依然没有解决：
+主从何哨兵可以解决**高可用、高并发**问题，但有两个问题依然没有解决：
 
 * 海量数据存储问题
 * 高并发读写问题
+
+使用分片集群可以解决上述问题，分片集群特征：
+
+* 集群有多个master，每个master保存不同的数据。
+* 每个master都可以有多个slave节点。
+* master之间通过ping监测彼此健康状态。
+* 客户端请求可以访问集群任意节点，最终都会被转发到正确结点。
+
+![img_50.png](studyImgs/img_50.png)
+
+##### 11.10.1 散列插槽
+
+Redis会把每个master结点映射到0~16383共16384个插槽（hash slot）上，查看集群信息时就能看到。
+
+#### 11.11 多级缓存-亿级流量的缓存方案
+
+ **传统缓存的问题：**
+
+![img_51.png](studyImgs/img_51.png)
+
+**多级缓存方案：**
+
+![img_52.png](studyImgs/img_52.png)
+
+#### 11.12 最佳实践
+
+##### 11.12.1 优雅的key结构
+
+Redis的key虽然可以自定义，但最好遵循下面的几个最佳实践约定：
+
+* 遵循基本格式：[业务名称]:[数据名]:[id]，如：login:user:11
+* 长度不超过44个字节。
+* 不包含特殊字符。
+
+优点：
+
+①可读性强。
+
+②避免key冲突。
+
+③方便管理。
+
+④更省内存：key是字符串类型，底层编码包含int、embstr和raw三种，embstr当值小于44字节时使用，采用连续内存空间，内存占用更小。
+
+##### 11.12.2 拒绝BigKey
+
+BigKey通常以key的大小和key中的成员的数量来综合判定，例如：
+
+* key本身数据量大：一个String类型的key，它值为5MB。
+* key中的成员数量过多：一个zset类型的key，它的成员数量为10,000个。
+* key中的成员数据量过大：一个hash类型的key，它的成员数量虽然只用1,000个但这些类型成员的value总大小为100MB。
+
+**推荐：**
+
+* 单个key的value小于10KB。
+* 对于集合类型的key，建议数量小于1000。
+
+**BigKey的危害：**
+
+* 网络阻塞：对BigKey执行读请求时，少量的QPS就可能导致带宽使用率被占满，导致Redis实例乃至所在物理机变慢。
+* 数据倾斜：BigKey所在的Redis实例内存使用率远超其他实例，无法使数据分片的内存资源达到均衡。
+* Redis阻塞：对元素较多的hash、list、zset等做运算耗时较久，使主线程被阻塞。
+* CPU压力：对BigKey的数据序列化和反序列化会导致CPU的使用率飙升，影响Redis实例和本机其他应用。
+
+**如何发现BigKey？**
+
+* 使用`redis-cli --bigkeys`命令：利用redis-cli提供的--bigKys参数，可以遍历分析所有key，并返回key的整体统计信息与每个数据的top1的big key。
+* scan扫描：自己编程，利用scan扫描Redis中的所有key，利用strlen、hlen等命令判断key的长度。
+* 第三方工具：如Redis-Rdb-Tools分析RDB快照文件，全面分析内存使用情况。
+* 网络监控：自定义工具，监控进出Redis的网络数据，超出预警值时主动告警。
+
+**如何删除BigKey？**
+
+BigKey内存占用较多，即便删除这样的key也需要耗时很长时间，导致Redis主线程阻塞，引发一些列问题。
+
+所以，使用异步删除命令`unlink`渐进式删除。
+
+##### 11.12.3 批处理优化
+
+##### 11.12.4 持久化配置
+
+Redis持久化虽然可以保证数据安全，也会带来很多额外的开销，因此持久化应遵循下列建议：
+
+①用来作缓存的Redis实力尽量不要开启持久化功能。
+
+②建议关闭RDB持久化功能，使用AOF持久化。
+
+③利用脚本定期在slave节点做RDB，实现数据备份。
+
+④设置合理的rewrite阈值，避免频繁的bgrewrite。
+
+⑤配置no-appendfsync-on-rewrite=yes，禁止在rewrite期间做aof引起阻塞。
+
+部署有关建议：
+
+①redis实例的物理机要预留足够内存，应该fork和rewrite。
+
+②单个redis实力内存上限不要太大，例如4G或8G。可以加快fork的速度、减少主从同步、数据迁移压力。
+
+③不要与CPU密集型应用部署在一起。
+
+④不要与高硬盘负载应用一起部署，如数据库、消息队列。
+
+##### 11.12.5 慢查询
+
+在Redis执行耗时超过某个阈值的命令，称为慢查询。
+
+慢查询阈值可以通过配置指定：
+
+* slowlog-log-slower-than：慢查询阈值，单位是微秒，默认是10,000，建议1000.
+
+慢查询会被放入慢查询日志中，日志的长度有上限，可以通过配置指定：
+
+* slowlog-max-len：慢查询日志的长度，默认是128，建议1000。
+
+
 
 ### 十二、Spring Security
 
