@@ -8104,6 +8104,1307 @@ class MyData {
 <img src="studyImgs/img_23.png" alt="img_23.png"  />
 
 
+## 四、数据结构与算法
+
+### 一、稀疏数组与队列
+#### 1.1 稀疏数组
+当一个数组中元素大部分为0时，或为同一个值的时候，可以使用稀疏数组来保存该数组。
+
+稀疏数组的处理方式有：
+
+* 记录数组有几行几列，有多少个不同值。
+
+* 把具有不同值的元素的行列以及值记录在一个小规模的数组中，从而缩小程序的规模。
+
+![img_53.png](studyImgs/img_53.png)
+
+**应用：**
+棋子棋谱保存(10x10)。
+
+![img_54.png](studyImgs/img_54.png)
+
+将二维数组转为稀疏数组的思路：
+* 遍历二维数组，得到原始数组中的有效元素个数sum。
+* 根据sum的值创建稀疏数组，int[sum+1][3]，分别记录行、列、值。
+* 将二维数组中有效元素存进这个稀疏数组中。
+
+将稀疏数组转为二维数组的思路：
+* 先读取稀疏数组的第一行数据，根据第一行的数据创建二维数组。
+* 再读取稀疏数组的后续数据，并赋给二维数组。
+
+#### 1.2 队列
+队列是一个有序列表，可以使用**数组**或**链表**来实现。
+
+队列的特点：先进先出。
+
+队列可以使用**数组** 或 **链表**来实现
+
+>对于普通的队列：<br>
+>**队列判满：rear=maxSize-1**<br>
+>**队列判空：front==rear**
+
+* 普通队列的优缺点：
+
+  普通队列使用一次就不能在使用了，没有达到复用的效果。
+
+```java
+package com.algorithm.queue;
+
+import java.util.Scanner;
+
+/**
+ * @author QRH
+ * @date 2024/9/30 18:48
+ * @description 用数组实现一个队列
+ */
+public class ArrayQueueDemo {
+    public static void main(String[] args) {
+        ArrayQueue queue = new ArrayQueue(3);
+        char key = ' ';
+        boolean loop = true;
+
+
+        Scanner scanner = new Scanner(System.in);
+        while (loop) {
+            System.out.println("s(show):显示队列");
+            System.out.println("e(exit):退出程序");
+            System.out.println("a(add):添加数据到队列");
+            System.out.println("g(get):从队列中取出数据");
+            System.out.println("h(head):查看队列头的数据");
+            key = scanner.next().charAt(0);
+            switch (key) {
+                case 's':
+                    queue.showQueue();
+                    break;
+                case 'a':
+                    System.out.println("请输入数据：");
+                    int value = scanner.nextInt();
+                    queue.addQueue(value);
+                    break;
+                case 'g':
+                    try {
+                        int res = queue.getQueue();
+                        System.out.println("取出的数据是：" + res);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case 'h':
+                    try {
+                        int first = queue.headQueue();
+                        System.out.println("队列头的数据是：" + first);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case 'e':
+                    scanner.close();
+                    loop = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+        System.out.println("程序退出");
+    }
+
+}
+
+class ArrayQueue {
+    private int maxSize;//数组最大容量
+    private int front;//队列头
+    private int rear; //队列尾
+    private int[] arr; //用于存放数据，模拟队列
+
+    public ArrayQueue(int arrMaxSize) {
+        this.maxSize = arrMaxSize;
+        this.arr = new int[maxSize];
+        this.front = -1;//指向队列头部的前一个位置
+        this.rear = -1;//指向队尾，指向队尾的数据，即队列最后一个数据
+    }
+
+    /**
+     * 判断队列是否满
+     *
+     * @return
+     */
+    public boolean isFull() {
+        return rear == maxSize - 1;
+    }
+
+    /**
+     * 判断队列是否为空
+     *
+     * @return
+     */
+    public boolean isEmpty() {
+        return rear == front;
+    }
+
+    /**
+     * 向队列添加数据
+     *
+     * @param n 要添加的数据
+     */
+    public void addQueue(int n) {
+        //判断队列是否满
+        if (isFull()) {
+            System.out.println("队列满，不能加入数据");
+            return;
+        }
+        rear++;
+        arr[rear] = n;
+    }
+
+    /**
+     * 取数据，出队列
+     *
+     * @return 数据
+     */
+    public int getQueue() {
+        if (isEmpty()) {
+            throw new RuntimeException("队列为空，不能取数据");
+        }
+        return arr[++front];
+    }
+
+    /**
+     * 显示队列的所有数据
+     */
+    public void showQueue() {
+        if (isEmpty()) {
+            System.out.println("队列为空，没有数据");
+            return;
+        }
+        for (int i=0;i<arr.length;i++) {
+            System.out.printf("arr[%d]=%d\n", i, arr[i]);
+        }
+    }
+
+    /**
+     * 查看队列的第一个元素
+     *
+     * @return
+     */
+    public int headQueue() {
+        if (isEmpty()) {
+            throw new RuntimeException("队列为空，没有数据~");
+        }
+        return arr[front + 1];
+    }
+}
+```
+
+将数组改为环形队列可以达到复用的效果。
+
+##### 循环队列
+
+front指向队列的第一个元素,即front的初始值为0。
+
+rear指向队列的最后一个**元素的后一个位置**，因为希望空出一个空间作为约定,rear的初始值为0。
+
+当队列满时：**(rear+1)%maxSize=front**
+
+当队列为空时：**rear==front**
+
+队列中有效的元素个数：**(rear+maxSize-front)%maxSize**
+
+向队列添加数据：**(rear+1)%maxSize**
+
+队列取出数据：**(front + 1) % maxSize**
+
+```java
+package com.algorithm.queue;
+
+import java.util.Scanner;
+
+/**
+ * @author QRH
+ * @date 2024/9/30 19:32
+ * @description 将队列改为循环队列
+ */
+public class CircleQueueDemo {
+    public static void main(String[] args) {
+        CircleQueue queue = new CircleQueue(5);
+        char key = ' ';
+        Scanner scanner = new Scanner(System.in);
+        boolean loop = true;
+
+        while (loop) {
+            System.out.println("s(show):显示队列");
+            System.out.println("e(exit):退出程序");
+            System.out.println("a(add):添加数据到队列");
+            System.out.println("g(get):从队列中取出数据");
+            System.out.println("p(peak):查看队列头的数据");
+            System.out.println("c(count):查看队列中有效的元素个数");
+            key = scanner.next().charAt(0);
+
+            switch (key) {
+                case 's':
+                    queue.showQueue();
+                    break;
+                case 'a':
+                    int value = scanner.nextInt();
+                    queue.addQueue(value);
+                    break;
+                case 'g':
+                    try {
+                        int res = queue.getQueue();
+                        System.out.println("取出的元素是：" + res);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case 'p':
+                    try {
+                        int first = queue.peekQueue();
+                        System.out.println("循环队列的第一个元素为：" + first);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case 'c':
+                    int count = queue.count();
+                    System.out.println("循环队列中有效的元素个数为：" + count);
+                    break;
+                case 'e':
+                    scanner.close();
+                    loop = false;
+                    break;
+                default:
+                    break;
+            }
+
+        }
+        System.out.println("程序退出~~~");
+
+    }
+}
+
+class CircleQueue {
+    private int maxSize;
+    private int front;
+    private int rear;
+    private int[] arr;
+
+    public CircleQueue(int maxSize) {
+        this.maxSize = maxSize;
+        front = 0;
+        rear = 0;
+        arr = new int[maxSize];
+    }
+
+    /**
+     * 判断循环队列是否为空
+     *
+     * @return
+     */
+    public boolean isEmpty() {
+        return  front==rear;
+    }
+
+    /**
+     * 判断循环队列是否满
+     *
+     * @return
+     */
+    public boolean isFull() {
+        return (rear + 1) % maxSize == front;
+    }
+
+    /**
+     * 向循环队列中添加数据
+     *
+     * @param n 要添加的数据
+     */
+    public void addQueue(int n) {
+        if (isFull()) {
+            System.out.println("队列已满，不能加入");
+            return;
+        }
+        arr[rear] = n;
+        rear=(rear+1)%maxSize;
+    }
+
+    /**
+     * 取数据
+     *
+     * @return
+     */
+    public int getQueue() {
+        if (isEmpty()) {
+            throw new RuntimeException("队列为空，不能取数据");
+        }
+        int value = front;
+        front = (front + 1) % maxSize;
+        return arr[value];
+    }
+
+    /**
+     * 查看队列中的第一个元素
+     *
+     * @return
+     */
+    public int peekQueue() {
+        return arr[front];
+    }
+
+    /**
+     * 查看队列中的所有元素
+     */
+    public void showQueue() {
+        if (isEmpty()) {
+            System.out.println("队列为空 ");
+            return;
+        }
+        for (int i = front; i < front + count(); i++) {
+            System.out.printf("arr[%d]=%d\t", i % maxSize, arr[i % maxSize]);
+        }
+        System.out.println();
+    }
+
+    /**
+     * 获取循环队列中有效的元素个数
+     *
+     * @return
+     */
+    public int count() {
+        return (rear + maxSize - front) % maxSize;
+    }
+
+}
+
+```
+
+### 二、 链表
+
+#### 2.1 单向链表
+
+![img_55.png](studyImgs/img_55.png)
+
+1) 链表是以节点的方式来存储,**是链式存储**。
+
+2) 每个节点包含 data 域， next 域：指向下一个节点。
+
+3) 如图：发现**链表的各个节点不一定是连续存储**。
+
+4) 链表分**带头节点的链表**和**没有头节点的链表**，根据实际的需求来确定。
+
+![img_56.png](studyImgs/img_56.png)
+
+```java
+package com.algorithm.linklist;
+
+/**
+ * @author QRH
+ * @date 2024/9/30 20:35
+ * @description 单向链表
+ */
+public class SingleLinkListDemo {
+    public static void main(String[] args) {
+        HeroNode heroNode1 = new HeroNode(1, "宋江", "及时雨");
+        HeroNode heroNode2 = new HeroNode(2, "卢俊义", "玉麒麟");
+        HeroNode heroNode3 = new HeroNode(3, "无用", "智多星");
+        HeroNode heroNode4 = new HeroNode(4, "林冲", "豹子头");
+
+        SingleLinkedList singleLinkedList = new SingleLinkedList();
+        singleLinkedList.add(heroNode3);
+        singleLinkedList.add(heroNode1);
+        singleLinkedList.add(heroNode2);
+        singleLinkedList.add(heroNode4);
+
+        singleLinkedList.list();
+
+//        System.out.println("-------------");
+//
+//        System.out.println(singleLinkedList.findByNo(2));
+
+//        System.out.println("-------------");
+
+//        System.out.println(singleLinkedList.delFirst());
+//        System.out.println("-------------");
+//        singleLinkedList.list();
+
+//        System.out.println("-------------");
+//        System.out.println(singleLinkedList.delLast());
+//        System.out.println("-------------");
+//        singleLinkedList.list();
+
+
+        System.out.println("-------------");
+        System.out.println(singleLinkedList.update(2,new HeroNode(1,"宋江1","JJ1")));
+        System.out.println("-------------");
+        singleLinkedList.list();
+
+
+
+    }
+}
+
+class SingleLinkedList {
+    //初始化头结点
+    private   HeroNode head = new HeroNode(0, "", "");
+
+    /**
+     * 向链表中添加数据，尾插法
+     *
+     * @param heroNode
+     */
+    public void add(HeroNode heroNode) {
+        HeroNode tmp = head;
+        //遍历链表
+        while (true) {
+            //找到链表的最后元素
+            if (tmp.getNext() == null) {
+                break;
+            }
+            //如果没找到最后一个元素，继续向后找
+            tmp = tmp.getNext();
+        }
+        //当退出while循环时，tmp就指向了链表的最后
+        tmp.setNext(heroNode);
+    }
+
+    /**
+     * 遍历链表数据
+     */
+    public void list() {
+        if (head.getNext() == null) {
+            System.out.println("链表为空");
+            return;
+        }
+        HeroNode tmp = head.getNext();
+        while (true) {
+            //判断是否到链表最后
+            if (tmp == null) {
+                break;
+            }
+            System.out.println(tmp.toString());
+            tmp = tmp.getNext();
+        }
+
+    }
+
+    /**
+     * 删除元素，头删法
+     *
+     * @return 返回第一个元素
+     */
+    public HeroNode delFirst() {
+        if (head.getNext() == null) {
+            throw new RuntimeException("数据为空，不能删除");
+        }
+        HeroNode first = head.getNext();
+        head.setNext(first.getNext());
+        return first;
+    }
+
+    /**
+     * 删除元素，尾删法
+     *
+     * @return 返回最后一个元素
+     */
+    public HeroNode delLast() {
+        if (head.getNext() == null) {
+            throw new RuntimeException("数据为空，不能删除");
+        }
+        HeroNode last = head;
+        HeroNode tmp = head.getNext();
+        while (true) {
+            if (tmp.getNext() == null) {
+                last.setNext(tmp.getNext());
+                break;
+            }
+            last = tmp;
+            tmp = tmp.getNext();
+        }
+        return tmp;
+    }
+
+    /**
+     * 根据no修改指定节点
+     *
+     * @param no          HeroNode中的no属性
+     * @param newHeroNode 要修改的内容
+     * @return true|false
+     */
+    public boolean update(int no, HeroNode newHeroNode) {
+        if (head.getNext() == null) {
+            return false;
+        }
+        HeroNode res = null;
+        HeroNode tmp = head.getNext();
+        while (true) {
+            if (tmp.getNo() == no || tmp.getNext() == null) {
+                if (tmp.getNo() == no) {
+                    res = tmp;
+                }
+                break;
+            }
+            tmp = tmp.getNext();
+        }
+        if (res == null) {
+            System.out.println("没有该no对应的元素，无法修改");
+            return false;
+        } else {
+            tmp.setName(newHeroNode.getName());
+            tmp.setNickName(newHeroNode.getNickName());
+            return true;
+        }
+    }
+
+    /**
+     * 根据no查找节点
+     *
+     * @param no
+     * @return
+     */
+    public HeroNode findByNo(int no) {
+        if (head.getNext() == null) {
+            throw new RuntimeException("数据为空，无法查找");
+        }
+        HeroNode res = null;
+        HeroNode tmp = head.getNext();
+        while (true) {
+            if (tmp.getNo() == no || tmp.getNext() == null) {
+                if (tmp.getNo() == no) {
+                    res = tmp;
+                }
+                break;
+            }
+            tmp = tmp.getNext();
+        }
+        if (res == null) {
+            System.out.println("找不到对应no的元素");
+            return null;
+        } else {
+            return res;
+        }
+    }
+
+}
+
+class HeroNode {
+    private int no;
+    private String name;
+    private String nickName;
+    private HeroNode next;
+
+    public HeroNode(int no, String name, String nickName) {
+        this.no = no;
+        this.name = name;
+        this.nickName = nickName;
+        this.next = null;
+    }
+
+    @Override
+    public String toString() {
+        return "HeroNode{" +
+                "no=" + no +
+                ", name='" + name + '\'' +
+                ", nickName='" + nickName + '\'' +
+                '}';
+    }
+
+    public int getNo() {
+        return no;
+    }
+
+    public void setNo(int no) {
+        this.no = no;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public HeroNode getNext() {
+        return next;
+    }
+
+    public void setNext(HeroNode next) {
+        this.next = next;
+    }
+}
+
+```
+
+#### 2.2 双向链表
+
+* 单向链表的缺点：
+
+  1) 单向链表，查找的方向只能是一个方向，而双向链表可以向前或者向后查找。
+
+  2) 单向链表不能自我删除，需要靠辅助节点 ，而双向链表，则可以自我删除，所以前面我们单链表删除
+
+  时节点，总是找到 temp,temp 是待删除节点的前一个节点。
+
+![img_57.png](studyImgs/img_57.png)
+
+```java
+package com.algorithm.linklist;
+
+/**
+ * @author QRH
+ * @date 2024/10/1 19:41
+ * @description 双向链表
+ */
+public class DoubleLinkedListDemo {
+    public static void main(String[] args) {
+        HeroNode1 heroNode1 = new HeroNode1(1, "宋江", "及时雨");
+        HeroNode1 heroNode2 = new HeroNode1(2, "卢俊义", "玉麒麟");
+        HeroNode1 heroNode3 = new HeroNode1(3, "无用", "智多星");
+        HeroNode1 heroNode4 = new HeroNode1(4, "林冲", "豹子头");
+
+        DoubleLinkedList doubleLinkedList = new DoubleLinkedList();
+        doubleLinkedList.add(heroNode1);
+        doubleLinkedList.add(heroNode2);
+        doubleLinkedList.add(heroNode3);
+        doubleLinkedList.add(heroNode4);
+
+        doubleLinkedList.list();
+
+        System.out.println("------------------------------------------");
+        
+    }
+}
+
+class DoubleLinkedList {
+
+    private HeroNode1 head = new HeroNode1(0, "", "");
+
+    /**
+     * 获取头结点
+     *
+     * @return
+     */
+    public HeroNode1 getHead() {
+        return head.next;
+    }
+
+    /**
+     * 遍历链表
+     */
+    public void list() {
+        if (head.next == null) {
+            System.out.println("链表为空");
+            return;
+        }
+        HeroNode1 temp = head.next;
+        while (true) {
+            if (temp == null) {
+                break;
+            }
+            System.out.println(temp);
+            temp = temp.next;
+        }
+    }
+
+    /**
+     * 添加元素
+     * @param heroNode1
+     */
+    public void add(HeroNode1 heroNode1) {
+        HeroNode1 temp = head;
+        while (true) {
+            if (temp.next == null) {
+                break;
+            }
+            temp = temp.next;
+        }
+        temp.next=heroNode1;
+        heroNode1.prev=temp;
+    }
+
+}
+
+class HeroNode1 {
+    public HeroNode1 prev;
+    public int no;
+    public String name;
+    public String nickName;
+    public HeroNode1 next;
+
+    public HeroNode1(int no, String name, String nickName) {
+        this.prev = null;
+        this.no = no;
+        this.name = name;
+        this.nickName = nickName;
+        this.next = null;
+    }
+
+    @Override
+    public String toString() {
+        return "HeroNode1{" +
+                "no=" + no +
+                ", name='" + name + '\'' +
+                ", nickName='" + nickName + '\'' +
+                '}';
+    }
+}
+```
+
+### 三、栈
+
+栈是一个**先进后出**的有序列表。
+
+栈是限制线性表中元素的**插入和删除只能在线性表的同一端进行**的一种特殊线性表。允许插入和删除的一端，为变化的一端，称为**栈顶**，另一端为固定的一端，称为**栈底**。
+
+根据栈的定义可知，最先放入栈中元素在栈底，最后放入的元素在栈顶，而删除元素刚好相反，最后放入的元素最先删除，最先放入的元素最后删除。
+
+![img_58.png](studyImgs/img_58.png)
+
+
+
+#### 3.1 数组栈
+
+```java
+package com.algorithm.stack;
+
+import java.util.Scanner;
+
+/**
+ * @author QRH
+ * @date 2024/10/5 13:12
+ * @description TODO
+ */
+public class ArrayStackDemo {
+    public static void main(String[] args) {
+        ArrayStack stack = new ArrayStack(4);
+        String key = " ";
+        boolean loop = true;
+        Scanner scanner = new Scanner(System.in);
+
+        while (loop) {
+            System.out.println("s:表示显示栈");
+            System.out.println("e:退出程序");
+            System.out.println("i:入栈");
+            System.out.println("o:出栈");
+            System.out.println("请输入你的选择：");
+
+            key = scanner.next();
+            switch (key) {
+                case "s":
+                    stack.list();
+                    break;
+                case "i":
+                    int value = scanner.nextInt();
+                    stack.push(value);
+                    break;
+                case "o":
+                    try {
+                        int res = stack.pop();
+                        System.out.println("出栈-数据为：" + res);
+                        break;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                case "e":
+                    scanner.close();
+                    loop = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+        System.out.println("程序退出!!");
+    }
+
+}
+
+class ArrayStack {
+    private int maxSize;//占的大小
+    private int[] stack;//数组，模拟栈，用于存放数据
+    private int top = -1;//栈顶，初始化为-1
+
+    public ArrayStack(int maxSize) {
+        this.maxSize = maxSize;
+        stack = new int[this.maxSize];
+    }
+
+    /**
+     * 判断栈顶
+     *
+     * @return
+     */
+    public boolean isFull() {
+        return top == maxSize - 1;
+    }
+
+    /**
+     * 判断栈空
+     *
+     * @return
+     */
+    public boolean isEmpty() {
+        return top == -1;
+    }
+
+
+    /**
+     * 入栈
+     *
+     * @param value 数据
+     */
+    public void push(int value) {
+        //先判满
+        if (isFull()) {
+            System.out.println("栈满");
+            return;
+        }
+        top++;
+        stack[top] = value;
+    }
+
+    /**
+     * 出栈
+     *
+     * @return 栈顶数据
+     */
+    public int pop() {
+        //先判空
+        if (isEmpty()) {
+            throw new RuntimeException("栈空，没有数据");
+        }
+        int value = stack[top];
+        top--;
+        return value;
+    }
+
+    /**
+     * 遍历栈
+     */
+    public void list() {
+        if (isEmpty()) {
+            System.out.println("栈空，不能遍历");
+            return;
+        }
+        for (int i = top; i >= 0; i--) {
+            System.out.printf("stack[%d]=%d\t", i, stack[i]);
+        }
+        System.out.println();
+    }
+}
+
+```
+
+
+
+#### 3.2 单链表栈
+
+用单链表头插法不带头结点实现栈。
+
+![img_59.png](studyImgs/img_59.png)
+
+
+
+
+```java
+package com.algorithm.stack;
+
+import java.util.Scanner;
+
+/**
+ * @author QRH
+ * @date 2024/10/9 11:29
+ * @description 用单链表 不带头结点的头插法实现栈
+ */
+public class LinkedListStackDemo {
+    public static void main(String[] args) {
+        LinkedListStack stack = new LinkedListStack();
+        String key = " ";
+        boolean loop = true;
+        Scanner scanner = new Scanner(System.in);
+
+        while (loop) {
+            System.out.println("s:表示显示栈");
+            System.out.println("e:退出程序");
+            System.out.println("i:入栈");
+            System.out.println("o:出栈");
+            System.out.println("请输入你的选择：");
+
+            key = scanner.next();
+            switch (key) {
+                case "s":
+                    stack.list();
+                    break;
+                case "i":
+                    int value = scanner.nextInt();
+                    stack.push(value);
+                    break;
+                case "o":
+                    try {
+                        LinkedListNode res = stack.pop();
+                        System.out.println("出栈-数据为：" + res);
+                        break;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                case "e":
+                    scanner.close();
+                    loop = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+        System.out.println("程序退出!!");
+
+    }
+}
+
+class LinkedListNode {
+    public int data;
+    public LinkedListNode next = null;
+
+    public LinkedListNode(int data, LinkedListNode next) {
+        this.data = data;
+        this.next = next;
+    }
+
+    public LinkedListNode() {
+    }
+
+    @Override
+    public String toString() {
+        return "LinkedListNode{" +
+                "data=" + data +
+                '}';
+    }
+}
+
+class LinkedListStack {
+    private LinkedListNode first = new LinkedListNode();
+
+    private LinkedListNode top;
+
+    /**
+     * 判空
+     */
+    public boolean isEmpty() {
+        return top == null;
+    }
+
+    /**
+     * 入栈
+     *
+     * @param value 数据
+     */
+    public void push(int value) {
+        if (isEmpty()) {
+            first.data = value;
+            top = first;
+        } else {
+            LinkedListNode newNode = new LinkedListNode(value, top);
+            top = newNode;
+        }
+    }
+
+    /**
+     * 出栈
+     *
+     * @return 数据
+     */
+    public LinkedListNode pop() {
+        if (isEmpty()) {
+            System.out.println("栈空，无法操作");
+            return null;
+        }
+        LinkedListNode res = top;
+        top = top.next;
+        return res;
+    }
+
+    /**
+     * 遍历
+     */
+    public void list() {
+        if (top == null) {
+            System.out.println("栈空~~");
+            return;
+        }
+        LinkedListNode tmp = top;
+        while (tmp != null) {
+            System.out.println(tmp.toString());
+            tmp = tmp.next;
+        }
+    }
+
+}
+```
+
+
+
+#### 3.3 前缀、中缀、后缀表达式
+
+* 前缀表达式，又名波兰式，**前缀表达式的运算符在操作数之前**。
+
+  如：(3+4)*5-6对应的表达式为：- \* + 3 4 5 6。
+
+* 中缀表达式就是常见的表达式，如(3+4)*5-6。
+
+* 后缀表达式，又名逆波兰式，**运算符在操作数之后**。
+
+  如：(3+4)*5-6对应的表达式为：3 4 + 5 * 6 -。
+  
+  
+
+### 四、递归
+
+递归的应用场景：迷宫问题（回溯）、递归。
+
+递归就是自己调自己，每次调用时传入不同的变量，有助于编程着实现复杂的问题，也有助于代码简洁。
+
+#### 4.1 迷宫问题（简易版）
+
+```java
+package com.algorithm.recursion;
+
+/**
+ * @author QRH
+ * @date 2024/10/10 14:56
+ * @description 迷宫问题（简易版）实现
+ */
+public class MiGong {
+    public static void main(String[] args) {
+        int[][] map = new int[8][7];
+
+        //使用1表示墙，上下全部置为1
+        map = initWall(map);
+
+        setWay(map, 1, 1);
+
+        display(map);
+
+    }
+
+
+    /**
+     * 使用递归回溯给小球找路
+     * 约定：当map[i][j]为0表示该点没有走过，当为1表示墙，2表示通路可以走，3表示该点已经走过，但是走不通
+     * 再走迷宫时，需要确定一个策略 下->右->上->左，如果该店走不通就回溯
+     *
+     * @param map 地图
+     * @param i   小球从地图的位置出发的横坐标
+     * @param j   小球从地图的位置出发的纵坐标
+     * @return 找到通路返回true，否者false
+     */
+    public static boolean setWay(int[][] map, int i, int j) {
+        if (map[6][5] == 2) {//通路已经找到
+            return true;
+        } else {
+            if (map[i][j] == 0) {//如果当前这个点还没有走过
+                map[i][j] = 2;//假设该点可以走通
+                if (setWay(map, i + 1, j)) {//向下走
+                    return true;
+                } else if (setWay(map, i, j + 1)) {//向右走
+                    return true;
+                } else if (setWay(map, i - 1, j)) {//向上走
+                    return true;
+                } else if (setWay(map, i, j - 1)) {//向左走
+                    return true;
+                } else {
+                    //说明该点走不通，是死路
+                    map[i][j] = 3;
+                    return false;
+                }
+            } else {
+                //map[i][j]!=0,可能是1,2,3,
+                return false;
+            }
+        }
+    }
+
+    /**
+     * 遍历迷宫图
+     *
+     * @param map
+     */
+    private static void display(int[][] map) {
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[i].length; j++) {
+                System.out.print(map[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    /**
+     * 初始化迷宫的墙
+     *
+     * @param map
+     * @return
+     */
+    private static int[][] initWall(int[][] map) {
+        for (int i = 0; i < 7; i++) {
+            map[0][i] = 1;
+            map[7][i] = 1;
+            map[i][0] = 1;
+            map[i][6] = 1;
+        }
+        map[3][1] = 1;
+        map[3][2] = 1;
+        return map;
+    }
+}
+
+```
+
+
+
+#### 4.2 八皇后问题
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

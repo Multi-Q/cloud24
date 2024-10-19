@@ -14,28 +14,28 @@ import java.util.List;
  * @description TODO
  */
 //@FeignClient(value = "cloud-payment-service")
-@FeignClient(value = "cloud-gateway")
+@FeignClient(value = "cloud-gateway",path="/pay")
 public interface PayFeignApi {
 
-    @PostMapping(value = "/pay/add/")
+    @PostMapping(value = "/add/")
     public ResultData<String> addPay(@RequestBody PayDTO payDTO);
 
-    @GetMapping(value = "/pay/get/{id}")
+    @GetMapping(value = "/get/{id}")
     public ResultData getPayInfo(@PathVariable("id") Integer id);
 
-    @DeleteMapping("/pay/del/{id}")
+    @DeleteMapping("/del/{id}")
     public ResultData<Integer> deletePay(@PathVariable("id") Integer id);
 
-    @PutMapping(value = "/pay/update")
+    @PutMapping(value = "/update")
     public ResultData<String> updatePay(@RequestBody PayDTO payDTO);
 
-    @GetMapping(value = "/pay/get/{id}")
+    @GetMapping(value = "/get/{id}")
     public ResultData<PayDTO> getById(@PathVariable("id") Integer id);
 
-    @GetMapping(value = "/pay/get")
+    @GetMapping(value = "/get")
     public ResultData<List<PayDTO>> getAll();
 
-    @GetMapping(value = "/pay/get/info")
+    @GetMapping(value = "/get/info")
     public String mylb();
 
     /**
@@ -43,7 +43,7 @@ public interface PayFeignApi {
      * @param id
      * @return 提示信息
      */
-    @GetMapping(value = "/pay/circuit/{id}")
+    @GetMapping(value = "/circuit/{id}")
     public String myCircuit(@PathVariable("id") Integer id);
 
     /**
@@ -51,10 +51,10 @@ public interface PayFeignApi {
      * @param id
      * @return 提示信息
      */
-    @GetMapping(value = "/pay/bulkhead/{id}")
+    @GetMapping(value = "/bulkhead/{id}")
     public String myBulkHead(@PathVariable("id") Integer id);
 
-    @GetMapping(value = "/pay/ratelimit/{id}")
+    @GetMapping(value = "/ratelimit/{id}")
     public String myRateLimiter(@PathVariable("id") Integer id);
 
     /**
@@ -63,14 +63,14 @@ public interface PayFeignApi {
      * @param id
      * @return
      */
-    @GetMapping(value = "/pay/micrometer/{id}")
+    @GetMapping(value = "/micrometer/{id}")
     public String myMicrometer(@PathVariable("id") Integer id);
 
 
-    @GetMapping(value = "/pay/gateway/get/{id}")
+    @GetMapping(value = "/gateway/get/{id}")
     public ResultData getGateWayById(@PathVariable("id") Integer id);
 
-    @GetMapping(value = "/pay/gateway/get/info")
+    @GetMapping(value = "/gateway/get/info")
     public ResultData getGateWayInfo();
 
 
