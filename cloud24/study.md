@@ -9264,42 +9264,343 @@ public class MiGong {
 
 
 
-#### 4.2 八皇后问题
+### 五、排序
+
+排序也叫**排序算法**，是将一组数据**按照指定顺序**进行**排列的过程**。
+
+* 排序的分类：
+
+  1）内部排序：将需要处理的所有数据都加载到内部存储器中进行排序。
+
+  2）外部排序：数据量过大，无法全部加载到内存中，需要借助外部存储进行排序。
 
 
 
+![img_60.png](studyImgs/img_60.png)
 
+* 算法时间复杂度
 
+  度量一个算法的执行时间的两种方法：
 
+​	1）事后统计的方法：
 
+​		这种方法可行，但是有两个问题：一是相对设计的算法的运行性能进行测评，需要实际运行程序；而是所得时间的统计量依赖于计算机的硬件、软件等环境因素，**这种方式，要在同一台计算机的相同状态下运行，才能比较哪个算法速度更快**。
 
+​	2）事前估算的方法：
 
+​		通过分析某个算法的时间复杂度来判断哪个算法更优。
 
+* 时间频度
 
+  一个算法花费的时间与算法中语句的执行次数成正比，哪个算法中语句执行次数多，他花费的时间就多。**一个算法中的语句执行次数成为语句频度或时间频度。即为T(n)**。
 
+举例：
 
+![img_61.png](studyImgs/img_61.png)
 
+**估算时间复杂度**通常忽略掉**时间频度**的==常数项==和==低次项==。如T(n)=2n+20，则时间复杂度为2n；T(n)=2n<sup>5</sup>+3n<sup>3</sup>+20 ，则时间复杂度为2n<sup>5</sup>。
 
+常见的时间复杂度：
 
+​	1）常数阶O(1)
 
+```java
+int i=1;
+int j=2;
+int m=i+j;
+```
 
+​	2）对数阶O(log<sub>2</sub>n)
 
+```java
+int i=1;
+while(i<n){
+    i=i*2;
+}
+```
 
+​	3）线性阶O(n)
 
+```java
+for(int i=1;i<n;i++){
+    int j=i;
+}
+```
 
+​	4）线性对数阶O(nlog<sub>2</sub>n)
 
+```java
+for(int m=1;m<n;m++){
+    int i=1;
+    while(i<n){
+    	i=i*2;
+	}
+}
+```
 
+​	5）平方阶O(n<sup>2</sup>)
 
+```java
+for(int m=1;m<n;m++){
+   for(int i=1;i<n;i++){
+    	int j=i;
+	}
+}
+```
 
+​	6）立方阶O(n<sup>3</sup>)
 
+```java
+for(int m=1;m<n;m++){
+   for(int i=1;i<n;i++){
+    	 for(int k=1;k<n;k++){
+    		int j=i;
+		}
+	}
+}
+```
 
+​	7）k次方阶O(n<sup>k</sup>)
 
+```java
+//包含k个for循环
+```
 
+​	8）指数阶O(2<sup>n</sup>)
 
+随着问题规模n的增大，时间复杂度也随之增大，算法的执行效率就越低。
 
+**O(1)<O(log<sub>2</sub>n)<O(n)<O(nlog<sub>2</sub>n)<O(n<sup>2</sup>)<O(n<sup>3</sup>)<O(n<sup>k</sup>)<O(2<sup>n</sup>)<O(n!)**
 
+* 平均时间复杂度和最坏时间复杂度
 
+**平均时间复杂度**：是指所有可能的输入实例均以等概率出现的情况下，该算法的运行时间。
 
+**最坏情况时间复杂度**：算法在任何输入实例上运行时间的界限，这就保证了算法的运行时间不会比最坏情况更长。
+
+平均时间复杂度和最坏时间复杂度是否一致与算法有关。
+
+| 排序法    | 平均时间             | 最差情形            | 稳定度 | 额外空间 | 备注                                |
+| --------- | -------------------- | ------------------- | ------ | -------- | ----------------------------------- |
+| 冒泡排序（交换排序） | O(n<sup>2</sup>)     | O(n<sup>2</sup>)    | 稳定   | O(1)     | n小时较好                           |
+| 交换排序（交换排序） | O(n<sup>2</sup>)     | O(n<sup>2</sup>)    | 不稳定 | O(1)     | n小时较好                           |
+| 选择排序（选择排序） | O(n<sup>2</sup>)     | O(n<sup>2</sup>)    | 不稳定  | O(1)     | n小时较好                           |
+| 插入排序（插入排序） | O(n2)                | O(n<sup>2</sup>)    | 稳定   | O(1)     | 大部分已排好序时较好                |
+| 基数排序  | O(log<sub>R</sub>B)  | O(log<sub>R</sub>B)          | 稳定   | O(n)     | B是真数（0-9）<br>R是基数（个十百） |
+| Shell排序（插入排序） | O(nlog<sub>2</sub>n) | O(n<sup>s</sup>)  1<s<2 | 不稳定       | O(1)         |s是所选分组                                     |
+|快速排序（交换排序）|O(nlog<sub>2</sub>n|O(n<sup>2</sup>)|不稳定|O(nlog<sub>2</sub>n)|n大时较好|
+|归并排序|O(nlog<sub>2</sub>n) |O(nlog<sub>2</sub>n) |稳定|O(1)|n大时较好|
+|堆排序（选择排序）|O(nlog<sub>2</sub>n) |O(nlog<sub>2</sub>n) |不稳定|O(1)|n大时较好|
+
+#### 5.1 冒泡排序
+
+**思想**：通过对待排序序列从前向后（从下标较小的元素开始），一次比较相邻元素的值，若发现逆序则交换，是值大的元素逐渐从前移向后移，就像水底下的气泡一样逐渐向上冒。
+
+![img_62.png](studyImgs/img_62.png)
+
+```java
+package com.algorithm.sort;
+
+import java.util.Arrays;
+
+/**
+ * @author QRH
+ * @date 2024/10/25 15:48
+ * @description 冒泡排序
+ */
+public class BubbleSortDemo {
+    public static void main(String[] args) {
+        int arr[] = {3, 0, -1, 10, -2};
+
+        arr = bubbleSort(arr);
+    }
+
+    /**
+     * 冒泡排序改进版
+     * <p>
+     * 如果在某一趟交换中没有发生交换就说明数组已经有序了，没必要再进行下面的交换了
+     *
+     * @param arr 待排序的数组
+     * @return 已排好序的数组
+     */
+    private static int[] bubbleSort(int[] arr) {
+        int temp;
+        boolean flag = false;//是否进行过交换
+
+        for (int i = 0; i < arr.length - 1; i++) {
+            for (int j = 0; j < arr.length - 1 - i; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    flag = true;
+                    temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                }
+            }
+            System.out.println("第" + (i + 1) + "趟排序后的数组：" + Arrays.toString(arr));
+            if (!flag) {
+                break;//一趟排序中，如果没有发生交换就退出循环
+            } else {
+                flag = false;//重置flag，让其进行下次交换
+            }
+        }
+        return arr;
+    }
+}
+
+```
+
+#### 5.2 选择排序
+
+**思想**：是一种简单的排序方法。第一次从arr[0]-arr[n-1]中选取最小值，与arr[0]交换；第二次从arr[1]-arr[n-1]中选取最小值，与arr[1]交换；第三次从arr[2]-arr[n-1]中选取最小值，与arr[2]交换；......；第i次从arr[i]-arr[n-1]中选取最小值，与arr[i]交换。总共通过**n-1**次，得到一个排好序的有序序列。
+
+```java
+package com.algorithm.sort;
+
+import java.util.Arrays;
+
+/**
+ * @author QRH
+ * @date 2024/10/25 16:15
+ * @description 选择排序（简单选择排序）
+ */
+public class SelectSortDemo {
+    public static void main(String[] args) {
+        int[] arr = {101, 34, 2, 119, 1};
+        selectSort(arr);
+    }
+
+    /**
+     * 选择排序
+     *
+     * @param arr 待排序的数组
+     * @return 排序好的数组
+     */
+    private static int[] selectSort(int[] arr) {
+        boolean flag = false;
+        for (int i = 0; i < arr.length - 1; i++) {
+            int min = arr[i];
+            int minIndex = i;
+
+            for (int j = i + 1; j < arr.length; j++) {
+                if (min > arr[j]) {
+                    min = arr[j];
+                    minIndex = j;
+                }
+            }
+            //将最小值放在arr[i]，即交换
+            if (minIndex != i) {
+                arr[minIndex] = arr[i];
+                arr[i] = min;
+            }
+            System.out.println("第" + (i + 1) + "趟，排序后结果：" + Arrays.toString(arr));
+        }
+        return arr;
+    }
+}
+
+```
+
+#### 5.3 插入排序
+
+**思想**：把n个待排序的元素看成为一个有序表和无序表，开始时有序表只包含一个元素，无序表中包含有n-1个元素，排序过程中每次从无序表中去除第一个元素，把他的排序码依次与有序表的排序码进行比较，将他插入到有序表中的适当位置，是之成为新的有序表。
+
+![img_63.png](studyImgs/img_63.png)
+
+```java
+package com.algorithm.sort;
+
+import java.util.Arrays;
+
+/**
+ * @author QRH
+ * @date 2024/10/25 16:56
+ * @description 插入排序
+ */
+public class InsertSortDemo {
+    public static void main(String[] args) {
+        int[] arr = {101, 34, 119, 1};
+        insertSort(arr);
+    }
+
+    /**
+     * 插入排序
+     *
+     * @param arr 待排序的数组
+     * @return 已排好序的数组
+     */
+    private static int[] insertSort(int[] arr) {
+        for (int i = 1; i < arr.length; i++) {
+            int insertVal = arr[i]; //待插入的数
+            int insertIndex = i - 1;//有序数组中的最后一个元素的下标
+
+            while (insertIndex >= 0 && insertVal < arr[insertIndex]) {
+                arr[insertIndex + 1] = arr[insertIndex];
+                insertIndex--;
+            }
+            arr[insertIndex + 1] = insertVal;
+
+            System.out.println("第" + (i + 1) + "趟排序后的数组：" + Arrays.toString(arr));
+        }
+
+        return arr;
+    }
+}
+
+```
+
+#### 5.4 希尔排序
+
+希尔排序也是一种插入排序，他是简单插入排序进过改进之后的一个更高效的版本，也叫缩小增量排序。
+
+**思想**：希尔排序是把记录按下标的一定增量分组，对每组使用直接插入排序算法排序，随着增量逐渐减少，每组包含的关键词越来越多，当增量减至1时，整个文件恰被分成一组，算法便终止。
+
+![img_64.png](studyImgs/img_64.png)
+
+```java
+package com.algorithm.sort;
+
+import java.util.Arrays;
+
+/**
+ * @author QRH
+ * @date 2024/10/25 19:00
+ * @description 希尔排序
+ */
+public class ShellSortDemo {
+    public static void main(String[] args) {
+        int[] arr = {8, 9, 1, 7, 2, 3, 5, 4, 6, 0};
+
+        shellSort(arr);
+        System.out.println(Arrays.toString(arr));
+    }
+
+    /**
+     * 希尔排序
+     *
+     * @param arr
+     * @return
+     */
+    private static int[] shellSort(int[] arr) {
+        for (int gap = arr.length / 2; gap > 0; gap /= 2) {
+            for (int i = gap; i < arr.length; i++) {
+                int j = i;
+                int temp = arr[j];
+                if (arr[j] < arr[j - gap]) {
+                    while (j - gap >= 0 && temp < arr[j - gap]) {
+                        //移动
+                        arr[j] = arr[j - gap];
+                        j -= gap;
+                    }
+                    //退出while后，就给temp找到插入位置
+                    arr[j] = temp;
+                }
+            }
+        }
+        return arr;
+    }
+}
+
+```
 
 
 
