@@ -9,7 +9,7 @@ import java.util.Arrays;
  */
 public class QuickSortDemo {
     public static void main(String[] args) {
-        int[] arr = {-9, 78, 0, 23, -567, 70};
+        int[] arr = {-9, 78, 0, 23, -567,0, 70};
         arr = quickSort(arr, 0, arr.length - 1);
         System.out.println(Arrays.toString(arr));
     }

@@ -9476,7 +9476,6 @@ public class SelectSortDemo {
      * @return 排序好的数组
      */
     private static int[] selectSort(int[] arr) {
-        boolean flag = false;
         for (int i = 0; i < arr.length - 1; i++) {
             int min = arr[i];
             int minIndex = i;
@@ -9678,19 +9677,269 @@ public class QuickSortDemo {
 
 ```
 
+#### 5.6 归并排序
+
+ **思想**：利用归并的思想实现排序，采用==分治策略==（分治法将问题分成一些小的问题然后递归求解），而治的阶段则将分的阶段得到的个答案“修补在一起”，即分而治之。
+
+![img_66.png](studyImgs/img_66.png)
+
+![img_66_1.png](studyImgs/img_66_1.png)
+
+```java
+package com.algorithm.sort;
+
+import java.util.Arrays;
+
+/**
+ * @author QRH
+ * @date 2024/10/27 16:02
+ * @description 归并排序
+ */
+public class MergeSortDemo {
+    public static void main(String[] args) {
+        int[] arr = {8, 4, 5, 7, 1, 3, 6, 2};
+         mergeSort(arr, 0,  arr.length - 1, new int[arr.length]);
+        System.out.println(Arrays.toString(arr));
+    }
+
+    private static void mergeSort(int[] arr, int left, int right, int[] temp) {
+        if (left < right) {
+            int mid = (left + right) / 2;
+            //向左递归
+            mergeSort(arr, left, mid, temp);
+            //向右递归
+            mergeSort(arr, mid + 1, right, temp);
+
+            //合并
+           merge(arr, left, mid, right, temp);
+        }
+    }
+
+    private static void merge(int[] arr, int left, int mid, int right, int[] temp) {
+        int i = left;//初始化i，左边有序序列的初始索引
+        int j = mid + 1;//初始化j，右边有序序列的初始索引
+        int t = 0;//指向temp数组的当前索引
+
+        //先把左右两边的数据按照规则填充到temp数组直到左右两边的有序序列，有一边处理完成为止
+        while (i <= mid && j <= right) {
+            //如果左边的有序序列的当前元素钓鱼等于右边有序序列的当前元素，即将左边的当前元素拷贝到temp数组
+            if (arr[i] < arr[j]) {
+                temp[t] = arr[i];
+                t++;
+                i++;
+            } else {//反之，将右边有序序列的当前元素，填充到temp数组
+                temp[t] = arr[j];
+                t++;
+                j++;
+            }
+        }
+
+        //把剩余数据的一编的数据依次填充到temp
+        while (i <= mid) {
+            //左边的有序序列还有剩余的元素，就全部填充到temp
+            temp[t] = arr[i];
+            t++;
+            i++;
+        }
+        while (j <= right) {
+            //右边的有序序列还有剩余的元素，就全部填充到temp
+            temp[t] = arr[j];
+            t++;
+            j++;
+        }
+
+        //将temp数组的元素拷贝到arr，但并不是每次都拷贝所有
+        t = 0;
+               for (int tempLeft = left; tempLeft <= right; tempLeft++, t++) {
+            arr[tempLeft] = temp[t];
+        }
+        
+//        int tempLeft = left;
+//        while (tempLeft <= right) {
+//            arr[tempLeft] = temp[t];
+//            t++;
+//            tempLeft++;
+//        }
+
+    }
+}
+
+```
+
+#### 5.7 基数排序
+
+基数排序也称桶排序，通过键值的各个位的值，将要排序的元素分配至某些“桶”中，达到排序的作用。基数排序是桶排序的扩展。
+
+**思想**：将所有待比较数值统一为同样的数位长度，数位较短的前面补零。然后从最低位开始，依次进行一次排序，这样从最低位排序一直到最高位排序完成以后，数列就变成一个有序序列。
+
+**注**：数组中有负数就不要用基数排序，并且十分消耗jvm内存。
 
 
 
+![img_67.png](studyImgs/img_67.png)
+
+![img_68.png](studyImgs/img_68.png)
+
+![img_69.png](studyImgs/img_69.png)
+
+```java
+package com.algorithm.sort;
+
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+
+/**
+ * @author QRH
+ * @date 2024/10/27 16:02
+ * @description 归并排序
+ */
+public class RadixSortDemo {
+    public static void main(String[] args) {
+        int[] arr = {53, 3, 542, 748, 14, 214};
+        radixSort(arr);
+//        System.out.println(Arrays.toString(arr));
+    }
+
+    private static void radixSort(int[] arr) {
+        //得到属数组中最大的位数
+        int max = arr[0];
+        for (int i = 1; i < arr.length; i++) {
+            if (arr[i] > max) {
+                max = arr[i];
+            }
+        }
+        //得到最大数
+        int maxLength = (max + "").length();
+
+        //定义一个二维数组，表示10个桶，每个桶都是一维数组
+        //每个桶的大小定为arr.length
+        int[][] bucket = new int[10][arr.length];
+        //记录每个桶中实际存放了多少个数据，定义一个一维数组来记录各个桶的每次放入的数据个数
+        //比如bucketOfElement[0]，就表示放入第0个桶
+        int[] bucketElementCounts = new int[10];
+
+        for (int i = 0, n = 1; i < maxLength; i++, n *= 10) {
+            
+            for (int j = 0; j < arr.length; j++) {
+                //取出每个元素对应的位数值，个位，十位，百位
+                int digitOfElement = arr[j] / n % 10;
+                //放入到对应的桶中
+                bucket[digitOfElement][bucketElementCounts[digitOfElement]] = arr[j];
+                bucketElementCounts[digitOfElement]++;
+            }
+
+            //便利每个桶，将桶的数据放回原数组
+            int index = 0;
+            for (int k = 0; k < bucketElementCounts.length; k++) {
+                //如果桶中有数据，才放回到原数组
+                if (bucketElementCounts[k] != 0) {
+                    //循环将该桶中的元素放入
+                    for (int l = 0; l < bucketElementCounts[k]; l++) {
+                        arr[index++] = bucket[k][l];
+                    }
+                }
+                //第n轮后需要将每个bucketElementCounts[k]设置为0
+                bucketElementCounts[k] = 0;
+            }
+            System.out.println("第" + (i + 1) + "轮，arr=" + Arrays.toString(arr));
+        }
+    }
+
+
+}
+```
+
+#### 5.8 堆排序
+
+后面再补
 
 
 
+### 六、查找
+
+查找分为：线性查找、二分查找、插值查找、斐波那契查找。
+
+#### 6.1 线性查找
+
+```java
+package com.algorithm.search;
+
+/**
+ * @author QRH
+ * @date 2024/10/27 19:38
+ * @description TODO
+ */
+public class SeqSearchDemo {
+    public static void main(String[] args) {
+        int[] arr = {1, 5, 2, 90, 2, 8};
+        int index = seqSearch(arr, 12);
+        if (index==-1){
+            System.out.println("数组中没有该数据");
+        }else{
+            System.out.println(index);
+        }
+    }
+
+    /**
+     * 线性查找，找到第一个就返回下标
+     * @param arr 源数组
+     * @param findVal 要查找的数据
+     * @return 该数据在arr中的下标 | -1，没有找到
+     */
+    private static int seqSearch(int[] arr, int findVal) {
+        for (int i = 0; i < arr.length; i++) {
+            if (findVal == arr[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}
+
+```
 
 
 
+#### 6.2 二分查找
+
+二分查找要求数组必须**有序**。
+
+```java
+package com.algorithm.search;
+ 
+public class BinarySearchDemo {
+    public static void main(String[] args) {
+        int[] arr = {1, 8, 10, 89, 1000, 124};
+        int index = binarySearch(arr, 0, arr.length - 1, 89);
+        System.out.println(index);
+    }
+
+    private static int binarySearch(int[] arr, int left, int right, int findVal) {
+        int mid = (left + right) / 2;
+        int midVal = arr[mid];
+
+        if (findVal > midVal) {
+            return binarySearch(arr, mid + 1, right, findVal);
+        } else if (findVal < midVal) {
+            return binarySearch(arr, left, mid - 1, findVal);
+        } else if (findVal == midVal) {
+            return mid;
+        }
+        return -1;
+    }
+}
+
+```
+
+#### 6.3 插值查找
+
+插值查找类似于二分查找，不同的是每次查找从自适应mid处开始查找。
+
+公式：**mid = left + ( right - left ) \* ( findVal - arr[left] ) / ( arr[right] - arr[left] )**
 
 
 
-
+#### 6.4 
 
 
 
