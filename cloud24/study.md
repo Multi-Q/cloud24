@@ -9937,45 +9937,381 @@ public class BinarySearchDemo {
 
 公式：**mid = left + ( right - left ) \* ( findVal - arr[left] ) / ( arr[right] - arr[left] )**
 
+注：查找的数据必须是数组里面有的，数组里面没有的查找会报StackOverflowError。
+
+```java
+package com.algorithm.search;
+
+/**
+ * @author QRH
+ * @date 2024/10/28 13:47
+ * @description 插值查找
+ */
+public class InsertValueDemo {
+    public static void main(String[] args) {
+        int[] arr = {1, 3, 7, 8, 12, 34, 67, 88, 90, 98};
+        System.out.println(insertValue(arr, 0, arr.length - 1, 1 ));
+    }
+
+    /**
+     * @param arr     源数组
+     * @param left    数组左边索引
+     * @param right   数组右边索引
+     * @param findVal 查找值
+     * @return 所在的下标
+     */
+    private static int insertValue(int[] arr, int left, int right, int findVal) {
+        if (left > right || findVal < arr[0] || findVal > arr[arr.length - 1]) {
+            return -1;
+        }
+        int mid = left + (right - left) * (findVal - arr[left]) / (arr[right] - arr[left]);
+        int midVal = arr[mid];
+            if (findVal > midVal) {//向右递归
+                return insertValue(arr, mid + 1, right, findVal);
+            } else if (findVal < midVal) {//向左递归
+                return insertValue(arr, left, mid - 1, findVal);
+            } else  {
+                return mid;
+            }
+    }
+}
+
+```
 
 
-#### 6.4 
+
+#### 6.4 斐波那契查找
+
+mid=low+F(k-1)-1
+
+```java
+package com.algorithm.search;
+
+import java.util.Arrays;
+
+/**
+ * @author QRH
+ * @date 2024/10/28 14:29
+ * @description TODO
+ */
+public class FibSearchDemo {
+    public static void main(String[] args) {
+        int[] arr = {1, 8, 10, 89, 1000, 1024};
+        System.out.println(fibSearch(arr, 1024));
+    }
+
+    private static int fibSearch(int[] arr, int key) {
+        int low = 0;
+        int high = arr.length - 1;
+        int k = 0;//斐波那契分割的下标
+        int mid;
+        int[] f = fib();
+
+        while (high > f[k] - 1) {
+            k++;
+        }
+        //f[k]的值可能大于arr的长度，因此我们需要使用Array类构造一个新的数组，并指向arr
+        int[] temp = Arrays.copyOf(arr, f[k]);
+        for (int i = high + 1; i < temp.length; i++) {
+            temp[i] = arr[high];
+        }
+
+        while (low <= high) {
+            mid = low + f[k - 1] - 1;
+            if (key < temp[mid]) {
+                //向数组前面查找
+                high = mid - 1;
+                k--;
+            } else if (key > temp[mid]) {
+                //向右边查找
+                low = mid + 1;
+                k -= 2;
+            } else {
+                if (mid <= high) {
+                    return mid;
+                } else {
+                    return high;
+                }
+            }
+        }
+        return -1;
+    }
+
+    private static int[] fib() {
+        int[] f = new int[20];
+        f[0] = 1;
+        f[1] = 1;
+        for (int i = 2; i < f.length; i++) {
+            f[i] = f[i - 1] + f[i - 2];
+        }
+        return f;
+    }
+}
+
+```
+
+### 七、哈希表
+
+哈希表是根据关键码值而直接进行访问的数据结构。
+
+### 八、树
+
+能提高数据**存储，读取**的效率。比如利用 **二叉排序树**(Binary Sort Tree)，既可以保证数据的检索速度，同时也
+
+可以保证数据的**插入，删除，修改**的速度。
+
+![img_70.png](studyImgs/img_70.png)
+
+树的常用术语(结合示意图理解):
+
+​	1) 节点
+
+​	2) 根节点
+
+​	3) 父节点
+
+​	4) 子节点
+
+​	5) 叶子节点 (没有子节点的节点)
+
+​	6) 节点的权(节点值)
+
+​	7) 路径(从 root 节点找到该节点的路线)
+
+​	8) 层
+
+​	9) 子树
+
+​	10) 树的高度(最大层数)
+
+​	11) 森林 :多颗子树构成森林
+
+#### 8.1 二叉树
+
+概念：每个节点**最多只能有两个子节点**的一种形式称为二叉树。二叉树的子节点分为左节点和右节点。
+
+![img_71.png](studyImgs/img_71.png)
+
+* **满二叉树**：如果**所有叶子结点都在最后一层**，并且**结点总数=2<sup>n</sup>-1**(n为层数)，则称为满二叉树。
+
+![img_72.png](studyImgs/img_72.png)
+
+* **完全二叉树**：如果该节点的所有叶子结点都在最后一层或倒数第二层，而且最后一层的叶子结点在左边连续，倒数第二层的叶子结点在右边连续，则称之为完全二叉树。
+
+![img_73.png](studyImgs/img_73.png)
+
+#### 8.2 二叉树的前序、中序、后序遍历
+
+* 前序遍历：根 左 右
+* 中序遍历：左 根 右
+* 后序遍历：左 右 根
+
+二叉树的前序、中序、后序的遍历步骤：
+
+1、创建一棵二叉树。
+
+* 前序遍历：
+
+  ​	2、先输出当前节点（初始的时候是root结点）。
+
+  ​	2.1、如果左子节点不为空，则递归继续**前序遍历**。
+
+  ​	2.2、如果右子节点不为空，则递归继续**前序遍历**。
+
+* 中序遍历：
+
+  ​	3、如果左子节点不为空，则递归继续**中序遍历**。
+
+  ​	3.1、先输出当前节点（初始的时候是root结点）。
+
+  ​	3.2、如果右子节点不为空，则递归继续**中序遍历**。
+
+* 后序遍历：
+
+  4、如果左子节点不为空，则递归继续**后序遍历**。
+
+  4.1、如果右子节点不为空，则递归继续**后序遍历**。
+
+  4.2、先输出当前节点（初始的时候是root结点）。
+
+示例：
+
+```java
+package com.algorithm.tree;
+
+/**
+ * @author QRH
+ * @date 2024/10/28 22:02
+ * @description 二叉树
+ */
+public class BinaryTreeDemo {
+    public static void main(String[] args) {
+        BinaryTree binaryTree = new BinaryTree();//空的二叉树
+        HeroNode root=new HeroNode(1,"宋江");
+        HeroNode node2=new HeroNode(2,"无用");
+        HeroNode node3=new HeroNode(3,"卢俊义");
+        HeroNode node4=new HeroNode(4,"林冲");
+        HeroNode node5=new HeroNode(5,"关胜");
+
+        //手动创建二叉树
+        root.setLeft(node2);
+        root.setRight(node3);
+        node3.setRight(node4);
+        node3.setLeft(node5);
+
+        binaryTree.setRoot(root);
+        /////////////////////////////////////////////
+        //前序遍历
+        System.out.println("===========前序遍历==================");
+        binaryTree.preOrder();
+        System.out.println("===========中序遍历==================");
+        binaryTree.infixOrder();
+        System.out.println("===========后序遍历==================");
+        binaryTree.postOrder();
+
+    }
+}
+
+///////////////////////////////////////
+class BinaryTree {
+    private HeroNode root;
+
+    public void setRoot(HeroNode root) {
+        this.root = root;
+    }
+
+    /**
+     * 前序遍历
+     */
+    public void preOrder() {
+        if (this.root != null) {
+            this.root.preOrder();
+        } else {
+            System.out.println("二叉树为空，无法遍历");
+        }
+    }
+
+    /**
+     * 中序遍历
+     */
+    public void infixOrder() {
+        if (this.root != null) {
+            this.root.infixOrder();
+        } else {
+            System.out.println("二叉树为空，无法遍历");
+        }
+    }
+
+    /**
+     * 后序遍历
+     */
+    public void postOrder() {
+        if (this.root != null) {
+            this.root.postOrder();
+        } else {
+            System.out.println("二叉树为空，无法遍历");
+        }
+    }
+
+}
+
+///////////////////////////////
+class HeroNode {
+    private int no;
+    private String name;
+    private HeroNode left;
+    private HeroNode right;
+
+    public HeroNode(int no,String name){
+        this.no=no;
+        this.name=name;
+    }
+
+    /**
+     * 前序遍历
+     */
+    public void preOrder() {
+        System.out.println(this);//先输出父节点
+        //递归向左子树前序遍历
+        if (this.left != null) {
+            this.left.preOrder();
+        }
+        //递归向右前序遍历
+        if (this.right != null) {
+            this.right.preOrder();
+        }
+    }
+
+    /**
+     * 中序遍历
+     */
+    public void infixOrder() {
+        if (this.left != null) {
+            this.left.infixOrder();
+        }
+        System.out.println(this);
+        if (this.right != null) {
+            this.right.infixOrder();
+        }
+    }
+
+    /**
+     * 后序遍历
+     */
+    public void postOrder() {
+        if (this.left != null) {
+            this.left.postOrder();
+        }
+        if (this.right != null) {
+            this.right.postOrder();
+        }
+        System.out.println(this);
+    }
 
 
+    @Override
+    public String toString() {
+        return "HeroNode{" +
+                "no=" + no +
+                ", name='" + name + '\'' +
+                '}';
+    }
 
+    public int getNo() {
+        return no;
+    }
 
+    public void setNo(int no) {
+        this.no = no;
+    }
 
+    public String getName() {
+        return name;
+    }
 
+    public void setName(String name) {
+        this.name = name;
+    }
 
+    public HeroNode getLeft() {
+        return left;
+    }
 
+    public void setLeft(HeroNode left) {
+        this.left = left;
+    }
 
+    public HeroNode getRight() {
+        return right;
+    }
 
+    public void setRight(HeroNode right) {
+        this.right = right;
+    }
+}
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#### 8.3 
 
 
 
