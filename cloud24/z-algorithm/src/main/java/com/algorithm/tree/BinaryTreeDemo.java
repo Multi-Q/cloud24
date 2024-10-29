@@ -8,11 +8,11 @@ package com.algorithm.tree;
 public class BinaryTreeDemo {
     public static void main(String[] args) {
         BinaryTree binaryTree = new BinaryTree();//空的二叉树
-        HeroNode root=new HeroNode(1,"宋江");
-        HeroNode node2=new HeroNode(2,"无用");
-        HeroNode node3=new HeroNode(3,"卢俊义");
-        HeroNode node4=new HeroNode(4,"林冲");
-        HeroNode node5=new HeroNode(5,"关胜");
+        HeroNode root = new HeroNode(1, "宋江");
+        HeroNode node2 = new HeroNode(2, "无用");
+        HeroNode node3 = new HeroNode(3, "卢俊义");
+        HeroNode node4 = new HeroNode(4, "林冲");
+        HeroNode node5 = new HeroNode(5, "关胜");
 
         //手动创建二叉树
         root.setLeft(node2);
@@ -30,7 +30,10 @@ public class BinaryTreeDemo {
 //        System.out.println("===========后序遍历==================");
 //        binaryTree.postOrder();
 
-        binaryTree.findNodeByPreOrder(5);
+//        binaryTree.findNodeByPreOrder(5);
+
+//        binaryTree.findNodeByInfixOrder(3);
+        binaryTree.findNodeByPostOrder(3);
 
     }
 }
@@ -38,8 +41,26 @@ public class BinaryTreeDemo {
 class BinaryTree {
     private HeroNode root;
 
+
     public void setRoot(HeroNode root) {
         this.root = root;
+    }
+
+    /**
+     * 删除节点
+     * @param no
+     */
+    public void delNode(int no){
+        if (this.root!=null){
+            if (this.root.getNo()==no){
+                this.root=null;
+            }else{
+                this.root.delNode(no);
+            }
+        }else{
+            System.out.println("树空，无法删除！");
+        }
+
     }
 
     /**
@@ -75,13 +96,37 @@ class BinaryTree {
         }
     }
 
-    public void findNodeByPreOrder(int no){
-        if(this.root.getNo()==no){
-            System.out.println(this.toString());
-            return;
-        }else{
-            this.root.preOrder();
-        }
+    /**
+     * 前序遍历查找指定no
+     *
+     * @param no 待查找的节点的no
+     * @return 对应节点的数据
+     */
+    public void findNodeByPreOrder(int no) {
+        HeroNode nodeByPreOrder = this.root.findNodeByPreOrder(no);
+        System.out.println(nodeByPreOrder == null ? null : nodeByPreOrder.toString());
+    }
+
+    /**
+     * 中序遍历查找指定no
+     *
+     * @param no 待查找的节点的no
+     * @return 对应节点的数据
+     */
+    public void findNodeByInfixOrder(int no) {
+        HeroNode nodeByPreOrder = this.root.findNodeByInfixOrder(no);
+        System.out.println(nodeByPreOrder == null ? null : nodeByPreOrder.toString());
+    }
+
+    /**
+     * 后序遍历查找指定no
+     *
+     * @param no 待查找的节点的no
+     * @return 对应节点的数据
+     */
+    public void findNodeByPostOrder(int no) {
+        HeroNode nodeByPreOrder = this.root.findNodeByPostOrder(no);
+        System.out.println(nodeByPreOrder == null ? null : nodeByPreOrder.toString());
     }
 
 }
@@ -92,9 +137,106 @@ class HeroNode {
     private HeroNode left;
     private HeroNode right;
 
-    public HeroNode(int no,String name){
-        this.no=no;
-        this.name=name;
+    public HeroNode(int no, String name) {
+        this.no = no;
+        this.name = name;
+    }
+
+    /**
+     * 删除节点
+     * @param no
+     */
+    public void delNode(int no){
+        if (this.left!=null&&this.getNo()==no){
+            this.left=null;
+            return ;
+        }
+        if (this.right!=null&&this.getNo()==no){
+            this.right=null;
+            return ;
+        }
+        if (this.left!=null){
+            this.left.delNode(no);
+        }
+        if (this.right!=null){
+            this.right.delNode(no);
+        }
+
+    }
+
+
+
+
+    /**
+     * 前序遍历查找指定no的节点
+     *
+     * @param no 待查找的节点的no
+     * @return 对应节点的数据
+     */
+    public HeroNode findNodeByPreOrder(int no) {
+        if (this.getNo() == no) {
+            return this;
+        }
+        HeroNode resNode = null;
+        if (this.left != null) {
+            resNode = this.left.findNodeByPreOrder(no);
+        }
+        if (resNode != null) {
+            return resNode;
+        }
+        if (this.right != null) {
+            resNode = this.right.findNodeByPreOrder(no);
+        }
+        return resNode;
+    }
+
+    /**
+     * 中序遍历查找指定no
+     *
+     * @param no 待查找的节点的no
+     * @return 对应节点的数据
+     */
+    public HeroNode findNodeByInfixOrder(int no) {
+        HeroNode resNode = null;
+        if (this.left != null) {
+            resNode = this.left.findNodeByInfixOrder(no);
+        }
+        if (resNode != null) {
+            return resNode;
+        }
+        if (this.getNo() == no) {
+            return this;
+        }
+        if (this.right != null) {
+            resNode = this.right.findNodeByInfixOrder(no);
+        }
+        return resNode;
+    }
+
+    /**
+     * 后序遍历查找指定no
+     *
+     * @param no 待查找的节点的no
+     * @return 对应节点的数据
+     */
+    public HeroNode findNodeByPostOrder(int no) {
+        HeroNode resNode = null;
+        if (this.left != null) {
+            resNode = this.left.findNodeByPostOrder(no);
+        }
+        if (resNode != null) {
+            return resNode;
+        }
+        if (this.right != null) {
+            resNode = this.right.findNodeByPostOrder(no);
+        }
+        if (resNode != null) {
+            return resNode;
+        }
+        if (this.getNo() == no) {
+            return this;
+        }
+        return null;
     }
 
     /**
