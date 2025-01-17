@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="BeansView">
+    <option name="showSidePanel" value="false" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="5373803b-dc75-4be6-a748-62b256e4cca0" name="更改" comment="">
+      <change afterPath="$PROJECT_DIR$/../cloud24/studyImgs/img_83.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cloud24/studyImgs/img_84.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cloud24/studyImgs/img_85.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cloud24/studyImgs/img_86.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cloud24/studyImgs/img_87.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cloud24/studyImgs/img_88.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cloud24/studyImgs/img_89.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cloud24/studyImgs/img_90.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cloud24/studyImgs/img_91.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cloud24/studyImgs/img_92.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cloud24/studyImgs/img_93.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cloud24/z-algorithm/src/main/java/com/algorithm/map/DSFDemo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cloud24/z-algorithm/src/main/java/com/algorithm/tree/AVLTreeDemo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../cloud24/z-algorithm/src/main/java/com/algorithm/tree/BinarySortTreeDemo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gateway/src/main/java/com/atguigu/Main.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/img/img1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/img/img2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/img/img3.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/img/img4.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model/src/main/java/com/atguigu/model/Order.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model/src/main/java/com/atguigu/model/Product.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-order/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-order/src/main/java/com/atguigu/ServiceOrderMain.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-order/src/main/java/com/atguigu/order/conf/LoadBalancerConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-order/src/main/java/com/atguigu/order/controller/OrderController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-order/src/main/java/com/atguigu/order/fegin/ProductFeignClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-order/src/main/java/com/atguigu/order/property/ServiceOrderProperty.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-order/src/main/java/com/atguigu/order/service/OrderService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-order/src/main/java/com/atguigu/order/service/impl/OrderServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-order/src/main/resources/application.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-product/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-product/src/main/java/com/atguigu/product/ServiceProductMain.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-product/src/main/java/com/atguigu/product/conf/LoadBalancerConfiguration.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-product/src/main/java/com/atguigu/product/controller/ProductController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-product/src/main/java/com/atguigu/product/service/ProductService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-product/src/main/java/com/atguigu/product/service/impl/ProductServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-product/src/main/resources/application.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/services/service-product/src/test/java/com/atguigu/test/NacosTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cloud24/study.md" beforeDir="false" afterPath="$PROJECT_DIR$/../cloud24/study.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cloud24/z-algorithm/src/main/java/com/algorithm/tree/HuffmanCodeDemo.java" beforeDir="false" afterPath="$PROJECT_DIR$/../cloud24/z-algorithm/src/main/java/com/algorithm/tree/HuffmanCodeDemo.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="customMavenHome" value="F:\Maven\apache-maven-3.9.9" />
+        <option name="localRepository" value="F:\Maven\maven-repository" />
+        <option name="mavenHomeTypeForPersistence" value="CUSTOM" />
+        <option name="useMavenConfig" value="false" />
+        <option name="userSettingsFile" value="F:\Maven\apache-maven-3.9.9\conf\settings.xml" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2redJUNokziFxK14swVkFoRElu0" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="flattenModules" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="false" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showVisibilityIcons" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;JUnit.LoadBalancerTest.loadBalancerClientTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.NacosTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.NacosTest.nacosDiscoveryClientTest.executor&quot;: &quot;Run&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;Spring Boot.ServiceOrderMain.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.ServiceProductMain.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_directory_selection&quot;: &quot;F:/Ideal_Projects/Cloud24/cloud25/services/service-order/src/main/java/com/atguigu/order&quot;,
+    &quot;last_opened_file_path&quot;: &quot;F:/Ideal_Projects/Cloud24/cloud25/img/img1.png&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;F:/Ideal_Projects/Cloud24/cloud25/services/service-product/src/main/java/com/atguigu/Main.java&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;模块&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reactor&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;,
+    &quot;应用程序.ServiceProductMain.executor&quot;: &quot;Run&quot;
+  }
+}</component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
+  <component name="RunManager" selected="Spring Boot.ServiceOrderMain">
+    <configuration name="ServiceProductMain" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.atguigu.product.ServiceProductMain" />
+      <module name="service-product" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.atguigu.product.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="LoadBalancerTest.loadBalancerClientTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="service-product" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.atguigu.test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.atguigu.test" />
+      <option name="MAIN_CLASS_NAME" value="com.atguigu.test.LoadBalancerTest" />
+      <option name="METHOD_NAME" value="loadBalancerClientTest" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="NacosTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="service-product" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.atguigu.test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.atguigu.test" />
+      <option name="MAIN_CLASS_NAME" value="com.atguigu.test.NacosTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="NacosTest.nacosDiscoveryClientTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="service-product" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.atguigu.test.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.atguigu.test" />
+      <option name="MAIN_CLASS_NAME" value="com.atguigu.test.NacosTest" />
+      <option name="METHOD_NAME" value="nacosDiscoveryClientTest" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ServiceOrderMain" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="service-order" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.atguigu.ServiceOrderMain" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.atguigu.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ServiceProductMain" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="service-product" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.atguigu.product.ServiceProductMain" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.ServiceOrderMain" />
+        <item itemvalue="JUnit.LoadBalancerTest.loadBalancerClientTest" />
+        <item itemvalue="JUnit.NacosTest.nacosDiscoveryClientTest" />
+        <item itemvalue="JUnit.NacosTest" />
+        <item itemvalue="应用程序.ServiceProductMain" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9f38398b9061-39b83d9b5494-intellij.indexing.shared.core-IU-241.18034.62" />
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-IU-241.18034.62" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="5373803b-dc75-4be6-a748-62b256e4cca0" name="更改" comment="" />
+      <created>1736921170098</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1736921170098</updated>
+      <workItem from="1736921171145" duration="506000" />
+      <workItem from="1736923403794" duration="1198000" />
+      <workItem from="1736935158938" duration="7068000" />
+      <workItem from="1737006825834" duration="87000" />
+      <workItem from="1737007096241" duration="327000" />
+      <workItem from="1737007437637" duration="13337000" />
+      <workItem from="1737090908063" duration="2695000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/atguigu/Main.java</url>
+          <line>13</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/services/src/main/java/com/atguigu/Main.java</url>
+          <line>13</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/model/src/main/java/com/atguigu/Main.java</url>
+          <line>13</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
